@@ -23,7 +23,7 @@ export default function ResultPage() {
           return r.json()
         })
         .then(() => {
-          const formData = sessionStorage.getItem('pending_form_data')
+          const formData = localStorage.getItem('pending_form_data')
           if (!formData) throw new Error('Form data missing. Please go back and try again.')
           return fetch('/api/generate', {
             method: 'POST',
@@ -38,7 +38,7 @@ export default function ResultPage() {
         .then((result) => {
           setContent(result)
           sessionStorage.setItem('resume_result', JSON.stringify(result))
-          sessionStorage.removeItem('pending_form_data')
+          localStorage.removeItem('pending_form_data')
         })
         .catch((e) => setError(e.message))
         .finally(() => setGenerating(false))

@@ -136,7 +136,7 @@ export default function OrderForm() {
     setLoading(true)
     setError('')
     try {
-      sessionStorage.setItem('pending_form_data', JSON.stringify(data))
+      localStorage.setItem('pending_form_data', JSON.stringify(data))
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
