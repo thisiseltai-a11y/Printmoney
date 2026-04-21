@@ -142,7 +142,10 @@ export default function OrderForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ plan: 'single' }),
       })
-      if (!res.ok) throw new Error('Failed to start checkout')
+      if (!res.ok) {
+        const body = await res.json()
+        throw new Error(body.error || 'Failed to start checkout')
+      }
       const { url } = await res.json()
       window.location.href = url
     } catch (e: unknown) {

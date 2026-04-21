@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 const PLANS = {
   single:    { amount: 1200, label: '1 Resume + Cover Letter' },
@@ -10,7 +7,17 @@ const PLANS = {
 }
 
 export async function POST(req: NextRequest) {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return NextResponse.json(
+      { error: 'Payments are not configured yet. Add STRIPE_SECRET_KEY to your Vercel environment variables.' },
+      { status: 503 }
+    )
+  }
+
   try {
+    const Stripe = (await import('stripe')).default
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+
     const { plan = 'single' } = await req.json()
     const selected = PLANS[plan as keyof typeof PLANS] ?? PLANS.single
     const base = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000'
@@ -38,6 +45,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url: session.url })
   } catch (error) {
     console.error('Checkout error:', error)
-    return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Failed to create checkout session'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
