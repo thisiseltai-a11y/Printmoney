@@ -4,6 +4,121 @@ import Link from 'next/link'
 import { Copy, Download, CheckCircle, ArrowLeft, Rocket, FileText, Mail, Loader2 } from 'lucide-react'
 import type { GeneratedContent } from '@/lib/types'
 
+// ---------- Resume renderer ----------
+
+function ResumeRenderer({ text }: { text: string }) {
+  const lines = text.split('\n')
+  const elements: React.ReactNode[] = []
+  let nameWritten = false
+
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i]
+    const line = raw.trim()
+
+    if (!line) {
+      elements.push(<div key={i} className="h-2" />)
+      continue
+    }
+
+    // First non-empty line = candidate name
+    if (!nameWritten) {
+      nameWritten = true
+      elements.push(
+        <h1 key={i} className="text-3xl font-bold text-slate-900 tracking-tight print:text-2xl">
+          {line}
+        </h1>
+      )
+      continue
+    }
+
+    // Section headers: ALL CAPS, letters/spaces/& only, 3+ chars
+    if (
+      line === line.toUpperCase() &&
+      line.length >= 3 &&
+      /^[A-Z0-9\s&\/\-–]+$/.test(line)
+    ) {
+      elements.push(
+        <div key={i} className="mt-6 mb-2">
+          <h2 className="text-[11px] font-bold uppercase tracking-[0.15em] text-indigo-600 border-b-2 border-indigo-100 pb-1">
+            {line}
+          </h2>
+        </div>
+      )
+      continue
+    }
+
+    // Job/edu entry lines: "Title | Company | Dates" or "Degree | School | Year"
+    if (line.includes('|')) {
+      const parts = line.split('|').map((p) => p.trim())
+      elements.push(
+        <div key={i} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 mt-3">
+          <span className="text-sm font-semibold text-slate-900">{parts[0]}</span>
+          {parts.slice(1).map((p, j) => (
+            <span key={j} className="text-xs text-slate-500">
+              {j === 0 ? '·' : '·'} {p}
+            </span>
+          ))}
+        </div>
+      )
+      continue
+    }
+
+    // Bullet points
+    if (/^[•\-–·*]/.test(line)) {
+      elements.push(
+        <div key={i} className="flex gap-2.5 text-sm text-slate-700 leading-relaxed ml-1 mt-1">
+          <span className="text-indigo-400 mt-0.5 flex-shrink-0 text-xs">▸</span>
+          <span>{line.replace(/^[•\-–·*]\s*/, '')}</span>
+        </div>
+      )
+      continue
+    }
+
+    // Contact info line (contains @ or linkedin or common separators)
+    if (!nameWritten || i <= 3) {
+      elements.push(
+        <p key={i} className="text-sm text-slate-500 mt-1">{line}</p>
+      )
+      continue
+    }
+
+    // Default: paragraph text
+    elements.push(
+      <p key={i} className="text-sm text-slate-700 leading-relaxed mt-1">{line}</p>
+    )
+  }
+
+  return <div className="space-y-0">{elements}</div>
+}
+
+function CoverLetterRenderer({ text }: { text: string }) {
+  const paragraphs = text.split('\n').reduce<string[][]>((acc, line) => {
+    if (!line.trim()) {
+      acc.push([])
+    } else {
+      if (!acc.length) acc.push([])
+      acc[acc.length - 1].push(line.trim())
+    }
+    return acc
+  }, [[]])
+
+  return (
+    <div className="space-y-4">
+      {paragraphs.map((group, i) => {
+        const content = group.join(' ')
+        if (!content) return null
+        return (
+          <p key={i} className="text-sm text-slate-700 leading-relaxed">
+            {content}
+          </p>
+        )
+      })}
+    </div>
+  )
+}
+
+// ---------- Main page ----------
+
 export default function ResultPage() {
   const [content, setContent] = useState<GeneratedContent | null>(null)
   const [activeTab, setActiveTab] = useState<'resume' | 'cover'>('resume')
@@ -24,18 +139,15 @@ export default function ResultPage() {
 
       setGenerating(true)
       try {
-        // 1. Verify payment
         const verifyRes = await fetch(`/api/verify-payment?session_id=${sessionId}`)
         if (!verifyRes.ok) {
           const body = await verifyRes.json().catch(() => ({}))
           throw new Error(body.error || `Payment verification failed (${verifyRes.status})`)
         }
 
-        // 2. Get saved form data
         const formData = localStorage.getItem('pending_form_data')
         if (!formData) throw new Error('Form data not found. Please go back and fill the form again.')
 
-        // 3. Generate resume
         const genRes = await fetch('/api/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -107,8 +219,6 @@ export default function ResultPage() {
     )
   }
 
-  const activeText = activeTab === 'resume' ? content.resume : content.coverLetter
-
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10 print:hidden">
@@ -136,7 +246,7 @@ export default function ResultPage() {
         </div>
       </header>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 print:px-0 print:py-0">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 print:px-0 print:py-0">
         <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl mb-6 print:hidden">
           <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0" />
           <div>
@@ -160,10 +270,14 @@ export default function ResultPage() {
           </button>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm print:shadow-none print:border-none">
-          <pre className="p-8 sm:p-12 text-sm text-slate-800 whitespace-pre-wrap font-mono leading-relaxed print:text-xs print:p-6">
-            {activeText}
-          </pre>
+        {/* Resume/Cover Letter card */}
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm print:shadow-none print:border-none print:rounded-none">
+          <div className="p-8 sm:p-12 print:p-8">
+            {activeTab === 'resume'
+              ? <ResumeRenderer text={content.resume} />
+              : <CoverLetterRenderer text={content.coverLetter} />
+            }
+          </div>
         </div>
 
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 print:hidden">
