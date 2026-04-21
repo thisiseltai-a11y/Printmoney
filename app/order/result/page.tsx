@@ -22,25 +22,37 @@ export default function ResultPage() {
           if (!r.ok) throw new Error('Payment could not be verified. Please contact support.')
           return r.json()
         })
-        .then(() => {
+        .then(async () => {
           const formData = localStorage.getItem('pending_form_data')
           if (!formData) throw new Error('Form data missing. Please go back and try again.')
-          return fetch('/api/generate', {
+
+          const res = await fetch('/api/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: formData,
           })
-        })
-        .then((r) => {
-          if (!r.ok) return r.json().then((e) => { throw new Error(e.error || 'Generation failed') })
-          return r.json()
-        })
-        .then((result) => {
+
+          if (!res.body) throw new Error('No response from server.')
+
+          // Read the streamed response — newlines are heartbeats, last line is JSON
+          const reader = res.body.getReader()
+          const decoder = new TextDecoder()
+          let buffer = ''
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+            buffer += decoder.decode(value, { stream: true })
+          }
+
+          const lastLine = buffer.trim().split('\n').filter(Boolean).pop() || ''
+          const result = JSON.parse(lastLine)
+          if (result.error) throw new Error(result.error)
+
           setContent(result)
           sessionStorage.setItem('resume_result', JSON.stringify(result))
           localStorage.removeItem('pending_form_data')
         })
-        .catch((e) => setError(e.message))
+        .catch((e) => setError(e instanceof Error ? e.message : 'Something went wrong.'))
         .finally(() => setGenerating(false))
     } else {
       const stored = sessionStorage.getItem('resume_result')

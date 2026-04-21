@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import type { ResumeFormData } from '@/lib/types'
 
@@ -110,7 +110,6 @@ OUTPUT FORMAT — Follow exactly:
 function parseOutput(text: string): { resume: string; coverLetter: string } {
   const resumeMatch = text.match(/<RESUME>([\s\S]*?)<\/RESUME>/)
   const coverMatch = text.match(/<COVER_LETTER>([\s\S]*?)<\/COVER_LETTER>/)
-
   return {
     resume: resumeMatch ? resumeMatch[1].trim() : text,
     coverLetter: coverMatch ? coverMatch[1].trim() : '',
@@ -118,42 +117,51 @@ function parseOutput(text: string): { resume: string; coverLetter: string } {
 }
 
 export async function POST(req: NextRequest) {
-  try {
-    const data: ResumeFormData = await req.json()
-
-    if (!data.name || !data.email || !data.targetJob) {
-      return NextResponse.json({ error: 'Name, email, and target job are required.' }, { status: 400 })
-    }
-
-    if (!process.env.ANTHROPIC_API_KEY) {
-      return NextResponse.json(
-        { error: 'API key not configured. Add ANTHROPIC_API_KEY to your environment.' },
-        { status: 500 }
-      )
-    }
-
-    const message = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 4096,
-      messages: [
-        {
-          role: 'user',
-          content: buildPrompt(data),
-        },
-      ],
-    })
-
-    const responseText = message.content
-      .filter((block) => block.type === 'text')
-      .map((block) => (block as { type: 'text'; text: string }).text)
-      .join('')
-
-    const parsed = parseOutput(responseText)
-
-    return NextResponse.json(parsed)
-  } catch (error) {
-    console.error('Generation error:', error)
-    const message = error instanceof Error ? error.message : 'Generation failed'
-    return NextResponse.json({ error: message }, { status: 500 })
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return Response.json({ error: 'API key not configured.' }, { status: 500 })
   }
+
+  const data: ResumeFormData = await req.json()
+
+  if (!data.name || !data.email || !data.targetJob) {
+    return Response.json({ error: 'Name, email, and target job are required.' }, { status: 400 })
+  }
+
+  const encoder = new TextEncoder()
+
+  // Stream the response — this keeps the connection alive during generation
+  // and bypasses Vercel's blocking-response timeout
+  const stream = new ReadableStream({
+    async start(controller) {
+      try {
+        let fullText = ''
+
+        const anthropicStream = client.messages.stream({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 4096,
+          messages: [{ role: 'user', content: buildPrompt(data) }],
+        })
+
+        for await (const event of anthropicStream) {
+          if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+            fullText += event.delta.text
+            // Heartbeat keeps the connection alive while Claude is writing
+            controller.enqueue(encoder.encode('\n'))
+          }
+        }
+
+        const result = parseOutput(fullText)
+        controller.enqueue(encoder.encode(JSON.stringify(result)))
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Generation failed'
+        controller.enqueue(encoder.encode(JSON.stringify({ error: msg })))
+      } finally {
+        controller.close()
+      }
+    },
+  })
+
+  return new Response(stream, {
+    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+  })
 }
