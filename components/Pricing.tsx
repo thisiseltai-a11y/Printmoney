@@ -1,0 +1,144 @@
+import Link from 'next/link'
+import { CheckCircle, Zap } from 'lucide-react'
+
+const plans = [
+  {
+    name: 'Single',
+    price: '$12',
+    period: 'one-time',
+    description: 'Perfect for one application or testing the service.',
+    cta: 'Get Started',
+    href: '/order',
+    popular: false,
+    features: [
+      '1 ATS-optimized resume',
+      '1 tailored cover letter',
+      'Keyword optimization',
+      'Instant download',
+      'Copy to clipboard',
+    ],
+  },
+  {
+    name: 'Bundle',
+    price: '$29',
+    period: 'one-time',
+    description: 'Best value. Everything you need for a full job search sprint.',
+    cta: 'Get the Bundle',
+    href: '/order',
+    popular: true,
+    features: [
+      '5 resume + cover letter sets',
+      'LinkedIn summary rewrite',
+      'Keyword optimization',
+      'Instant download',
+      'Priority AI model',
+      '30-day revision window',
+    ],
+  },
+  {
+    name: 'Unlimited',
+    price: '$19',
+    period: '/month',
+    description: 'For active job seekers who apply to multiple roles constantly.',
+    cta: 'Start Free Month',
+    href: '/order',
+    popular: false,
+    features: [
+      'Unlimited resumes',
+      'Unlimited cover letters',
+      'LinkedIn summary rewrites',
+      'Keyword optimization',
+      'Instant download',
+      'Cancel anytime',
+    ],
+  },
+]
+
+export default function Pricing() {
+  return (
+    <section id="pricing" className="py-24 bg-slate-950">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <p className="text-sm font-semibold text-indigo-400 uppercase tracking-wider mb-3">Transparent Pricing</p>
+          <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-4">
+            No subscriptions required.
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-violet-400 to-pink-400">
+              Pay only for what you need.
+            </span>
+          </h2>
+          <p className="text-lg text-slate-400 max-w-xl mx-auto">
+            Professional resume writers charge $150–$800. We charge a fraction and deliver in seconds.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          {plans.map((plan) => (
+            <div
+              key={plan.name}
+              className={`relative rounded-2xl p-8 flex flex-col ${
+                plan.popular
+                  ? 'bg-gradient-to-b from-indigo-600 to-violet-700 border-2 border-indigo-400 shadow-2xl shadow-indigo-500/25 scale-105'
+                  : 'bg-slate-800/50 border border-slate-700'
+              }`}
+            >
+              {plan.popular && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <div className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-400 text-slate-900 text-xs font-bold">
+                    <Zap className="w-3 h-3 fill-slate-900" />
+                    MOST POPULAR
+                  </div>
+                </div>
+              )}
+
+              <div className="mb-6">
+                <h3 className={`text-xl font-bold mb-1 ${plan.popular ? 'text-white' : 'text-slate-100'}`}>
+                  {plan.name}
+                </h3>
+                <div className="flex items-end gap-1 mb-3">
+                  <span className={`text-5xl font-extrabold ${plan.popular ? 'text-white' : 'text-white'}`}>
+                    {plan.price}
+                  </span>
+                  <span className={`text-lg mb-1 ${plan.popular ? 'text-indigo-200' : 'text-slate-400'}`}>
+                    {plan.period}
+                  </span>
+                </div>
+                <p className={`text-sm ${plan.popular ? 'text-indigo-200' : 'text-slate-400'}`}>
+                  {plan.description}
+                </p>
+              </div>
+
+              <ul className="space-y-3 mb-8 flex-1">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-3">
+                    <CheckCircle
+                      className={`w-4 h-4 flex-shrink-0 ${plan.popular ? 'text-indigo-200' : 'text-emerald-400'}`}
+                    />
+                    <span className={`text-sm ${plan.popular ? 'text-indigo-100' : 'text-slate-300'}`}>
+                      {feature}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <Link
+                href={plan.href}
+                className={`block text-center py-3 px-6 rounded-xl font-semibold text-sm transition-all duration-200 ${
+                  plan.popular
+                    ? 'bg-white text-indigo-700 hover:bg-indigo-50'
+                    : 'bg-indigo-600 text-white hover:bg-indigo-500'
+                }`}
+              >
+                {plan.cta}
+              </Link>
+            </div>
+          ))}
+        </div>
+
+        <p className="text-center text-slate-500 text-sm mt-10">
+          All plans include a 100% satisfaction guarantee. Not happy? We&apos;ll make it right.
+        </p>
+      </div>
+    </section>
+  )
+}
