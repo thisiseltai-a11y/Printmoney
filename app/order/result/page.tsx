@@ -135,7 +135,7 @@ function JobBlock({ entry }: { entry: JobEntry }) {
 }
 
 function SectionContent({ section }: { section: Section }) {
-  const isSkills = /SKILLS/i.test(section.title)
+  const isSkills = /SKILLS|COMPETENC/i.test(section.title)
 
   if (isSkills) {
     const skills: string[] = []
@@ -213,11 +213,13 @@ function ResumeRenderer({ text }: { text: string }) {
 
       {/* Two-column body */}
       <div className="space-y-5">
-        {sections.map((sec, i) => (
+        {sections.map((sec, i) => {
+          const label = /COMPETENC/i.test(sec.title) ? 'SKILLS' : sec.title
+          return (
           <div key={i} className="grid gap-5" style={{ gridTemplateColumns: '100px 1fr' }}>
             {/* Left: section label */}
             <div className="text-right pt-0.5">
-              {sec.title.split(/\s+/).map((word, j) => (
+              {label.split(/\s+/).map((word, j) => (
                 <span key={j} className="block text-[9px] font-bold uppercase tracking-widest text-teal-600 leading-tight">
                   {word}
                 </span>
@@ -228,7 +230,7 @@ function ResumeRenderer({ text }: { text: string }) {
               <SectionContent section={sec} />
             </div>
           </div>
-        ))}
+        )})
       </div>
     </div>
   )

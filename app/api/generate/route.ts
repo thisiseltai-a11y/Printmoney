@@ -55,7 +55,8 @@ INSTRUCTIONS:
 3. Quantify achievements with numbers/percentages where possible
 4. Include keywords from the job description naturally (ATS optimization)
 5. Use clean plain-text formatting, all-caps section headers
-6. Cover letter: open with a hook (not "I am writing to apply"), 3 short paragraphs
+6. Label the skills section exactly "SKILLS" — do NOT use "CORE COMPETENCIES" or any other label
+7. Cover letter: open with a hook (not "I am writing to apply"), 3 short paragraphs
 
 Output EXACTLY in this format:
 <RESUME>
