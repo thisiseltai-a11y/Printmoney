@@ -123,8 +123,8 @@ function JobBlock({ entry }: { entry: JobEntry }) {
       {entry.bullets.length > 0 && (
         <ul className="mt-2 space-y-1.5">
           {entry.bullets.map((b, i) => (
-            <li key={i} className="flex gap-2 text-[13px] text-slate-600 leading-relaxed">
-              <span className="text-teal-500 flex-shrink-0 mt-[3px] text-[8px]">▶</span>
+            <li key={i} className="flex gap-2.5 text-[13px] text-slate-700 leading-relaxed">
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-400 flex-shrink-0 mt-[5px]" />
               <span>{b}</span>
             </li>
           ))}
@@ -170,8 +170,8 @@ function SectionContent({ section }: { section: Section }) {
           return (
             <ul key={i} className="space-y-1.5">
               {block.items.map((b, j) => (
-                <li key={j} className="flex gap-2 text-[13px] text-slate-600 leading-relaxed">
-                  <span className="text-teal-500 flex-shrink-0 mt-[3px] text-[8px]">▶</span>
+                <li key={j} className="flex gap-2.5 text-[13px] text-slate-700 leading-relaxed">
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400 flex-shrink-0 mt-[5px]" />
                   <span>{b}</span>
                 </li>
               ))}
