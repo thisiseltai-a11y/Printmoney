@@ -74,6 +74,35 @@ function parseOutput(text: string): { resume: string; coverLetter: string } {
   }
 }
 
+async function generateWithRetry(client: Anthropic, prompt: string, attempts = 3): Promise<string> {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const message = await client.messages.create({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 3000,
+        messages: [{ role: 'user', content: prompt }],
+      })
+
+      return message.content
+        .filter((b) => b.type === 'text')
+        .map((b) => (b as { type: 'text'; text: string }).text)
+        .join('')
+    } catch (error) {
+      const isRetryable =
+        error instanceof Anthropic.APIConnectionError ||
+        error instanceof Anthropic.InternalServerError ||
+        (error instanceof Anthropic.RateLimitError && i < attempts - 1)
+
+      if (isRetryable && i < attempts - 1) {
+        await new Promise((r) => setTimeout(r, 1000 * (i + 1)))
+        continue
+      }
+      throw error
+    }
+  }
+  throw new Error('All retry attempts exhausted')
+}
+
 export async function POST(req: NextRequest) {
   if (!process.env.ANTHROPIC_API_KEY) {
     return Response.json({ error: 'ANTHROPIC_API_KEY is not set in environment variables.' }, { status: 500 })
@@ -93,25 +122,21 @@ export async function POST(req: NextRequest) {
   try {
     const client = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY,
-      timeout: 50_000,
+      timeout: 45_000,
     })
 
-    const message = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 2048,
-      messages: [{ role: 'user', content: buildPrompt(data) }],
-    })
-
-    const text = message.content
-      .filter((b) => b.type === 'text')
-      .map((b) => (b as { type: 'text'; text: string }).text)
-      .join('')
-
+    const text = await generateWithRetry(client, buildPrompt(data))
     return Response.json(parseOutput(text))
   } catch (error) {
     const name = error instanceof Error ? error.constructor.name : 'Error'
     const msg = error instanceof Error ? error.message : String(error)
     console.error('Generate error:', name, msg)
-    return Response.json({ error: `${name}: ${msg}` }, { status: 500 })
+
+    const isConnectionError = error instanceof Anthropic.APIConnectionError
+    const userMessage = isConnectionError
+      ? 'Could not reach the AI service. Please try again in a moment.'
+      : `${name}: ${msg}`
+
+    return Response.json({ error: userMessage }, { status: 500 })
   }
 }
