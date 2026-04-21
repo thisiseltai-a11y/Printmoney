@@ -136,21 +136,17 @@ export default function OrderForm() {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch('/api/generate', {
+      sessionStorage.setItem('pending_form_data', JSON.stringify(data))
+      const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ plan: 'single' }),
       })
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Generation failed')
-      }
-      const result = await res.json()
-      sessionStorage.setItem('resume_result', JSON.stringify(result))
-      router.push('/order/result')
+      if (!res.ok) throw new Error('Failed to start checkout')
+      const { url } = await res.json()
+      window.location.href = url
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Something went wrong. Please try again.')
-    } finally {
       setLoading(false)
     }
   }
