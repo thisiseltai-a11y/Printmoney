@@ -1,9 +1,10 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import {
   Copy, Download, CheckCircle, ArrowLeft, Rocket,
   FileText, Mail, Loader2, MapPin, Phone, Globe, Linkedin,
+  RefreshCw, Send,
 } from 'lucide-react'
 import type { GeneratedContent } from '@/lib/types'
 
@@ -88,11 +89,11 @@ type ContactIcon = 'email' | 'phone' | 'location' | 'linkedin' | 'globe'
 function parseContact(line: string): { icon: ContactIcon; text: string }[] {
   const parts = line.split(/[|·•]/).map(p => p.trim()).filter(Boolean)
   return parts.map(p => {
-    if (p.includes('@'))                              return { icon: 'email',    text: p }
+    if (p.includes('@'))                                 return { icon: 'email',    text: p }
     if (/\d{3}[-.\s]\d{3}[-.\s]\d{4}/.test(p) ||
-        /\(\d{3}\)/.test(p))                         return { icon: 'phone',    text: p }
-    if (/linkedin\.com/i.test(p))                    return { icon: 'linkedin', text: p }
-    if (/^https?:\/\//.test(p) || /\.\w{2,}\//.test(p)) return { icon: 'globe', text: p }
+        /\(\d{3}\)/.test(p))                            return { icon: 'phone',    text: p }
+    if (/linkedin\.com/i.test(p))                       return { icon: 'linkedin', text: p }
+    if (/^https?:\/\//.test(p) || /\.\w{2,}\//.test(p)) return { icon: 'globe',  text: p }
     return { icon: 'location', text: p }
   })
 }
@@ -191,7 +192,6 @@ function ResumeRenderer({ text }: { text: string }) {
 
   return (
     <div className="font-sans text-slate-800">
-      {/* Header */}
       <div className="flex items-center gap-4 pb-5 border-b-2 border-teal-500 mb-6 print:pb-3 print:mb-4">
         <div className="w-14 h-14 rounded-full bg-teal-600 flex items-center justify-center text-white font-bold text-xl flex-shrink-0 print:w-10 print:h-10 print:text-base">
           {initials}
@@ -211,26 +211,24 @@ function ResumeRenderer({ text }: { text: string }) {
         </div>
       </div>
 
-      {/* Two-column body */}
       <div className="space-y-5">
         {sections.map((sec, i) => {
           const label = /COMPETENC/i.test(sec.title) ? 'SKILLS' : sec.title
           return (
-          <div key={i} className="grid gap-5" style={{ gridTemplateColumns: '100px 1fr' }}>
-            {/* Left: section label */}
-            <div className="text-right pt-0.5">
-              {label.split(/\s+/).map((word, j) => (
-                <span key={j} className="block text-[9px] font-bold uppercase tracking-widest text-teal-600 leading-tight">
-                  {word}
-                </span>
-              ))}
+            <div key={i} className="grid gap-5" style={{ gridTemplateColumns: '100px 1fr' }}>
+              <div className="text-right pt-0.5">
+                {label.split(/\s+/).map((word, j) => (
+                  <span key={j} className="block text-[9px] font-bold uppercase tracking-widest text-teal-600 leading-tight">
+                    {word}
+                  </span>
+                ))}
+              </div>
+              <div className="border-l border-slate-100 pl-5">
+                <SectionContent section={sec} />
+              </div>
             </div>
-            {/* Right: content */}
-            <div className="border-l border-slate-100 pl-5">
-              <SectionContent section={sec} />
-            </div>
-          </div>
-        )})
+          )
+        })}
       </div>
     </div>
   )
@@ -246,14 +244,61 @@ function CoverLetterRenderer({ text }: { text: string }) {
   )
 }
 
+function LinkedInRenderer({ text }: { text: string }) {
+  return (
+    <div className="space-y-4 font-sans">
+      <div className="flex items-center gap-2 mb-4 pb-4 border-b border-slate-100">
+        <div className="w-8 h-8 rounded bg-[#0077b5] flex items-center justify-center">
+          <Linkedin className="w-4 h-4 text-white" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-slate-900">LinkedIn About Section</p>
+          <p className="text-xs text-slate-500">Copy this into your LinkedIn profile → Edit → About</p>
+        </div>
+      </div>
+      {text.split(/\n{2,}/).map(p => p.trim()).filter(Boolean).map((p, i) => (
+        <p key={i} className="text-[13px] text-slate-700 leading-relaxed">{p.replace(/\n/g, ' ')}</p>
+      ))}
+    </div>
+  )
+}
+
 // ─── Page ───────────────────────────────────────────────────────────────────
+
+type Tab = 'resume' | 'cover' | 'linkedin'
 
 export default function ResultPage() {
   const [content, setContent] = useState<GeneratedContent | null>(null)
-  const [activeTab, setActiveTab] = useState<'resume' | 'cover'>('resume')
+  const [activeTab, setActiveTab] = useState<Tab>('resume')
   const [copied, setCopied] = useState(false)
   const [generating, setGenerating] = useState(false)
+  const [regenerating, setRegenerating] = useState(false)
   const [error, setError] = useState('')
+  const [emailSent, setEmailSent] = useState(false)
+  const [sendingEmail, setSendingEmail] = useState(false)
+  const emailSentRef = useRef(false)
+
+  const sendEmail = async (result: GeneratedContent, formDataStr: string) => {
+    if (emailSentRef.current) return
+    try {
+      const formData = JSON.parse(formDataStr)
+      const res = await fetch('/api/send-resume', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          name: formData.name,
+          resume: result.resume,
+          coverLetter: result.coverLetter,
+          linkedinSummary: result.linkedinSummary,
+        }),
+      })
+      if (res.ok) {
+        emailSentRef.current = true
+        setEmailSent(true)
+      }
+    } catch { /* email is bonus, don't surface errors */ }
+  }
 
   useEffect(() => {
     const run = async () => {
@@ -274,13 +319,13 @@ export default function ResultPage() {
           throw new Error(body.error || `Payment verification failed (${verifyRes.status})`)
         }
 
-        const formData = localStorage.getItem('pending_form_data')
-        if (!formData) throw new Error('Form data not found. Please go back and fill the form again.')
+        const formDataStr = localStorage.getItem('pending_form_data')
+        if (!formDataStr) throw new Error('Form data not found. Please go back and fill the form again.')
 
         const genRes = await fetch('/api/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: formData,
+          body: formDataStr,
         })
 
         const result = await genRes.json()
@@ -289,6 +334,9 @@ export default function ResultPage() {
 
         setContent(result)
         sessionStorage.setItem('resume_result', JSON.stringify(result))
+
+        // Send email in background, then clear form data
+        await sendEmail(result, formDataStr)
         localStorage.removeItem('pending_form_data')
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e))
@@ -299,12 +347,61 @@ export default function ResultPage() {
     run()
   }, [])
 
+  const handleRegenerate = async () => {
+    const formDataStr = localStorage.getItem('pending_form_data') ||
+      sessionStorage.getItem('resume_form_data')
+    if (!formDataStr) {
+      alert('Original form data not available. Please go back and fill the form again.')
+      return
+    }
+    setRegenerating(true)
+    try {
+      const genRes = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: formDataStr,
+      })
+      const result = await genRes.json()
+      if (!genRes.ok || result.error) throw new Error(result.error || 'Generation failed')
+      setContent(result)
+      sessionStorage.setItem('resume_result', JSON.stringify(result))
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Regeneration failed. Please try again.')
+    } finally {
+      setRegenerating(false)
+    }
+  }
+
   const handleCopy = async () => {
-    const text = activeTab === 'resume' ? content?.resume : content?.coverLetter
+    const text = activeTab === 'resume'
+      ? content?.resume
+      : activeTab === 'cover'
+      ? content?.coverLetter
+      : content?.linkedinSummary
     if (!text) return
     await navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2500)
+  }
+
+  const handleResendEmail = async () => {
+    if (!content) return
+    setSendingEmail(true)
+    try {
+      const stored = sessionStorage.getItem('resume_result')
+      const formStr = localStorage.getItem('pending_form_data')
+      const email = prompt('Enter your email address:')
+      if (!email) return
+      const name = stored ? JSON.parse(stored).name ?? '' : ''
+      await fetch('/api/send-resume', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name, resume: content.resume, coverLetter: content.coverLetter, linkedinSummary: content.linkedinSummary }),
+      })
+      setEmailSent(true)
+    } finally {
+      setSendingEmail(false)
+    }
   }
 
   if (generating) return (
@@ -339,6 +436,8 @@ export default function ResultPage() {
     </div>
   )
 
+  const tabLabel = activeTab === 'resume' ? 'Resume' : activeTab === 'cover' ? 'Cover Letter' : 'LinkedIn Summary'
+
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10 print:hidden">
@@ -351,9 +450,7 @@ export default function ResultPage() {
           </Link>
           <div className="flex items-center gap-2">
             <button onClick={handleCopy} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
-              {copied
-                ? <><CheckCircle className="w-4 h-4 text-emerald-500" />Copied!</>
-                : <><Copy className="w-4 h-4" />Copy</>}
+              {copied ? <><CheckCircle className="w-4 h-4 text-emerald-500" />Copied!</> : <><Copy className="w-4 h-4" />Copy</>}
             </button>
             <button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors">
               <Download className="w-4 h-4" />Save as PDF
@@ -363,44 +460,78 @@ export default function ResultPage() {
       </header>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 print:px-0 print:py-0">
+        {/* Success banner */}
         <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl mb-6 print:hidden">
           <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-          <div>
-            <p className="text-sm font-semibold text-emerald-800">Your resume is ready!</p>
-            <p className="text-sm text-emerald-700">ATS-optimized and tailored to your target role.</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-emerald-800">Your documents are ready!</p>
+            <p className="text-sm text-emerald-700">
+              {emailSent
+                ? 'A copy has been sent to your email.'
+                : 'Copy the text or save as PDF — we\'ll email you a copy too.'}
+            </p>
           </div>
+          {!emailSent && (
+            <button
+              onClick={handleResendEmail}
+              disabled={sendingEmail}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-emerald-700 border border-emerald-300 rounded-lg hover:bg-emerald-100 transition-colors disabled:opacity-50"
+            >
+              <Send className="w-3 h-3" />
+              {sendingEmail ? 'Sending...' : 'Email me a copy'}
+            </button>
+          )}
         </div>
 
+        {/* Tabs */}
         <div className="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit mb-6 print:hidden">
           <button
             onClick={() => setActiveTab('resume')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'resume' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'resume' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
             <FileText className="w-4 h-4" />Resume
           </button>
           <button
             onClick={() => setActiveTab('cover')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'cover' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'cover' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
             <Mail className="w-4 h-4" />Cover Letter
           </button>
+          <button
+            onClick={() => setActiveTab('linkedin')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'linkedin' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            <Linkedin className="w-4 h-4" />LinkedIn
+          </button>
         </div>
 
+        {/* Content card */}
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm print:shadow-none print:border-none print:rounded-none">
           <div className="p-8 sm:p-12 print:p-8">
-            {activeTab === 'resume'
-              ? <ResumeRenderer text={content.resume} />
-              : <CoverLetterRenderer text={content.coverLetter} />}
+            {activeTab === 'resume' && <ResumeRenderer text={content.resume} />}
+            {activeTab === 'cover' && <CoverLetterRenderer text={content.coverLetter} />}
+            {activeTab === 'linkedin' && <LinkedInRenderer text={content.linkedinSummary || 'LinkedIn summary not available. Try regenerating.'} />}
           </div>
         </div>
 
+        {/* Footer actions */}
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 print:hidden">
-          <Link href="/order" className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 transition-colors">
-            <ArrowLeft className="w-4 h-4" />Generate another resume
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/order" className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 transition-colors">
+              <ArrowLeft className="w-4 h-4" />New resume
+            </Link>
+            <button
+              onClick={handleRegenerate}
+              disabled={regenerating}
+              className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 transition-colors disabled:opacity-40"
+            >
+              <RefreshCw className={`w-4 h-4 ${regenerating ? 'animate-spin' : ''}`} />
+              {regenerating ? 'Regenerating...' : 'Regenerate'}
+            </button>
+          </div>
           <div className="flex items-center gap-3">
             <button onClick={handleCopy} className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
-              <Copy className="w-4 h-4" />Copy {activeTab === 'resume' ? 'Resume' : 'Cover Letter'}
+              <Copy className="w-4 h-4" />Copy {tabLabel}
             </button>
             <button onClick={() => window.print()} className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl transition-all shadow-md shadow-teal-500/20">
               <Download className="w-4 h-4" />Download PDF

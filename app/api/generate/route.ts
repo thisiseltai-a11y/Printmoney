@@ -57,6 +57,7 @@ INSTRUCTIONS:
 5. Use clean plain-text formatting, all-caps section headers
 6. Label the skills section exactly "SKILLS" — do NOT use "CORE COMPETENCIES" or any other label
 7. Cover letter: open with a hook (not "I am writing to apply"), 3 short paragraphs
+8. LinkedIn summary: write a 3-paragraph first-person About section (no "I am a..." opener), ~200 words, professional but human tone
 
 Output EXACTLY in this format:
 <RESUME>
@@ -64,15 +65,20 @@ Output EXACTLY in this format:
 </RESUME>
 <COVER_LETTER>
 [cover letter text]
-</COVER_LETTER>`
+</COVER_LETTER>
+<LINKEDIN>
+[linkedin summary text]
+</LINKEDIN>`
 }
 
-function parseOutput(text: string): { resume: string; coverLetter: string } {
+function parseOutput(text: string): { resume: string; coverLetter: string; linkedinSummary: string } {
   const resumeMatch = text.match(/<RESUME>([\s\S]*?)<\/RESUME>/)
   const coverMatch = text.match(/<COVER_LETTER>([\s\S]*?)<\/COVER_LETTER>/)
+  const linkedinMatch = text.match(/<LINKEDIN>([\s\S]*?)<\/LINKEDIN>/)
   return {
     resume: resumeMatch ? resumeMatch[1].trim() : text,
     coverLetter: coverMatch ? coverMatch[1].trim() : '',
+    linkedinSummary: linkedinMatch ? linkedinMatch[1].trim() : '',
   }
 }
 

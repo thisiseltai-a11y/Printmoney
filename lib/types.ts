@@ -38,4 +38,5 @@ export interface ResumeFormData {
 export interface GeneratedContent {
   resume: string
   coverLetter: string
+  linkedinSummary: string
 }
