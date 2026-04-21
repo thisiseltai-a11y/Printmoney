@@ -321,7 +321,13 @@ export default function ResultPage() {
         const verifyRes = await fetch(`/api/verify-payment?session_id=${sessionId}`)
         if (!verifyRes.ok) {
           const body = await verifyRes.json().catch(() => ({}))
-          throw new Error(body.error || `Payment verification failed (${verifyRes.status})`)
+          const rawMsg = body.error || ''
+          const isSessionGone = rawMsg.toLowerCase().includes('no such checkout') || rawMsg.toLowerCase().includes('no such session')
+          throw new Error(
+            isSessionGone
+              ? 'Your payment session has expired. Please start a new order — your card was not charged.'
+              : rawMsg || `Payment verification failed (${verifyRes.status})`
+          )
         }
 
         const formDataStr = localStorage.getItem('pending_form_data')
