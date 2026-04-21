@@ -3,6 +3,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import type { ResumeFormData } from '@/lib/types'
 
 export const maxDuration = 60
+export const runtime = 'edge'
 
 function buildPrompt(data: ResumeFormData): string {
   const expSection = data.experience
