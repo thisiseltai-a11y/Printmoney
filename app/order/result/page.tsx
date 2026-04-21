@@ -283,10 +283,32 @@ export default function ResultPage() {
   const [sendingEmail, setSendingEmail] = useState(false)
   const emailSentRef = useRef(false)
 
-  const sendEmail = async (result: GeneratedContent, formDataStr: string) => {
+  const saveAndEmail = async (result: GeneratedContent, formDataStr: string) => {
     if (emailSentRef.current) return
     try {
       const formData = JSON.parse(formDataStr)
+
+      // Save to Supabase and get magic link
+      let resumeUrl: string | undefined
+      try {
+        const saveRes = await fetch('/api/save-resume', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: formData.email,
+            name: formData.name,
+            resume: result.resume,
+            coverLetter: result.coverLetter,
+            linkedinSummary: result.linkedinSummary,
+          }),
+        })
+        if (saveRes.ok) {
+          const { url } = await saveRes.json()
+          resumeUrl = url
+        }
+      } catch { /* non-blocking */ }
+
+      // Send email with magic link
       const res = await fetch('/api/send-resume', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -296,6 +318,7 @@ export default function ResultPage() {
           resume: result.resume,
           coverLetter: result.coverLetter,
           linkedinSummary: result.linkedinSummary,
+          resumeUrl,
         }),
       })
       if (res.ok) {
@@ -346,8 +369,8 @@ export default function ResultPage() {
         setContent(result)
         sessionStorage.setItem('resume_result', JSON.stringify(result))
 
-        // Send email in background, then clear form data
-        await sendEmail(result, formDataStr)
+        // Save to Supabase + send email with magic link
+        await saveAndEmail(result, formDataStr)
         localStorage.removeItem('pending_form_data')
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e))
