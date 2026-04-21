@@ -12,52 +12,71 @@ export default function ResultPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const sessionId = params.get('session_id')
+    const run = async () => {
+      const params = new URLSearchParams(window.location.search)
+      const sessionId = params.get('session_id')
 
-    if (sessionId) {
+      if (!sessionId) {
+        const stored = sessionStorage.getItem('resume_result')
+        if (stored) setContent(JSON.parse(stored))
+        return
+      }
+
       setGenerating(true)
-      fetch(`/api/verify-payment?session_id=${sessionId}`)
-        .then((r) => {
-          if (!r.ok) throw new Error('Payment could not be verified. Please contact support.')
-          return r.json()
+      try {
+        // 1. Verify payment
+        const verifyRes = await fetch(`/api/verify-payment?session_id=${sessionId}`)
+        if (!verifyRes.ok) {
+          const body = await verifyRes.json().catch(() => ({}))
+          throw new Error(body.error || `Payment verification failed (${verifyRes.status})`)
+        }
+
+        // 2. Get saved form data
+        const formData = localStorage.getItem('pending_form_data')
+        if (!formData) throw new Error('Form data not found. Please go back and fill the form again.')
+
+        // 3. Generate resume (streamed response)
+        const genRes = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: formData,
         })
-        .then(async () => {
-          const formData = localStorage.getItem('pending_form_data')
-          if (!formData) throw new Error('Form data missing. Please go back and try again.')
 
-          const res = await fetch('/api/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: formData,
-          })
+        if (!genRes.ok && !genRes.body) {
+          throw new Error(`Generation request failed (${genRes.status})`)
+        }
 
-          if (!res.body) throw new Error('No response from server.')
+        if (!genRes.body) throw new Error('No response body from server.')
 
-          // Read the streamed response — newlines are heartbeats, last line is JSON
-          const reader = res.body.getReader()
-          const decoder = new TextDecoder()
-          let buffer = ''
-          while (true) {
-            const { done, value } = await reader.read()
-            if (done) break
-            buffer += decoder.decode(value, { stream: true })
-          }
+        // Read stream — heartbeat newlines keep connection alive, last line is JSON
+        const reader = genRes.body.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ''
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          buffer += decoder.decode(value, { stream: true })
+        }
 
-          const lastLine = buffer.trim().split('\n').filter(Boolean).pop() || ''
-          const result = JSON.parse(lastLine)
-          if (result.error) throw new Error(result.error)
+        // Find the last line that looks like JSON
+        const jsonLine = buffer.trim().split('\n').filter((l) => l.trim().startsWith('{')).pop()
+        if (!jsonLine) throw new Error(`Empty response from AI. Raw: "${buffer.slice(0, 100)}"`)
 
-          setContent(result)
-          sessionStorage.setItem('resume_result', JSON.stringify(result))
-          localStorage.removeItem('pending_form_data')
-        })
-        .catch((e) => setError(e instanceof Error ? e.message : 'Something went wrong.'))
-        .finally(() => setGenerating(false))
-    } else {
-      const stored = sessionStorage.getItem('resume_result')
-      if (stored) setContent(JSON.parse(stored))
+        const result = JSON.parse(jsonLine)
+        if (result.error) throw new Error(`AI error: ${result.error}`)
+        if (!result.resume) throw new Error('Resume missing from response. Please try again.')
+
+        setContent(result)
+        sessionStorage.setItem('resume_result', JSON.stringify(result))
+        localStorage.removeItem('pending_form_data')
+      } catch (e) {
+        setError(e instanceof Error ? e.message : String(e))
+      } finally {
+        setGenerating(false)
+      }
     }
+
+    run()
   }, [])
 
   const handleCopy = async () => {
