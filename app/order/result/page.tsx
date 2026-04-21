@@ -35,36 +35,16 @@ export default function ResultPage() {
         const formData = localStorage.getItem('pending_form_data')
         if (!formData) throw new Error('Form data not found. Please go back and fill the form again.')
 
-        // 3. Generate resume (streamed response)
+        // 3. Generate resume
         const genRes = await fetch('/api/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: formData,
         })
 
-        if (!genRes.ok && !genRes.body) {
-          throw new Error(`Generation request failed (${genRes.status})`)
-        }
-
-        if (!genRes.body) throw new Error('No response body from server.')
-
-        // Read stream — heartbeat newlines keep connection alive, last line is JSON
-        const reader = genRes.body.getReader()
-        const decoder = new TextDecoder()
-        let buffer = ''
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-          buffer += decoder.decode(value, { stream: true })
-        }
-
-        // Find the last line that looks like JSON
-        const jsonLine = buffer.trim().split('\n').filter((l) => l.trim().startsWith('{')).pop()
-        if (!jsonLine) throw new Error(`Empty response from AI. Raw: "${buffer.slice(0, 100)}"`)
-
-        const result = JSON.parse(jsonLine)
-        if (result.error) throw new Error(`AI error: ${result.error}`)
-        if (!result.resume) throw new Error('Resume missing from response. Please try again.')
+        const result = await genRes.json()
+        if (!genRes.ok || result.error) throw new Error(result.error || `Generation failed (${genRes.status})`)
+        if (!result.resume) throw new Error('Resume missing from AI response. Please try again.')
 
         setContent(result)
         sessionStorage.setItem('resume_result', JSON.stringify(result))
