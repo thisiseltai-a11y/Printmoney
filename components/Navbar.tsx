@@ -30,14 +30,14 @@ export default function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center gap-3">
-            <Link href="/order" className="text-sm text-slate-600 hover:text-slate-900 transition-colors px-3 py-2">
-              Log In
+            <Link href="#pricing" className="text-sm text-slate-600 hover:text-slate-900 transition-colors px-3 py-2">
+              Pricing
             </Link>
             <Link
               href="/order"
               className="text-sm px-5 py-2.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors font-medium"
             >
-              Get Started Free
+              Build My Resume — $12
             </Link>
           </div>
 
@@ -62,7 +62,7 @@ export default function Navbar() {
             href="/order"
             className="block text-sm px-4 py-3 rounded-lg bg-indigo-600 text-white text-center font-medium mt-2"
           >
-            Get Started Free
+            Build My Resume — $12
           </Link>
         </div>
       )}
