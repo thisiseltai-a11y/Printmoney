@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { CheckCircle, Zap } from 'lucide-react'
+import { CheckCircle, Zap, Shield } from 'lucide-react'
 
 const plans = [
   {
@@ -135,9 +135,13 @@ export default function Pricing() {
           ))}
         </div>
 
-        <p className="text-center text-slate-500 text-sm mt-10">
-          All plans include a 100% satisfaction guarantee. Not happy? We&apos;ll make it right.
-        </p>
+        <div className="flex items-center justify-center gap-3 mt-10 p-4 rounded-2xl bg-slate-800/50 border border-slate-700 max-w-md mx-auto">
+          <Shield className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+          <p className="text-slate-300 text-sm">
+            <span className="font-semibold text-white">100% money-back guarantee.</span>{' '}
+            Not happy with your resume? We&apos;ll refund every penny. No questions asked.
+          </p>
+        </div>
       </div>
     </section>
   )
