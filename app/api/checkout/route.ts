@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
     const { plan = 'single' } = await req.json()
     const selected = PLANS[plan as keyof typeof PLANS] ?? PLANS.single
-    const base = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000'
+    const base = (process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000').replace(/\/$/, '')
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
