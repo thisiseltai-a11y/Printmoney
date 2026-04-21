@@ -3,21 +3,21 @@ import { Rocket } from 'lucide-react'
 
 const links = {
   Product: [
-    { label: 'How It Works', href: '#how-it-works' },
-    { label: 'Features', href: '#features' },
-    { label: 'Pricing', href: '#pricing' },
+    { label: 'How It Works', href: '/#how-it-works' },
+    { label: 'Features', href: '/#features' },
+    { label: 'Pricing', href: '/#pricing' },
     { label: 'Build My Resume', href: '/order' },
   ],
   Resources: [
-    { label: 'Resume Tips', href: '#' },
-    { label: 'Cover Letter Guide', href: '#' },
-    { label: 'ATS Guide', href: '#' },
-    { label: 'Career Blog', href: '#' },
+    { label: 'Resume Tips', href: '/#faq' },
+    { label: 'Cover Letter Guide', href: '/#how-it-works' },
+    { label: 'ATS Optimization', href: '/#features' },
+    { label: 'Testimonials', href: '/#testimonials' },
   ],
   Legal: [
-    { label: 'Privacy Policy', href: '#' },
-    { label: 'Terms of Service', href: '#' },
-    { label: 'Refund Policy', href: '#' },
+    { label: 'Privacy Policy', href: '/privacy' },
+    { label: 'Terms of Service', href: '/terms' },
+    { label: 'Refund Policy', href: '/refund' },
   ],
 }
 
