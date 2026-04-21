@@ -40,7 +40,7 @@ const plans = [
     price: '$19',
     period: '/month',
     description: 'For active job seekers who apply to multiple roles constantly.',
-    cta: 'Start Free Month',
+    cta: 'Subscribe — $19/mo',
     href: '/order',
     popular: false,
     features: [

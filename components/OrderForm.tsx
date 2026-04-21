@@ -451,12 +451,20 @@ export default function OrderForm() {
               ) : (
                 <>
                   <Rocket className="w-4 h-4" />
-                  Generate My Resume
+                  Generate My Resume — $12
                 </>
               )}
             </button>
           )}
         </div>
+        {step === STEP_LABELS.length - 1 && (
+          <p className="text-center text-xs text-slate-400 mt-3">
+            Not happy?{' '}
+            <a href="/refund" target="_blank" rel="noopener noreferrer" className="text-indigo-500 hover:text-indigo-400 underline">
+              100% money-back guarantee.
+            </a>
+          </p>
+        )}
       </div>
     </div>
   )

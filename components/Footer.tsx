@@ -56,7 +56,12 @@ export default function Footer() {
 
         <div className="border-t border-slate-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-slate-600">© {new Date().getFullYear()} ResumeRocket. All rights reserved.</p>
-          <p className="text-sm text-slate-600">Made with ♥ for job seekers everywhere</p>
+          <div className="flex items-center gap-4">
+            <a href="mailto:support@resumerocket.co" className="text-sm text-slate-600 hover:text-slate-400 transition-colors">
+              support@resumerocket.co
+            </a>
+            <p className="text-sm text-slate-600">Made with ♥ for job seekers everywhere</p>
+          </div>
         </div>
       </div>
     </footer>
