@@ -30,20 +30,11 @@ export const metadata: Metadata = {
     siteName: 'ResumeRocket',
     type: 'website',
     locale: 'en_US',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'ResumeRocket — AI Resume Builder',
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'ResumeRocket — AI Resume Builder That Lands Interviews',
     description: 'ATS-optimized resume + cover letter in 60 seconds. From $12.',
-    images: ['/og-image.png'],
   },
   alternates: {
     canonical: BASE_URL,
