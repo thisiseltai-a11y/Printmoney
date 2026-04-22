@@ -281,6 +281,8 @@ export default function ResultPage() {
   const [error, setError] = useState('')
   const [emailSent, setEmailSent] = useState(false)
   const [sendingEmail, setSendingEmail] = useState(false)
+  const [bundleUrl, setBundleUrl] = useState('')
+  const [bundleUsesRemaining, setBundleUsesRemaining] = useState(0)
   const emailSentRef = useRef(false)
 
   const saveAndEmail = async (result: GeneratedContent, formDataStr: string) => {
@@ -332,6 +334,8 @@ export default function ResultPage() {
     const run = async () => {
       const params = new URLSearchParams(window.location.search)
       const sessionId = params.get('session_id')
+      const plan = params.get('plan')
+      const isBundleSession = sessionId?.startsWith('bundle:')
 
       if (!sessionId) {
         const stored = sessionStorage.getItem('resume_result')
@@ -341,16 +345,19 @@ export default function ResultPage() {
 
       setGenerating(true)
       try {
-        const verifyRes = await fetch(`/api/verify-payment?session_id=${sessionId}`)
-        if (!verifyRes.ok) {
-          const body = await verifyRes.json().catch(() => ({}))
-          const rawMsg = body.error || ''
-          const isSessionGone = rawMsg.toLowerCase().includes('no such checkout') || rawMsg.toLowerCase().includes('no such session')
-          throw new Error(
-            isSessionGone
-              ? 'Your payment session has expired. Please start a new order — your card was not charged.'
-              : rawMsg || `Payment verification failed (${verifyRes.status})`
-          )
+        if (!isBundleSession) {
+          // Verify Stripe payment for normal purchases
+          const verifyRes = await fetch(`/api/verify-payment?session_id=${sessionId}`)
+          if (!verifyRes.ok) {
+            const body = await verifyRes.json().catch(() => ({}))
+            const rawMsg = body.error || ''
+            const isSessionGone = rawMsg.toLowerCase().includes('no such checkout') || rawMsg.toLowerCase().includes('no such session')
+            throw new Error(
+              isSessionGone
+                ? 'Your payment session has expired. Please start a new order — your card was not charged.'
+                : rawMsg || `Payment verification failed (${verifyRes.status})`
+            )
+          }
         }
 
         // Try server-side first (survives browser/device changes), fall back to localStorage
@@ -363,6 +370,22 @@ export default function ResultPage() {
           }
         }
         if (!formDataStr) throw new Error('Form data not found. Please go back and fill the form again.')
+
+        // After a real bundle purchase, create bundle credits for the remaining 4 resumes
+        if (plan === 'bundle' && !isBundleSession) {
+          try {
+            const btRes = await fetch('/api/create-bundle-token', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: formDataStr,
+            })
+            if (btRes.ok) {
+              const { bundleUrl: url } = await btRes.json()
+              if (url) setBundleUrl(url)
+              setBundleUsesRemaining(4)
+            }
+          } catch { /* non-blocking */ }
+        }
 
         const genRes = await fetch('/api/generate', {
           method: 'POST',
@@ -524,6 +547,24 @@ export default function ResultPage() {
             </button>
           )}
         </div>
+
+        {/* Bundle credits banner */}
+        {bundleUrl && (
+          <div className="flex items-start gap-3 p-4 bg-indigo-50 border border-indigo-200 rounded-xl mb-6 print:hidden">
+            <div className="text-xl">🎟️</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-indigo-800">You have {bundleUsesRemaining} more resumes in your bundle!</p>
+              <p className="text-sm text-indigo-700 mb-2">Bookmark your personal bundle link — use it any time, no payment needed.</p>
+              <a
+                href={bundleUrl}
+                className="text-sm font-medium text-indigo-600 underline break-all"
+              >
+                {bundleUrl}
+              </a>
+              <p className="text-xs text-indigo-500 mt-1">We also sent this to your email.</p>
+            </div>
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit mb-6 print:hidden">

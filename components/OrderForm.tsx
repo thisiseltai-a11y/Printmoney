@@ -1,6 +1,6 @@
 'use client'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Plus, Trash2, Rocket, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react'
 import type { ResumeFormData, WorkExperience, Education } from '@/lib/types'
 
@@ -96,8 +96,12 @@ function Textarea({
   )
 }
 
-export default function OrderForm() {
-  const router = useRouter()
+function OrderFormInner() {
+  const searchParams = useSearchParams()
+  const plan = searchParams.get('plan') || 'single'
+  const bundleToken = searchParams.get('bundle_token')
+  const isBundle = plan === 'bundle' || !!bundleToken
+
   const [step, setStep] = useState(0)
   const [data, setData] = useState<ResumeFormData>(initialData)
   const [loading, setLoading] = useState(false)
@@ -162,20 +166,35 @@ export default function OrderForm() {
     setLoading(true)
     setError('')
     try {
-      // Save to localStorage as backup
       localStorage.setItem('pending_form_data', JSON.stringify(data))
-      // Send form data with checkout so it's saved server-side
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: 'single', formData: data }),
-      })
-      if (!res.ok) {
-        const body = await res.json()
-        throw new Error(body.error || 'Failed to start checkout')
+
+      if (bundleToken) {
+        // Redeeming a bundle credit — skip Stripe
+        const res = await fetch('/api/use-bundle-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: bundleToken, formData: data }),
+        })
+        if (!res.ok) {
+          const body = await res.json()
+          throw new Error(body.error || 'Invalid bundle token')
+        }
+        const { sessionId } = await res.json()
+        window.location.href = `/order/result?session_id=${sessionId}`
+      } else {
+        // Normal Stripe checkout
+        const res = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan, formData: data }),
+        })
+        if (!res.ok) {
+          const body = await res.json()
+          throw new Error(body.error || 'Failed to start checkout')
+        }
+        const { url } = await res.json()
+        window.location.href = url
       }
-      const { url } = await res.json()
-      window.location.href = url
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Something went wrong. Please try again.')
       setLoading(false)
@@ -479,12 +498,12 @@ export default function OrderForm() {
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Generating...
+                  {bundleToken ? 'Generating...' : 'Redirecting to checkout...'}
                 </>
               ) : (
                 <>
                   <Rocket className="w-4 h-4" />
-                  Generate My Resume — $12
+                  {bundleToken ? 'Generate My Resume (Bundle)' : isBundle ? 'Get the Bundle — $29' : 'Generate My Resume — $12'}
                 </>
               )}
             </button>
@@ -500,5 +519,13 @@ export default function OrderForm() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function OrderForm() {
+  return (
+    <Suspense>
+      <OrderFormInner />
+    </Suspense>
   )
 }

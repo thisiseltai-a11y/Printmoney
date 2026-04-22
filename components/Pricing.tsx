@@ -24,7 +24,7 @@ const plans = [
     period: 'one-time',
     description: 'Actively job hunting? Get 5 fully tailored applications — best value by far.',
     cta: 'Get the Bundle — $29',
-    href: '/order',
+    href: '/order?plan=bundle',
     popular: true,
     features: [
       '5 resume + cover letter sets',
