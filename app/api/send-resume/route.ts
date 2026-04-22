@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Email not configured.' }, { status: 503 })
   }
 
-  const { email, name, resume, coverLetter, linkedinSummary } = await req.json()
+  const { email, name, resume, coverLetter, linkedinSummary, resumeUrl } = await req.json()
   if (!email || !resume) {
     return NextResponse.json({ error: 'Missing required fields.' }, { status: 400 })
   }
@@ -34,8 +34,15 @@ export async function POST(req: NextRequest) {
       </div>
       <div style="padding:32px;">
         <p style="margin:0 0 16px;color:#475569;font-size:14px;line-height:1.6;">
-          We've saved everything below so you'll never lose access. Copy your resume into a Word doc or Google Doc, then save as PDF before applying.
+          Your resume, cover letter, and LinkedIn summary are below — and saved permanently at your personal link. Come back anytime.
         </p>
+        ${resumeUrl ? `
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px 20px;margin-bottom:20px;">
+          <p style="margin:0 0 8px;font-size:12px;font-weight:600;color:#166534;text-transform:uppercase;letter-spacing:0.05em;">🔗 Your permanent resume link</p>
+          <a href="${resumeUrl}" style="color:#0d9488;font-size:14px;font-weight:600;word-break:break-all;">${resumeUrl}</a>
+          <p style="margin:8px 0 0;font-size:12px;color:#4ade80;">Bookmark this — it never expires. View, copy, and download anytime.</p>
+        </div>
+        ` : ''}
         <a href="https://resumerocket.co/order" style="display:inline-block;background:#0d9488;color:white;text-decoration:none;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;">Generate another resume →</a>
       </div>
     </div>

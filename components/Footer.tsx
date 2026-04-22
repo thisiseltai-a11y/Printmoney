@@ -3,21 +3,21 @@ import { Rocket } from 'lucide-react'
 
 const links = {
   Product: [
-    { label: 'How It Works', href: '#how-it-works' },
-    { label: 'Features', href: '#features' },
-    { label: 'Pricing', href: '#pricing' },
+    { label: 'How It Works', href: '/#how-it-works' },
+    { label: 'Features', href: '/#features' },
+    { label: 'Pricing', href: '/#pricing' },
     { label: 'Build My Resume', href: '/order' },
   ],
   Resources: [
-    { label: 'Resume Tips', href: '#' },
-    { label: 'Cover Letter Guide', href: '#' },
-    { label: 'ATS Guide', href: '#' },
-    { label: 'Career Blog', href: '#' },
+    { label: 'Resume Tips', href: '/#faq' },
+    { label: 'Cover Letter Guide', href: '/#how-it-works' },
+    { label: 'ATS Optimization', href: '/#features' },
+    { label: 'Testimonials', href: '/#testimonials' },
   ],
   Legal: [
-    { label: 'Privacy Policy', href: '#' },
-    { label: 'Terms of Service', href: '#' },
-    { label: 'Refund Policy', href: '#' },
+    { label: 'Privacy Policy', href: '/privacy' },
+    { label: 'Terms of Service', href: '/terms' },
+    { label: 'Refund Policy', href: '/refund' },
   ],
 }
 
@@ -56,7 +56,12 @@ export default function Footer() {
 
         <div className="border-t border-slate-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-slate-600">© {new Date().getFullYear()} ResumeRocket. All rights reserved.</p>
-          <p className="text-sm text-slate-600">Made with ♥ for job seekers everywhere</p>
+          <div className="flex items-center gap-4">
+            <a href="mailto:support@resumerocket.co" className="text-sm text-slate-600 hover:text-slate-400 transition-colors">
+              support@resumerocket.co
+            </a>
+            <p className="text-sm text-slate-600">Made with ♥ for job seekers everywhere</p>
+          </div>
         </div>
       </div>
     </footer>

@@ -49,8 +49,13 @@ function parseResume(text: string): Parsed {
 
     if (isSectionHead) {
       flushJob()
-      cur = { title: line, blocks: [] }
-      sections.push(cur)
+      const last = sections[sections.length - 1]
+      if (last && last.title === line) {
+        cur = last
+      } else {
+        cur = { title: line, blocks: [] }
+        sections.push(cur)
+      }
       continue
     }
 
@@ -278,10 +283,32 @@ export default function ResultPage() {
   const [sendingEmail, setSendingEmail] = useState(false)
   const emailSentRef = useRef(false)
 
-  const sendEmail = async (result: GeneratedContent, formDataStr: string) => {
+  const saveAndEmail = async (result: GeneratedContent, formDataStr: string) => {
     if (emailSentRef.current) return
     try {
       const formData = JSON.parse(formDataStr)
+
+      // Save to Supabase and get magic link
+      let resumeUrl: string | undefined
+      try {
+        const saveRes = await fetch('/api/save-resume', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: formData.email,
+            name: formData.name,
+            resume: result.resume,
+            coverLetter: result.coverLetter,
+            linkedinSummary: result.linkedinSummary,
+          }),
+        })
+        if (saveRes.ok) {
+          const { url } = await saveRes.json()
+          resumeUrl = url
+        }
+      } catch { /* non-blocking */ }
+
+      // Send email with magic link
       const res = await fetch('/api/send-resume', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -291,6 +318,7 @@ export default function ResultPage() {
           resume: result.resume,
           coverLetter: result.coverLetter,
           linkedinSummary: result.linkedinSummary,
+          resumeUrl,
         }),
       })
       if (res.ok) {
@@ -316,10 +344,24 @@ export default function ResultPage() {
         const verifyRes = await fetch(`/api/verify-payment?session_id=${sessionId}`)
         if (!verifyRes.ok) {
           const body = await verifyRes.json().catch(() => ({}))
-          throw new Error(body.error || `Payment verification failed (${verifyRes.status})`)
+          const rawMsg = body.error || ''
+          const isSessionGone = rawMsg.toLowerCase().includes('no such checkout') || rawMsg.toLowerCase().includes('no such session')
+          throw new Error(
+            isSessionGone
+              ? 'Your payment session has expired. Please start a new order — your card was not charged.'
+              : rawMsg || `Payment verification failed (${verifyRes.status})`
+          )
         }
 
-        const formDataStr = localStorage.getItem('pending_form_data')
+        // Try server-side first (survives browser/device changes), fall back to localStorage
+        let formDataStr = localStorage.getItem('pending_form_data')
+        if (!formDataStr) {
+          const fdRes = await fetch(`/api/get-form-data?session_id=${sessionId}`)
+          if (fdRes.ok) {
+            const { formData } = await fdRes.json()
+            if (formData) formDataStr = JSON.stringify(formData)
+          }
+        }
         if (!formDataStr) throw new Error('Form data not found. Please go back and fill the form again.')
 
         const genRes = await fetch('/api/generate', {
@@ -335,8 +377,8 @@ export default function ResultPage() {
         setContent(result)
         sessionStorage.setItem('resume_result', JSON.stringify(result))
 
-        // Send email in background, then clear form data
-        await sendEmail(result, formDataStr)
+        // Save to Supabase + send email with magic link
+        await saveAndEmail(result, formDataStr)
         localStorage.removeItem('pending_form_data')
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e))

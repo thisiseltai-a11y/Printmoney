@@ -102,9 +102,12 @@ export default function OrderForm() {
   const [data, setData] = useState<ResumeFormData>(initialData)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [stepError, setStepError] = useState('')
 
-  const set = <K extends keyof ResumeFormData>(key: K, value: ResumeFormData[K]) =>
+  const set = <K extends keyof ResumeFormData>(key: K, value: ResumeFormData[K]) => {
+    setStepError('')
     setData((d) => ({ ...d, [key]: value }))
+  }
 
   const updateExp = (id: string, field: keyof WorkExperience, value: string | boolean) =>
     setData((d) => ({
@@ -126,21 +129,46 @@ export default function OrderForm() {
   const removeEdu = (id: string) =>
     setData((d) => ({ ...d, education: d.education.filter((e) => e.id !== id) }))
 
-  const canNext = () => {
-    if (step === 0) return data.name && data.email
-    if (step === 1) return data.targetJob && data.jobDescription.length > 50
-    return true
+  const validate = (): string => {
+    if (step === 0) {
+      if (!data.name.trim()) return 'Full name is required.'
+      if (!data.email.trim()) return 'Email address is required.'
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) return 'Please enter a valid email address.'
+    }
+    if (step === 1) {
+      if (!data.targetJob.trim()) return 'Please enter the job title you\'re applying for.'
+      if (data.jobDescription.trim().length < 50) return 'Please paste the full job description (at least a few sentences) for the best results.'
+    }
+    if (step === 2) {
+      if (!data.experience.some((e) => e.title.trim())) return 'Please add at least one job title in your work experience.'
+    }
+    if (step === 4) {
+      if (!data.technicalSkills.trim()) return 'Please list at least a few technical skills so we can tailor your resume.'
+    }
+    return ''
+  }
+
+  const handleNext = () => {
+    const err = validate()
+    if (err) { setStepError(err); return }
+    setStepError('')
+    setStep((s) => s + 1)
   }
 
   const handleSubmit = async () => {
+    const err = validate()
+    if (err) { setStepError(err); return }
+    setStepError('')
     setLoading(true)
     setError('')
     try {
+      // Save to localStorage as backup
       localStorage.setItem('pending_form_data', JSON.stringify(data))
+      // Send form data with checkout so it's saved server-side
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: 'single' }),
+        body: JSON.stringify({ plan: 'single', formData: data }),
       })
       if (!res.ok) {
         const body = await res.json()
@@ -418,9 +446,15 @@ export default function OrderForm() {
         </div>
 
         {/* Navigation */}
-        <div className="flex items-center justify-between mt-6">
+        {stepError && (
+          <div className="mt-4 p-3 bg-rose-50 border border-rose-200 rounded-xl text-sm text-rose-700 flex items-start gap-2">
+            <span className="mt-0.5">⚠</span>
+            <span>{stepError}</span>
+          </div>
+        )}
+        <div className="flex items-center justify-between mt-4">
           <button
-            onClick={() => setStep((s) => s - 1)}
+            onClick={() => { setStepError(''); setStep((s) => s - 1) }}
             disabled={step === 0}
             className="flex items-center gap-2 px-5 py-3 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
@@ -430,9 +464,8 @@ export default function OrderForm() {
 
           {step < STEP_LABELS.length - 1 ? (
             <button
-              onClick={() => setStep((s) => s + 1)}
-              disabled={!canNext()}
-              className="flex items-center gap-2 px-7 py-3 bg-indigo-600 text-white font-semibold rounded-xl text-sm hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:-translate-y-0.5"
+              onClick={handleNext}
+              className="flex items-center gap-2 px-7 py-3 bg-indigo-600 text-white font-semibold rounded-xl text-sm hover:bg-indigo-700 transition-all hover:-translate-y-0.5"
             >
               Continue
               <ChevronRight className="w-4 h-4" />
@@ -451,12 +484,20 @@ export default function OrderForm() {
               ) : (
                 <>
                   <Rocket className="w-4 h-4" />
-                  Generate My Resume
+                  Generate My Resume — $12
                 </>
               )}
             </button>
           )}
         </div>
+        {step === STEP_LABELS.length - 1 && (
+          <p className="text-center text-xs text-slate-400 mt-3">
+            Not happy?{' '}
+            <a href="/refund" target="_blank" rel="noopener noreferrer" className="text-indigo-500 hover:text-indigo-400 underline">
+              100% money-back guarantee.
+            </a>
+          </p>
+        )}
       </div>
     </div>
   )

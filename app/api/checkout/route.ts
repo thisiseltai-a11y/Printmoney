@@ -18,9 +18,10 @@ export async function POST(req: NextRequest) {
     const Stripe = (await import('stripe')).default
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
-    const { plan = 'single' } = await req.json()
+    const body = await req.json()
+    const { plan = 'single', formData } = body
     const selected = PLANS[plan as keyof typeof PLANS] ?? PLANS.single
-    const base = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000'
+    const base = (process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000').replace(/\/$/, '')
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -41,6 +42,20 @@ export async function POST(req: NextRequest) {
       success_url: `${base}/order/result?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${base}/order`,
     })
+
+    // Save form data server-side so it survives browser/device changes
+    if (formData && session.id && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      try {
+        const { supabase } = await import('@/lib/supabase')
+        await supabase.from('pending_sessions').insert({
+          stripe_session_id: session.id,
+          form_data: formData,
+        })
+      } catch (e) {
+        console.error('Failed to save form data to Supabase:', e)
+        // Non-fatal — localStorage is the fallback
+      }
+    }
 
     return NextResponse.json({ url: session.url })
   } catch (error) {

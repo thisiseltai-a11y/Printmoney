@@ -1,55 +1,54 @@
 import Link from 'next/link'
-import { CheckCircle, Zap } from 'lucide-react'
+import { CheckCircle, Zap, Shield } from 'lucide-react'
 
 const plans = [
   {
     name: 'Single',
     price: '$12',
     period: 'one-time',
-    description: 'Perfect for one application or testing the service.',
-    cta: 'Get Started',
+    description: 'Applying to 1–2 jobs? Get a tailored resume and cover letter fast.',
+    cta: 'Get Started — $12',
     href: '/order',
     popular: false,
     features: [
       '1 ATS-optimized resume',
       '1 tailored cover letter',
+      'LinkedIn summary',
       'Keyword optimization',
       'Instant download',
-      'Copy to clipboard',
-    ],
-  },
-  {
-    name: 'Bundle',
-    price: '$29',
-    period: 'one-time',
-    description: 'Best value. Everything you need for a full job search sprint.',
-    cta: 'Get the Bundle',
-    href: '/order',
-    popular: true,
-    features: [
-      '5 resume + cover letter sets',
-      'LinkedIn summary rewrite',
-      'Keyword optimization',
-      'Instant download',
-      'Priority AI model',
-      '30-day revision window',
     ],
   },
   {
     name: 'Unlimited',
     price: '$19',
     period: '/month',
-    description: 'For active job seekers who apply to multiple roles constantly.',
-    cta: 'Start Free Month',
+    description: 'Actively job hunting? Pays for itself after just 2 resumes. Cancel anytime.',
+    cta: 'Start Unlimited — $19/mo',
     href: '/order',
-    popular: false,
+    popular: true,
     features: [
       'Unlimited resumes',
       'Unlimited cover letters',
-      'LinkedIn summary rewrites',
+      'Unlimited LinkedIn rewrites',
       'Keyword optimization',
       'Instant download',
       'Cancel anytime',
+    ],
+  },
+  {
+    name: 'Bundle',
+    price: '$29',
+    period: 'one-time',
+    description: 'Need 5 tailored applications at once? Best one-time value.',
+    cta: 'Get the Bundle — $29',
+    href: '/order',
+    popular: false,
+    features: [
+      '5 resume + cover letter sets',
+      '5 LinkedIn summary rewrites',
+      'Keyword optimization',
+      'Instant download',
+      '30-day revision window',
     ],
   },
 ]
@@ -135,9 +134,13 @@ export default function Pricing() {
           ))}
         </div>
 
-        <p className="text-center text-slate-500 text-sm mt-10">
-          All plans include a 100% satisfaction guarantee. Not happy? We&apos;ll make it right.
-        </p>
+        <div className="flex items-center justify-center gap-3 mt-10 p-4 rounded-2xl bg-slate-800/50 border border-slate-700 max-w-md mx-auto">
+          <Shield className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+          <p className="text-slate-300 text-sm">
+            <span className="font-semibold text-white">100% money-back guarantee.</span>{' '}
+            Not happy with your resume? We&apos;ll refund every penny. No questions asked.
+          </p>
+        </div>
       </div>
     </section>
   )

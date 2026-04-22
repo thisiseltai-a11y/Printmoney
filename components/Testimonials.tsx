@@ -63,7 +63,7 @@ function Stars() {
 
 export default function Testimonials() {
   return (
-    <section className="py-24 bg-white">
+    <section id="testimonials" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <p className="text-sm font-semibold text-indigo-600 uppercase tracking-wider mb-3">Real Results</p>

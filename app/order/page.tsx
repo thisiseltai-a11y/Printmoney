@@ -1,6 +1,14 @@
 import Link from 'next/link'
 import { Rocket } from 'lucide-react'
 import OrderForm from '@/components/OrderForm'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Build Your Resume',
+  description:
+    'Paste your job description and let AI write an ATS-optimized resume and cover letter tailored to the role — in under 60 seconds.',
+  robots: { index: false, follow: false },
+}
 
 export default function OrderPage() {
   return (
