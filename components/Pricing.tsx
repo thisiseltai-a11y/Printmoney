@@ -19,36 +19,20 @@ const plans = [
     ],
   },
   {
-    name: 'Unlimited',
-    price: '$19',
-    period: '/month',
-    description: 'Actively job hunting? Pays for itself after just 2 resumes. Cancel anytime.',
-    cta: 'Start Unlimited — $19/mo',
-    href: '/order',
-    popular: true,
-    features: [
-      'Unlimited resumes',
-      'Unlimited cover letters',
-      'Unlimited LinkedIn rewrites',
-      'Keyword optimization',
-      'Instant download',
-      'Cancel anytime',
-    ],
-  },
-  {
     name: 'Bundle',
     price: '$29',
     period: 'one-time',
-    description: 'Need 5 tailored applications at once? Best one-time value.',
+    description: 'Actively job hunting? Get 5 fully tailored applications — best value by far.',
     cta: 'Get the Bundle — $29',
     href: '/order',
-    popular: false,
+    popular: true,
     features: [
       '5 resume + cover letter sets',
       '5 LinkedIn summary rewrites',
       'Keyword optimization',
       'Instant download',
       '30-day revision window',
+      'Best value — $5.80 per application',
     ],
   },
 ]
@@ -71,7 +55,7 @@ export default function Pricing() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
           {plans.map((plan) => (
             <div
               key={plan.name}
