@@ -55,10 +55,8 @@ INSTRUCTIONS:
 3. Quantify achievements with numbers/percentages where possible
 4. Include keywords from the job description naturally (ATS optimization)
 5. Use clean plain-text formatting, all-caps section headers
-6. SKILLS SECTION: Always include a "SKILLS" section with 10–15 skills minimum. Group them into exactly 3 lines using this format (each on its own line, no bullets):
-   Technical: [comma-separated hard/technical skills]
-   Tools: [comma-separated software, platforms, tools]
-   Soft Skills: [comma-separated interpersonal/professional skills]
+6. SKILLS SECTION: Always include a "SKILLS" section with 10–15 skills minimum. Group them into exactly 3 lines using industry-appropriate category names that make sense for the target role (e.g. for tech: "Technical / Tools / Soft Skills"; for hospitality: "Service Skills / Food & Beverage / Interpersonal"; for healthcare: "Clinical Skills / Medical Tools / Patient Care"; for sales: "Sales Skills / CRM & Tools / Communication" — choose whatever 3 labels fit the job best). Format each group on its own line as:
+   [Category Label]: [comma-separated skills]
    Use the candidate's provided skills as a base and expand with highly relevant skills inferred from the job description. If they provided nothing, infer all skills from the job description and experience. Do NOT use | separators. Label the section exactly "SKILLS".
 7. Cover letter: open with a hook (not "I am writing to apply"), 3 short paragraphs
 8. LinkedIn summary: write a 3-paragraph first-person About section (no "I am a..." opener), ~200 words, professional but human tone
