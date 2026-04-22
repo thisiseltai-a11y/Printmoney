@@ -6,13 +6,12 @@ const links = {
     { label: 'How It Works', href: '/#how-it-works' },
     { label: 'Features', href: '/#features' },
     { label: 'Pricing', href: '/#pricing' },
-    { label: 'Build My Resume', href: '/order' },
+    { label: 'Reviews', href: '/#testimonials' },
   ],
-  Resources: [
-    { label: 'Resume Tips', href: '/#faq' },
-    { label: 'Cover Letter Guide', href: '/#how-it-works' },
-    { label: 'ATS Optimization', href: '/#features' },
-    { label: 'Testimonials', href: '/#testimonials' },
+  'Get Started': [
+    { label: 'Build My Resume — $12', href: '/order' },
+    { label: 'Resume + 5 Applications', href: '/order?plan=bundle' },
+    { label: 'View My Saved Resume', href: '/resume' },
   ],
   Legal: [
     { label: 'Privacy Policy', href: '/privacy' },
