@@ -94,33 +94,57 @@ function parseJobHeader(header: string) {
   return { title, company, datePart }
 }
 
-function extractSkills(sections: Section[]): { skills: string[]; rest: Section[] } {
+interface SkillGroup { label: string; items: string[] }
+
+function extractSkillItems(text: string): string[] {
+  return text.split(/[,|]/).map(s => s.trim()).filter(Boolean)
+}
+
+function extractSkills(sections: Section[]): { skills: string[]; skillGroups: SkillGroup[]; rest: Section[] } {
   const skills: string[] = []
+  const skillGroups: SkillGroup[] = []
   const rest: Section[] = []
+
   for (const sec of sections) {
     if (/SKILLS|COMPETENC/i.test(sec.title)) {
       for (const block of sec.blocks) {
         if (block.type === 'bullets') {
-          skills.push(...block.items)
+          for (const item of block.items) {
+            const colonIdx = item.indexOf(':')
+            if (colonIdx > -1 && colonIdx < 20) {
+              const label = item.slice(0, colonIdx).trim()
+              const items = extractSkillItems(item.slice(colonIdx + 1))
+              skillGroups.push({ label, items })
+              skills.push(...items)
+            } else {
+              skills.push(item)
+            }
+          }
         } else if (block.type === 'job') {
-          // AI sometimes formats skills with | separators, which the parser treats as job entries
           const parts = block.header.split('|').map(p => p.trim()).filter(Boolean)
           for (const part of parts) {
             const raw = part.includes(':') ? part.slice(part.indexOf(':') + 1) : part
-            skills.push(...raw.split(',').map(s => s.trim()).filter(Boolean))
+            skills.push(...extractSkillItems(raw))
           }
           if (block.bullets.length) skills.push(...block.bullets)
         } else if (block.type === 'para') {
-          const raw = block.text.includes(':') ? block.text.slice(block.text.indexOf(':') + 1) : block.text
-          // handle both comma and pipe separators
-          skills.push(...raw.split(/[,|]/).map(s => s.trim()).filter(Boolean))
+          const colonIdx = block.text.indexOf(':')
+          // Detect "Category: skill1, skill2" format (label is short, before first colon)
+          if (colonIdx > -1 && colonIdx < 20) {
+            const label = block.text.slice(0, colonIdx).trim()
+            const items = extractSkillItems(block.text.slice(colonIdx + 1))
+            skillGroups.push({ label, items })
+            skills.push(...items)
+          } else {
+            skills.push(...extractSkillItems(block.text))
+          }
         }
       }
     } else {
       rest.push(sec)
     }
   }
-  return { skills, rest }
+  return { skills, skillGroups, rest }
 }
 
 // ─── Template 1: Sharp ───────────────────────────────────────────────────────
@@ -173,7 +197,7 @@ function SharpSectionBlocks({ section }: { section: Section }) {
 function SharpTemplate({ parsed }: { parsed: Parsed }) {
   const { name, contactLine, sections } = parsed
   const contacts = parseContact(contactLine)
-  const { skills, rest } = extractSkills(sections)
+  const { skills, skillGroups, rest } = extractSkills(sections)
 
   return (
     <div className="font-sans">
@@ -193,20 +217,33 @@ function SharpTemplate({ parsed }: { parsed: Parsed }) {
         <div className="mt-3 h-[2px] bg-slate-900" />
       </div>
 
-      {/* Skills */}
+      {/* Skills — grouped if available, flat pills fallback */}
       {skills.length > 0 && (
         <div className="mb-5">
           <div className="flex items-center gap-2 mb-2.5">
             <div className="w-[3px] h-3.5 rounded-full bg-blue-800" />
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-700">Skills</p>
           </div>
-          <div className="flex flex-wrap gap-1.5">
-            {skills.map((s, i) => (
-              <span key={i} className="px-2.5 py-0.5 text-[11px] text-slate-700 bg-slate-100 rounded border border-slate-200">
-                {s}
-              </span>
-            ))}
-          </div>
+          {skillGroups.length > 0 ? (
+            <div className="space-y-1.5">
+              {skillGroups.map((g, i) => (
+                <div key={i} className="flex gap-2 items-baseline">
+                  <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400 w-16 flex-shrink-0 pt-0.5">{g.label}</span>
+                  <div className="flex flex-wrap gap-1">
+                    {g.items.map((s, j) => (
+                      <span key={j} className="px-2 py-0.5 text-[11px] text-slate-700 bg-slate-100 rounded border border-slate-200">{s}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-1.5">
+              {skills.map((s, i) => (
+                <span key={i} className="px-2.5 py-0.5 text-[11px] text-slate-700 bg-slate-100 rounded border border-slate-200">{s}</span>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -256,7 +293,7 @@ function ExecJobEntry({ entry }: { entry: JobEntry }) {
 function ExecutiveTemplate({ parsed }: { parsed: Parsed }) {
   const { name, contactLine, sections } = parsed
   const contacts = parseContact(contactLine)
-  const { skills, rest } = extractSkills(sections)
+  const { skills, skillGroups, rest } = extractSkills(sections)
   const initials = name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
 
   return (
@@ -284,18 +321,38 @@ function ExecutiveTemplate({ parsed }: { parsed: Parsed }) {
           </div>
         )}
 
-        {/* Skills */}
+        {/* Skills — grouped if available */}
         {skills.length > 0 && (
           <div>
-            <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-2">Skills</p>
-            <div className="space-y-1.5">
-              {skills.map((s, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <span className="w-1 h-1 rounded-full bg-blue-500 flex-shrink-0" />
-                  <span className="text-[10px] text-slate-300 leading-tight">{s}</span>
+            {skillGroups.length > 0 ? (
+              <div className="space-y-3">
+                {skillGroups.map((g, i) => (
+                  <div key={i}>
+                    <p className="text-[8px] font-bold uppercase tracking-[0.18em] text-slate-400 mb-1.5">{g.label}</p>
+                    <div className="space-y-1">
+                      {g.items.map((s, j) => (
+                        <div key={j} className="flex items-center gap-2">
+                          <span className="w-1 h-1 rounded-full bg-blue-500 flex-shrink-0" />
+                          <span className="text-[10px] text-slate-300 leading-tight">{s}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div>
+                <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-2">Skills</p>
+                <div className="space-y-1.5">
+                  {skills.map((s, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="w-1 h-1 rounded-full bg-blue-500 flex-shrink-0" />
+                      <span className="text-[10px] text-slate-300 leading-tight">{s}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
           </div>
         )}
       </div>
