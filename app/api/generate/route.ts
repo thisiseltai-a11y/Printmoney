@@ -43,11 +43,11 @@ ${expSection || 'None provided'}
 EDUCATION:
 ${eduSection || 'None provided'}
 
-SKILLS:
-Technical: ${data.technicalSkills || ''}
-Soft: ${data.softSkills || ''}
-Certifications: ${data.certifications || ''}
-Languages: ${data.languages || ''}
+SKILLS PROVIDED BY CANDIDATE:
+Technical: ${data.technicalSkills || 'none provided'}
+Soft: ${data.softSkills || 'none provided'}
+Certifications: ${data.certifications || 'none provided'}
+Languages: ${data.languages || 'none provided'}
 
 INSTRUCTIONS:
 1. Write a 2-sentence professional summary tailored to the job
@@ -55,7 +55,7 @@ INSTRUCTIONS:
 3. Quantify achievements with numbers/percentages where possible
 4. Include keywords from the job description naturally (ATS optimization)
 5. Use clean plain-text formatting, all-caps section headers
-6. Label the skills section exactly "SKILLS" — do NOT use "CORE COMPETENCIES" or any other label
+6. SKILLS SECTION: Always include a "SKILLS" section. If the candidate provided skills, use and enhance them. If they provided none or very few, infer 8–12 highly relevant skills from the job description and their work experience. Format as a simple comma-separated list on one line (e.g. "Python, React, SQL, AWS, Docker, Agile, Figma"). Do NOT use | separators. Label it exactly "SKILLS".
 7. Cover letter: open with a hook (not "I am writing to apply"), 3 short paragraphs
 8. LinkedIn summary: write a 3-paragraph first-person About section (no "I am a..." opener), ~200 words, professional but human tone
 

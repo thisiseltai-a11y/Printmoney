@@ -100,10 +100,20 @@ function extractSkills(sections: Section[]): { skills: string[]; rest: Section[]
   for (const sec of sections) {
     if (/SKILLS|COMPETENC/i.test(sec.title)) {
       for (const block of sec.blocks) {
-        if (block.type === 'bullets') skills.push(...block.items)
-        else if (block.type === 'para') {
+        if (block.type === 'bullets') {
+          skills.push(...block.items)
+        } else if (block.type === 'job') {
+          // AI sometimes formats skills with | separators, which the parser treats as job entries
+          const parts = block.header.split('|').map(p => p.trim()).filter(Boolean)
+          for (const part of parts) {
+            const raw = part.includes(':') ? part.slice(part.indexOf(':') + 1) : part
+            skills.push(...raw.split(',').map(s => s.trim()).filter(Boolean))
+          }
+          if (block.bullets.length) skills.push(...block.bullets)
+        } else if (block.type === 'para') {
           const raw = block.text.includes(':') ? block.text.slice(block.text.indexOf(':') + 1) : block.text
-          skills.push(...raw.split(',').map(s => s.trim()).filter(Boolean))
+          // handle both comma and pipe separators
+          skills.push(...raw.split(/[,|]/).map(s => s.trim()).filter(Boolean))
         }
       }
     } else {
