@@ -134,16 +134,22 @@ export default function ResultPage() {
           }
         }
 
-        // Try server-side first (survives browser/device changes), fall back to localStorage
+        // Get form data: localStorage (same session) or server (cross-device fallback)
         let formDataStr = localStorage.getItem('pending_form_data')
-        if (!formDataStr) {
+        if (!formDataStr && !isBundleSession) {
           const fdRes = await fetch(`/api/get-form-data?session_id=${sessionId}`)
           if (fdRes.ok) {
             const { formData } = await fdRes.json()
             if (formData) formDataStr = JSON.stringify(formData)
           }
+        } else if (!isBundleSession) {
+          // Clean up server record even when localStorage was available
+          fetch(`/api/get-form-data?session_id=${sessionId}`).catch(() => {})
         }
         if (!formDataStr) throw new Error('Form data not found. Please go back and fill the form again.')
+
+        // Save form data to sessionStorage so regenerate works after localStorage is cleared
+        sessionStorage.setItem('resume_form_data', formDataStr)
 
         // After a real bundle purchase, create bundle credits for the remaining 4 resumes
         if (plan === 'bundle' && !isBundleSession) {
@@ -190,10 +196,11 @@ export default function ResultPage() {
     const formDataStr = localStorage.getItem('pending_form_data') ||
       sessionStorage.getItem('resume_form_data')
     if (!formDataStr) {
-      alert('Original form data not available. Please go back and fill the form again.')
+      setError('Form data is no longer available. Please go back and fill the form again.')
       return
     }
     setRegenerating(true)
+    setError('')
     try {
       const genRes = await fetch('/api/generate', {
         method: 'POST',
@@ -205,7 +212,7 @@ export default function ResultPage() {
       setContent(result)
       sessionStorage.setItem('resume_result', JSON.stringify(result))
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Regeneration failed. Please try again.')
+      setError(e instanceof Error ? e.message : 'Regeneration failed. Please try again.')
     } finally {
       setRegenerating(false)
     }
