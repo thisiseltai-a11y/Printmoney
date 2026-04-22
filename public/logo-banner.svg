@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#1e1b4b"/>
+    </linearGradient>
+    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="rocketGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#e0e7ff"/>
+    </linearGradient>
+    <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:0.3"/>
+      <stop offset="100%" style="stop-color:#6366f1;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+
+  <!-- Subtle glow behind logo area -->
+  <ellipse cx="380" cy="315" rx="300" ry="280" fill="url(#glowGrad)"/>
+
+  <!-- Icon box -->
+  <rect x="160" y="175" width="200" height="200" rx="40" ry="40" fill="url(#iconGrad)"/>
+
+  <!-- Rocket inside icon box -->
+  <g transform="translate(260, 265)">
+    <path d="M0,-68 C22,-60 38,-38 38,0 C38,30 22,50 0,62 C-22,50 -38,30 -38,0 C-38,-38 -22,-60 0,-68 Z"
+          fill="white" opacity="0.95"/>
+    <circle cx="0" cy="-68" r="8" fill="white"/>
+    <circle cx="0" cy="-14" r="13" fill="#7c3aed" opacity="0.85"/>
+    <circle cx="0" cy="-14" r="8" fill="white" opacity="0.9"/>
+    <path d="M-38,22 L-60,62 L-26,46 Z" fill="white" opacity="0.85"/>
+    <path d="M38,22 L60,62 L26,46 Z" fill="white" opacity="0.85"/>
+    <ellipse cx="0" cy="84" rx="18" ry="26" fill="#f59e0b" opacity="0.7"/>
+    <ellipse cx="0" cy="78" rx="11" ry="17" fill="#fef3c7" opacity="0.9"/>
+  </g>
+
+  <!-- Brand name -->
+  <text x="400" y="285" font-family="'Segoe UI', Arial, sans-serif" font-size="86" font-weight="800" fill="white" letter-spacing="-2">
+    Resume
+  </text>
+  <text x="400" y="375" font-family="'Segoe UI', Arial, sans-serif" font-size="86" font-weight="800" fill="url(#iconGrad)" letter-spacing="-2">
+    Rocket
+  </text>
+
+  <!-- Tagline -->
+  <text x="400" y="430" font-family="'Segoe UI', Arial, sans-serif" font-size="28" font-weight="400" fill="#94a3b8" letter-spacing="1">
+    AI-Powered Resumes That Land Interviews
+  </text>
+
+  <!-- Decorative dots -->
+  <circle cx="1080" cy="120" r="6" fill="#6366f1" opacity="0.5"/>
+  <circle cx="1120" cy="180" r="4" fill="#7c3aed" opacity="0.4"/>
+  <circle cx="1050" cy="220" r="8" fill="#6366f1" opacity="0.3"/>
+  <circle cx="1140" cy="80" r="3" fill="#a5b4fc" opacity="0.5"/>
+  <circle cx="100" cy="520" r="5" fill="#6366f1" opacity="0.4"/>
+  <circle cx="60" cy="480" r="3" fill="#7c3aed" opacity="0.3"/>
+</svg>
