@@ -180,6 +180,14 @@ export default function ResultPage() {
         setContent(result)
         sessionStorage.setItem('resume_result', JSON.stringify(result))
 
+        // Fire Facebook Purchase event
+        if (!isBundleSession) {
+          const value = plan === 'bundle' ? 29.00 : 12.00
+          if (typeof window !== 'undefined' && (window as any).fbq) {
+            (window as any).fbq('track', 'Purchase', { value, currency: 'USD' })
+          }
+        }
+
         // Save to Supabase + send email with magic link
         await saveAndEmail(result, formDataStr)
         localStorage.removeItem('pending_form_data')
