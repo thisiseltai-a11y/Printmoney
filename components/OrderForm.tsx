@@ -141,7 +141,6 @@ function OrderFormInner() {
     }
     if (step === 1) {
       if (!data.targetJob.trim()) return 'Please enter the job title you\'re applying for.'
-      if (data.jobDescription.trim().length < 50) return 'Please paste the full job description (at least a few sentences) for the best results.'
     }
     if (step === 2) {
       if (!data.experience.some((e) => e.title.trim())) return 'Please add at least one job title in your work experience.'
@@ -269,22 +268,22 @@ function OrderFormInner() {
                 </div>
               </div>
               <div>
-                <FieldLabel required>
+                <FieldLabel>
                   Job Description{' '}
-                  <span className="font-normal text-indigo-600">— paste the full posting here</span>
+                  <span className="font-normal text-slate-400">— optional but recommended</span>
                 </FieldLabel>
                 <Textarea
                   value={data.jobDescription}
                   onChange={(v) => set('jobDescription', v)}
-                  placeholder="Paste the complete job description here. The more detail you provide, the better the AI can tailor your resume with the exact keywords the ATS is scanning for..."
+                  placeholder="Paste the job posting here for a more tailored resume. Open the listing, copy all the text, and paste it. On mobile: hold down in the job posting → Select All → Copy, then come back and paste here."
                   rows={8}
                 />
                 <p className="text-xs text-slate-400 mt-1">
-                  {data.jobDescription.length < 50 && data.jobDescription.length > 0
-                    ? 'Please paste the full job description for best results.'
-                    : data.jobDescription.length >= 50
-                    ? `✓ ${data.jobDescription.length} characters — looking good!`
-                    : 'This is the most important field. Paste the full job posting.'}
+                  {data.jobDescription.length >= 50
+                    ? `✓ ${data.jobDescription.length} characters — your resume will be highly tailored`
+                    : data.jobDescription.length > 0
+                    ? 'Keep going — more detail means better ATS keyword matching'
+                    : 'Skipping this? No problem — we\'ll tailor your resume based on your job title.'}
                 </p>
               </div>
             </div>

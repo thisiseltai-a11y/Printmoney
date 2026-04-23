@@ -35,7 +35,7 @@ LinkedIn: ${data.linkedin || ''}
 TARGET JOB: ${data.targetJob}${data.targetCompany ? ` at ${data.targetCompany}` : ''}
 
 JOB DESCRIPTION:
-${data.jobDescription}
+${data.jobDescription?.trim() || `No job description provided. Infer typical responsibilities, required skills, and keywords for a "${data.targetJob}" role based on industry standards. Write the resume and cover letter as if you had a detailed job description for this exact role.`}
 
 WORK EXPERIENCE:
 ${expSection || 'None provided'}
