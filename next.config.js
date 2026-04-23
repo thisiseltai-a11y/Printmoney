@@ -6,17 +6,17 @@ const nextConfig = {
   async headers() {
     return [
       {
-        // Cache static assets for 1 year
-        source: '/:path*\\.(:ext(js|css|woff|woff2|ttf|otf|ico|png|jpg|jpeg|svg|webp))',
+        // Next.js compiled static assets — cache forever (filename includes hash)
+        source: '/_next/static/:path*',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ],
       },
       {
-        // Cache HTML pages for 5 minutes, allow stale while revalidating
-        source: '/((?!api|_next/static|_next/image|favicon.ico).*)',
+        // Public folder static files
+        source: '/(.+\\.(?:ico|png|jpg|jpeg|svg|webp|woff|woff2|ttf|otf))',
         headers: [
-          { key: 'Cache-Control', value: 'public, max-age=300, stale-while-revalidate=3600' },
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ],
       },
     ]
