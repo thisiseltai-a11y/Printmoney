@@ -292,7 +292,8 @@ function OrderFormInner() {
           {/* Step 2: Work Experience */}
           {step === 2 && (
             <div className="animate-fade-in">
-              <h2 className="text-2xl font-bold text-slate-900 mb-6">Work Experience</h2>
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">Work Experience</h2>
+              <p className="text-sm text-slate-500 mb-6">For best results, include 2–3 positions. Part-time, freelance, and volunteer work all count.</p>
               <div className="space-y-6">
                 {data.experience.map((exp, i) => (
                   <div key={exp.id} className="border border-slate-200 rounded-xl p-5 relative">
