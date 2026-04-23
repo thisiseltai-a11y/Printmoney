@@ -1,11 +1,13 @@
+import dynamic from 'next/dynamic'
 import Navbar from '@/components/Navbar'
 import Hero from '@/components/Hero'
-import HowItWorks from '@/components/HowItWorks'
-import Features from '@/components/Features'
-import Pricing from '@/components/Pricing'
-import Testimonials from '@/components/Testimonials'
-import FAQ from '@/components/FAQ'
-import Footer from '@/components/Footer'
+
+const HowItWorks = dynamic(() => import('@/components/HowItWorks'))
+const Features = dynamic(() => import('@/components/Features'))
+const Pricing = dynamic(() => import('@/components/Pricing'))
+const Testimonials = dynamic(() => import('@/components/Testimonials'))
+const FAQ = dynamic(() => import('@/components/FAQ'))
+const Footer = dynamic(() => import('@/components/Footer'))
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -51,17 +53,6 @@ const jsonLd = {
           price: '29.00',
           priceCurrency: 'USD',
           description: '5 resume + cover letter sets with LinkedIn summary',
-        },
-        {
-          '@type': 'Offer',
-          name: 'Unlimited',
-          price: '19.00',
-          priceCurrency: 'USD',
-          description: 'Unlimited resumes and cover letters per month',
-          priceSpecification: {
-            '@type': 'UnitPriceSpecification',
-            billingDuration: 'P1M',
-          },
         },
       ],
       aggregateRating: {
