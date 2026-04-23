@@ -307,7 +307,7 @@ export default function ResultPage() {
               {copied ? <><CheckCircle className="w-4 h-4 text-emerald-500" />Copied!</> : <><Copy className="w-4 h-4" />Copy</>}
             </button>
             <button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors">
-              <Download className="w-4 h-4" />Save as PDF
+              <Download className="w-4 h-4" />Download PDF
             </button>
           </div>
         </div>
@@ -379,7 +379,7 @@ export default function ResultPage() {
 
         {/* Template picker — only shown on resume tab */}
         {activeTab === 'resume' && (
-          <div className="mb-4">
+          <div className="mb-4 print:hidden">
             <TemplatePicker current={template} onChange={setTemplate} />
           </div>
         )}
@@ -412,9 +412,12 @@ export default function ResultPage() {
             <button onClick={handleCopy} className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
               <Copy className="w-4 h-4" />Copy {tabLabel}
             </button>
-            <button onClick={() => window.print()} className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl transition-all shadow-md shadow-teal-500/20">
-              <Download className="w-4 h-4" />Download PDF
-            </button>
+            <div className="flex flex-col items-end gap-1">
+              <button onClick={() => window.print()} className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl transition-all shadow-md shadow-teal-500/20">
+                <Download className="w-4 h-4" />Download PDF
+              </button>
+              <p className="text-xs text-slate-400">In the dialog, choose &quot;Save as PDF&quot;</p>
+            </div>
           </div>
         </div>
       </div>
