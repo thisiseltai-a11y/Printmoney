@@ -1,10 +1,13 @@
 'use client'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Plus, Trash2, Rocket, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react'
+import { useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { Plus, Trash2, Rocket, ChevronRight, ChevronLeft, Loader2, CheckCircle } from 'lucide-react'
 import type { ResumeFormData, WorkExperience, Education } from '@/lib/types'
+import type { Template } from '@/components/ResumeTemplates'
+import { ACCENT_COLORS, DEFAULT_ACCENT } from '@/components/ResumeTemplates'
+import FormResumePreview from '@/components/FormResumePreview'
 
-const STEP_LABELS = ['Personal Info', 'Target Job', 'Experience', 'Education', 'Skills']
+const STEP_LABELS = ['Personal Info', 'Target Job', 'Experience', 'Education', 'Skills', 'Choose Style']
 
 const emptyExp = (): WorkExperience => ({
   id: crypto.randomUUID(),
@@ -96,10 +99,17 @@ function Textarea({
   )
 }
 
-export default function OrderForm() {
-  const router = useRouter()
+function OrderFormInner() {
+  const searchParams = useSearchParams()
+  const plan = searchParams.get('plan') || 'single'
+  const bundleToken = searchParams.get('bundle_token')
+  const prefilledJob = searchParams.get('job') || ''
+  const isBundle = plan === 'bundle' || !!bundleToken
+
   const [step, setStep] = useState(0)
-  const [data, setData] = useState<ResumeFormData>(initialData)
+  const [data, setData] = useState<ResumeFormData>({ ...initialData, targetJob: prefilledJob })
+  const [template, setTemplate] = useState<Template>('sharp')
+  const [accentColor, setAccentColor] = useState(DEFAULT_ACCENT)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [stepError, setStepError] = useState('')
@@ -137,7 +147,6 @@ export default function OrderForm() {
     }
     if (step === 1) {
       if (!data.targetJob.trim()) return 'Please enter the job title you\'re applying for.'
-      if (data.jobDescription.trim().length < 50) return 'Please paste the full job description (at least a few sentences) for the best results.'
     }
     if (step === 2) {
       if (!data.experience.some((e) => e.title.trim())) return 'Please add at least one job title in your work experience.'
@@ -162,20 +171,37 @@ export default function OrderForm() {
     setLoading(true)
     setError('')
     try {
-      // Save to localStorage as backup
       localStorage.setItem('pending_form_data', JSON.stringify(data))
-      // Send form data with checkout so it's saved server-side
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: 'single', formData: data }),
-      })
-      if (!res.ok) {
-        const body = await res.json()
-        throw new Error(body.error || 'Failed to start checkout')
+      localStorage.setItem('selected_template', template)
+      localStorage.setItem('selected_color', accentColor)
+
+      if (bundleToken) {
+        // Redeeming a bundle credit — skip Stripe
+        const res = await fetch('/api/use-bundle-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: bundleToken, formData: data }),
+        })
+        if (!res.ok) {
+          const body = await res.json()
+          throw new Error(body.error || 'Invalid bundle token')
+        }
+        const { sessionId } = await res.json()
+        window.location.href = `/order/result?session_id=${sessionId}`
+      } else {
+        // Normal Stripe checkout
+        const res = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan, formData: data }),
+        })
+        if (!res.ok) {
+          const body = await res.json()
+          throw new Error(body.error || 'Failed to start checkout')
+        }
+        const { url } = await res.json()
+        window.location.href = url
       }
-      const { url } = await res.json()
-      window.location.href = url
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Something went wrong. Please try again.')
       setLoading(false)
@@ -184,7 +210,8 @@ export default function OrderForm() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="max-w-2xl mx-auto px-4 py-12">
+      <div className="max-w-5xl mx-auto px-4 py-12 lg:flex lg:gap-10 lg:items-start">
+      <div className="flex-1 min-w-0">
         {/* Progress */}
         <div className="mb-10">
           <div className="flex items-center justify-between mb-3">
@@ -250,22 +277,22 @@ export default function OrderForm() {
                 </div>
               </div>
               <div>
-                <FieldLabel required>
+                <FieldLabel>
                   Job Description{' '}
-                  <span className="font-normal text-indigo-600">— paste the full posting here</span>
+                  <span className="font-normal text-slate-400">— optional but recommended</span>
                 </FieldLabel>
                 <Textarea
                   value={data.jobDescription}
                   onChange={(v) => set('jobDescription', v)}
-                  placeholder="Paste the complete job description here. The more detail you provide, the better the AI can tailor your resume with the exact keywords the ATS is scanning for..."
+                  placeholder="Paste the job posting here for a more tailored resume. Open the listing, copy all the text, and paste it. On mobile: hold down in the job posting → Select All → Copy, then come back and paste here."
                   rows={8}
                 />
                 <p className="text-xs text-slate-400 mt-1">
-                  {data.jobDescription.length < 50 && data.jobDescription.length > 0
-                    ? 'Please paste the full job description for best results.'
-                    : data.jobDescription.length >= 50
-                    ? `✓ ${data.jobDescription.length} characters — looking good!`
-                    : 'This is the most important field. Paste the full job posting.'}
+                  {data.jobDescription.length >= 50
+                    ? `✓ ${data.jobDescription.length} characters — your resume will be highly tailored`
+                    : data.jobDescription.length > 0
+                    ? 'Keep going — more detail means better ATS keyword matching'
+                    : 'Skipping this? No problem — we\'ll tailor your resume based on your job title.'}
                 </p>
               </div>
             </div>
@@ -274,7 +301,8 @@ export default function OrderForm() {
           {/* Step 2: Work Experience */}
           {step === 2 && (
             <div className="animate-fade-in">
-              <h2 className="text-2xl font-bold text-slate-900 mb-6">Work Experience</h2>
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">Work Experience</h2>
+              <p className="text-sm text-slate-500 mb-6">For best results, include 2–3 positions. Part-time, freelance, and volunteer work all count.</p>
               <div className="space-y-6">
                 {data.experience.map((exp, i) => (
                   <div key={exp.id} className="border border-slate-200 rounded-xl p-5 relative">
@@ -443,6 +471,83 @@ export default function OrderForm() {
               )}
             </div>
           )}
+
+          {/* Step 5: Choose Style */}
+          {step === 5 && (
+            <div className="animate-fade-in">
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">Choose Your Style</h2>
+              <p className="text-sm text-slate-500 mb-6">Pick the resume design that fits your industry best. You can switch after too.</p>
+              <div className="space-y-4">
+                {([
+                  {
+                    id: 'sharp' as Template,
+                    name: 'Sharp',
+                    desc: 'Bold navy accents, strong section headers. Best for corporate, finance, and management roles.',
+                    preview: ['█████████████████████', '── EXPERIENCE ────────', '▸ Led team of 12 engineers', '▸ Increased revenue 40%', '', '── SKILLS ────────────', 'Python · SQL · Leadership'],
+                  },
+                  {
+                    id: 'executive' as Template,
+                    name: 'Executive',
+                    desc: 'Dark sidebar with grouped skills. Best for senior, director, and executive roles.',
+                    preview: ['█ NAME          ██████', '█ Skills        Role 1', '█ ─────────     ──────', '█ Python        Led 50+', '█ Leadership    Built $2M', '█ Strategy      pipeline'],
+                  },
+                  {
+                    id: 'minimal' as Template,
+                    name: 'Minimal',
+                    desc: 'Clean and light with hairline rules. Best for tech, creative, and modern workplaces.',
+                    preview: ['Name', '─────────────────────', 'Experience', 'Role · Company · 2023', 'Delivered X, achieved Y', '', 'Skills', 'Python · React · SQL'],
+                  },
+                ] as const).map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setTemplate(t.id)}
+                    className={`w-full text-left rounded-2xl border-2 p-4 transition-all ${
+                      template === t.id
+                        ? 'border-indigo-500 bg-indigo-50'
+                        : 'border-slate-200 hover:border-slate-300 bg-white'
+                    }`}
+                  >
+                    <div className="flex items-start gap-4">
+                      {/* Mini preview */}
+                      <div className="flex-shrink-0 w-32 bg-white border border-slate-200 rounded-lg p-2 font-mono text-[6px] leading-relaxed text-slate-600 shadow-sm">
+                        {t.preview.map((line, i) => (
+                          <div key={i} className={line.startsWith('──') || line.startsWith('─') ? 'text-slate-400' : line.startsWith('█') ? 'text-slate-800' : ''}>{line || ' '}</div>
+                        ))}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold text-slate-900">{t.name}</span>
+                          {template === t.id && <CheckCircle className="w-4 h-4 text-indigo-500" />}
+                        </div>
+                        <p className="text-sm text-slate-500 leading-relaxed">{t.desc}</p>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Color picker */}
+              <div className="mt-6 pt-5 border-t border-slate-100">
+                <p className="text-sm font-semibold text-slate-700 mb-3">Accent Color</p>
+                <div className="flex items-center gap-3">
+                  {ACCENT_COLORS.map((c) => (
+                    <button
+                      key={c.hex}
+                      onClick={() => setAccentColor(c.hex)}
+                      title={c.name}
+                      className={`w-9 h-9 rounded-full ring-offset-2 transition-all ${
+                        accentColor === c.hex ? 'ring-2 ring-indigo-500 scale-110' : 'hover:scale-105'
+                      }`}
+                      style={{ backgroundColor: c.hex }}
+                    />
+                  ))}
+                  <span className="text-xs text-slate-400 ml-1">
+                    {ACCENT_COLORS.find(c => c.hex === accentColor)?.name}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Navigation */}
@@ -479,12 +584,12 @@ export default function OrderForm() {
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Generating...
+                  {bundleToken ? 'Generating...' : 'Redirecting to checkout...'}
                 </>
               ) : (
                 <>
                   <Rocket className="w-4 h-4" />
-                  Generate My Resume — $12
+                  {bundleToken ? 'Generate My Resume (Bundle)' : isBundle ? 'Get the Bundle — $29' : 'Generate My Resume — $12'}
                 </>
               )}
             </button>
@@ -499,6 +604,21 @@ export default function OrderForm() {
           </p>
         )}
       </div>
+
+      {/* Live preview panel — desktop only */}
+      <div className="hidden lg:block w-80 flex-shrink-0">
+        <FormResumePreview data={data} />
+      </div>
+
     </div>
+    </div>
+  )
+}
+
+export default function OrderForm() {
+  return (
+    <Suspense>
+      <OrderFormInner />
+    </Suspense>
   )
 }

@@ -3,241 +3,14 @@ import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import {
   Copy, Download, CheckCircle, ArrowLeft, Rocket,
-  FileText, Mail, Loader2, MapPin, Phone, Globe, Linkedin,
+  FileText, Mail, Loader2, Linkedin,
   RefreshCw, Send,
 } from 'lucide-react'
 import type { GeneratedContent } from '@/lib/types'
+import { ResumeRenderer, TemplatePicker, ACCENT_COLORS, DEFAULT_ACCENT } from '@/components/ResumeTemplates'
+import type { Template } from '@/components/ResumeTemplates'
 
-// ─── Parser ────────────────────────────────────────────────────────────────
-
-interface JobEntry  { type: 'job';     header: string; bullets: string[] }
-interface BulletList{ type: 'bullets'; items: string[] }
-interface Para      { type: 'para';    text: string }
-type Block = JobEntry | BulletList | Para
-
-interface Section { title: string; blocks: Block[] }
-interface Parsed  { name: string; contactLine: string; sections: Section[] }
-
-function parseResume(text: string): Parsed {
-  const lines = text.split('\n')
-  let name = '', contactLine = '', headerDone = false
-  const sections: Section[] = []
-  let cur: Section | null = null
-  let job: JobEntry | null = null
-
-  const flushJob = () => {
-    if (job && cur) { cur.blocks.push(job); job = null }
-  }
-
-  for (const raw of lines) {
-    const line = raw.trim()
-
-    if (!headerDone) {
-      if (!line) { if (name) headerDone = true; continue }
-      if (!name) { name = line; continue }
-      contactLine = contactLine ? contactLine + ' ' + line : line
-      continue
-    }
-
-    if (!line) { flushJob(); continue }
-
-    const isSectionHead =
-      line === line.toUpperCase() &&
-      line.length >= 3 &&
-      /^[A-Z0-9\s&\/\-–]+$/.test(line) &&
-      !line.includes('|')
-
-    if (isSectionHead) {
-      flushJob()
-      const last = sections[sections.length - 1]
-      if (last && last.title === line) {
-        cur = last
-      } else {
-        cur = { title: line, blocks: [] }
-        sections.push(cur)
-      }
-      continue
-    }
-
-    if (!cur) continue
-
-    if (/^[•\-–·*▸]/.test(line)) {
-      const bullet = line.replace(/^[•\-–·*▸]\s*/, '')
-      if (job) {
-        job.bullets.push(bullet)
-      } else {
-        const last = cur.blocks[cur.blocks.length - 1]
-        if (last?.type === 'bullets') last.items.push(bullet)
-        else cur.blocks.push({ type: 'bullets', items: [bullet] })
-      }
-      continue
-    }
-
-    if (line.includes('|')) {
-      flushJob()
-      job = { type: 'job', header: line, bullets: [] }
-      continue
-    }
-
-    flushJob()
-    cur.blocks.push({ type: 'para', text: line })
-  }
-
-  flushJob()
-  return { name, contactLine, sections }
-}
-
-// ─── Contact parsing ────────────────────────────────────────────────────────
-
-type ContactIcon = 'email' | 'phone' | 'location' | 'linkedin' | 'globe'
-
-function parseContact(line: string): { icon: ContactIcon; text: string }[] {
-  const parts = line.split(/[|·•]/).map(p => p.trim()).filter(Boolean)
-  return parts.map(p => {
-    if (p.includes('@'))                                 return { icon: 'email',    text: p }
-    if (/\d{3}[-.\s]\d{3}[-.\s]\d{4}/.test(p) ||
-        /\(\d{3}\)/.test(p))                            return { icon: 'phone',    text: p }
-    if (/linkedin\.com/i.test(p))                       return { icon: 'linkedin', text: p }
-    if (/^https?:\/\//.test(p) || /\.\w{2,}\//.test(p)) return { icon: 'globe',  text: p }
-    return { icon: 'location', text: p }
-  })
-}
-
-// ─── Small UI pieces ────────────────────────────────────────────────────────
-
-const ICONS: Record<ContactIcon, React.ReactNode> = {
-  email:    <Mail      className="w-3 h-3" />,
-  phone:    <Phone     className="w-3 h-3" />,
-  location: <MapPin    className="w-3 h-3" />,
-  linkedin: <Linkedin  className="w-3 h-3" />,
-  globe:    <Globe     className="w-3 h-3" />,
-}
-
-function JobBlock({ entry }: { entry: JobEntry }) {
-  const parts = entry.header.split('|').map(p => p.trim())
-  const title = parts[0]
-  const datePart = parts.find(p => /\d{4}|present|current/i.test(p))
-  const company = parts.filter(p => p !== title && p !== datePart).join(' · ')
-
-  return (
-    <div className="mt-4 first:mt-0">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-        <span className="text-sm font-bold text-slate-900">{title}</span>
-        {datePart && <span className="text-xs text-slate-400 whitespace-nowrap">{datePart}</span>}
-      </div>
-      {company && <p className="text-xs font-medium text-teal-700 mt-0.5">{company}</p>}
-      {entry.bullets.length > 0 && (
-        <ul className="mt-2 space-y-1.5">
-          {entry.bullets.map((b, i) => (
-            <li key={i} className="flex gap-2.5 text-[13px] text-slate-700 leading-relaxed">
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-400 flex-shrink-0 mt-[5px]" />
-              <span>{b}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  )
-}
-
-function SectionContent({ section }: { section: Section }) {
-  const isSkills = /SKILLS|COMPETENC/i.test(section.title)
-
-  if (isSkills) {
-    const skills: string[] = []
-    for (const block of section.blocks) {
-      if (block.type === 'bullets') {
-        skills.push(...block.items)
-      } else if (block.type === 'para') {
-        const colonIdx = block.text.indexOf(':')
-        const raw = colonIdx > -1 ? block.text.slice(colonIdx + 1) : block.text
-        skills.push(...raw.split(',').map(s => s.trim()).filter(Boolean))
-      }
-    }
-    if (skills.length) {
-      return (
-        <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
-          {skills.map((s, i) => (
-            <div key={i} className="flex items-center gap-1.5 text-[13px] text-slate-700">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-500 flex-shrink-0" />
-              {s}
-            </div>
-          ))}
-        </div>
-      )
-    }
-  }
-
-  return (
-    <div className="space-y-1">
-      {section.blocks.map((block, i) => {
-        if (block.type === 'job') return <JobBlock key={i} entry={block} />
-        if (block.type === 'bullets') {
-          return (
-            <ul key={i} className="space-y-1.5">
-              {block.items.map((b, j) => (
-                <li key={j} className="flex gap-2.5 text-[13px] text-slate-700 leading-relaxed">
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400 flex-shrink-0 mt-[5px]" />
-                  <span>{b}</span>
-                </li>
-              ))}
-            </ul>
-          )
-        }
-        return <p key={i} className="text-[13px] text-slate-700 leading-relaxed">{block.text}</p>
-      })}
-    </div>
-  )
-}
-
-function ResumeRenderer({ text }: { text: string }) {
-  const { name, contactLine, sections } = parseResume(text)
-  const initials = name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
-  const contacts = parseContact(contactLine)
-
-  return (
-    <div className="font-sans text-slate-800">
-      <div className="flex items-center gap-4 pb-5 border-b-2 border-teal-500 mb-6 print:pb-3 print:mb-4">
-        <div className="w-14 h-14 rounded-full bg-teal-600 flex items-center justify-center text-white font-bold text-xl flex-shrink-0 print:w-10 print:h-10 print:text-base">
-          {initials}
-        </div>
-        <div className="min-w-0">
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight print:text-xl">{name}</h1>
-          {contacts.length > 0 && (
-            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5">
-              {contacts.map((c, i) => (
-                <span key={i} className="flex items-center gap-1 text-slate-500">
-                  {ICONS[c.icon]}
-                  <span className="text-[11px]">{c.text}</span>
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="space-y-5">
-        {sections.map((sec, i) => {
-          const label = /COMPETENC/i.test(sec.title) ? 'SKILLS' : sec.title
-          return (
-            <div key={i} className="grid gap-5" style={{ gridTemplateColumns: '100px 1fr' }}>
-              <div className="text-right pt-0.5">
-                {label.split(/\s+/).map((word, j) => (
-                  <span key={j} className="block text-[9px] font-bold uppercase tracking-widest text-teal-600 leading-tight">
-                    {word}
-                  </span>
-                ))}
-              </div>
-              <div className="border-l border-slate-100 pl-5">
-                <SectionContent section={sec} />
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
+// Resume rendering is handled by components/ResumeTemplates.tsx
 
 function CoverLetterRenderer({ text }: { text: string }) {
   return (
@@ -281,6 +54,14 @@ export default function ResultPage() {
   const [error, setError] = useState('')
   const [emailSent, setEmailSent] = useState(false)
   const [sendingEmail, setSendingEmail] = useState(false)
+  const [bundleUrl, setBundleUrl] = useState('')
+  const [bundleUsesRemaining, setBundleUsesRemaining] = useState(0)
+  const [template, setTemplate] = useState<Template>(
+    () => (typeof window !== 'undefined' ? (localStorage.getItem('selected_template') as Template) || 'sharp' : 'sharp')
+  )
+  const [accentColor, setAccentColor] = useState<string>(
+    () => (typeof window !== 'undefined' ? localStorage.getItem('selected_color') || DEFAULT_ACCENT : DEFAULT_ACCENT)
+  )
   const emailSentRef = useRef(false)
 
   const saveAndEmail = async (result: GeneratedContent, formDataStr: string) => {
@@ -332,6 +113,8 @@ export default function ResultPage() {
     const run = async () => {
       const params = new URLSearchParams(window.location.search)
       const sessionId = params.get('session_id')
+      const plan = params.get('plan')
+      const isBundleSession = sessionId?.startsWith('bundle:')
 
       if (!sessionId) {
         const stored = sessionStorage.getItem('resume_result')
@@ -341,28 +124,53 @@ export default function ResultPage() {
 
       setGenerating(true)
       try {
-        const verifyRes = await fetch(`/api/verify-payment?session_id=${sessionId}`)
-        if (!verifyRes.ok) {
-          const body = await verifyRes.json().catch(() => ({}))
-          const rawMsg = body.error || ''
-          const isSessionGone = rawMsg.toLowerCase().includes('no such checkout') || rawMsg.toLowerCase().includes('no such session')
-          throw new Error(
-            isSessionGone
-              ? 'Your payment session has expired. Please start a new order — your card was not charged.'
-              : rawMsg || `Payment verification failed (${verifyRes.status})`
-          )
+        if (!isBundleSession) {
+          // Verify Stripe payment for normal purchases
+          const verifyRes = await fetch(`/api/verify-payment?session_id=${sessionId}`)
+          if (!verifyRes.ok) {
+            const body = await verifyRes.json().catch(() => ({}))
+            const rawMsg = body.error || ''
+            const isSessionGone = rawMsg.toLowerCase().includes('no such checkout') || rawMsg.toLowerCase().includes('no such session')
+            throw new Error(
+              isSessionGone
+                ? 'Your payment session has expired. Please start a new order — your card was not charged.'
+                : rawMsg || `Payment verification failed (${verifyRes.status})`
+            )
+          }
         }
 
-        // Try server-side first (survives browser/device changes), fall back to localStorage
+        // Get form data: localStorage (same session) or server (cross-device fallback)
         let formDataStr = localStorage.getItem('pending_form_data')
-        if (!formDataStr) {
+        if (!formDataStr && !isBundleSession) {
           const fdRes = await fetch(`/api/get-form-data?session_id=${sessionId}`)
           if (fdRes.ok) {
             const { formData } = await fdRes.json()
             if (formData) formDataStr = JSON.stringify(formData)
           }
+        } else if (!isBundleSession) {
+          // Clean up server record even when localStorage was available
+          fetch(`/api/get-form-data?session_id=${sessionId}`).catch(() => {})
         }
         if (!formDataStr) throw new Error('Form data not found. Please go back and fill the form again.')
+
+        // Save form data to sessionStorage so regenerate works after localStorage is cleared
+        sessionStorage.setItem('resume_form_data', formDataStr)
+
+        // After a real bundle purchase, create bundle credits for the remaining 4 resumes
+        if (plan === 'bundle' && !isBundleSession) {
+          try {
+            const btRes = await fetch('/api/create-bundle-token', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: formDataStr,
+            })
+            if (btRes.ok) {
+              const { bundleUrl: url } = await btRes.json()
+              if (url) setBundleUrl(url)
+              setBundleUsesRemaining(4)
+            }
+          } catch { /* non-blocking */ }
+        }
 
         const genRes = await fetch('/api/generate', {
           method: 'POST',
@@ -376,6 +184,14 @@ export default function ResultPage() {
 
         setContent(result)
         sessionStorage.setItem('resume_result', JSON.stringify(result))
+
+        // Fire Facebook Purchase event
+        if (!isBundleSession) {
+          const value = plan === 'bundle' ? 29.00 : 12.00
+          if (typeof window !== 'undefined' && (window as any).fbq) {
+            (window as any).fbq('track', 'Purchase', { value, currency: 'USD' })
+          }
+        }
 
         // Save to Supabase + send email with magic link
         await saveAndEmail(result, formDataStr)
@@ -393,10 +209,11 @@ export default function ResultPage() {
     const formDataStr = localStorage.getItem('pending_form_data') ||
       sessionStorage.getItem('resume_form_data')
     if (!formDataStr) {
-      alert('Original form data not available. Please go back and fill the form again.')
+      setError('Form data is no longer available. Please go back and fill the form again.')
       return
     }
     setRegenerating(true)
+    setError('')
     try {
       const genRes = await fetch('/api/generate', {
         method: 'POST',
@@ -408,7 +225,7 @@ export default function ResultPage() {
       setContent(result)
       sessionStorage.setItem('resume_result', JSON.stringify(result))
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Regeneration failed. Please try again.')
+      setError(e instanceof Error ? e.message : 'Regeneration failed. Please try again.')
     } finally {
       setRegenerating(false)
     }
@@ -495,7 +312,7 @@ export default function ResultPage() {
               {copied ? <><CheckCircle className="w-4 h-4 text-emerald-500" />Copied!</> : <><Copy className="w-4 h-4" />Copy</>}
             </button>
             <button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors">
-              <Download className="w-4 h-4" />Save as PDF
+              <Download className="w-4 h-4" />Download PDF
             </button>
           </div>
         </div>
@@ -525,6 +342,24 @@ export default function ResultPage() {
           )}
         </div>
 
+        {/* Bundle credits banner */}
+        {bundleUrl && (
+          <div className="flex items-start gap-3 p-4 bg-indigo-50 border border-indigo-200 rounded-xl mb-6 print:hidden">
+            <div className="text-xl">🎟️</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-indigo-800">You have {bundleUsesRemaining} more resumes in your bundle!</p>
+              <p className="text-sm text-indigo-700 mb-2">Bookmark your personal bundle link — use it any time, no payment needed.</p>
+              <a
+                href={bundleUrl}
+                className="text-sm font-medium text-indigo-600 underline break-all"
+              >
+                {bundleUrl}
+              </a>
+              <p className="text-xs text-indigo-500 mt-1">We also sent this to your email.</p>
+            </div>
+          </div>
+        )}
+
         {/* Tabs */}
         <div className="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit mb-6 print:hidden">
           <button
@@ -547,10 +382,31 @@ export default function ResultPage() {
           </button>
         </div>
 
+        {/* Template + color picker — only shown on resume tab */}
+        {activeTab === 'resume' && (
+          <div className="mb-4 print:hidden flex flex-wrap items-center gap-x-6 gap-y-3">
+            <TemplatePicker current={template} onChange={setTemplate} />
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-slate-400">Color:</span>
+              {ACCENT_COLORS.map(c => (
+                <button
+                  key={c.hex}
+                  onClick={() => setAccentColor(c.hex)}
+                  title={c.name}
+                  className={`w-6 h-6 rounded-full ring-offset-2 transition-all ${
+                    accentColor === c.hex ? 'ring-2 ring-indigo-500 scale-110' : 'hover:scale-105'
+                  }`}
+                  style={{ backgroundColor: c.hex }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Content card */}
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm print:shadow-none print:border-none print:rounded-none">
           <div className="p-8 sm:p-12 print:p-8">
-            {activeTab === 'resume' && <ResumeRenderer text={content.resume} />}
+            {activeTab === 'resume' && <ResumeRenderer text={content.resume} template={template} accentColor={accentColor} />}
             {activeTab === 'cover' && <CoverLetterRenderer text={content.coverLetter} />}
             {activeTab === 'linkedin' && <LinkedInRenderer text={content.linkedinSummary || 'LinkedIn summary not available. Try regenerating.'} />}
           </div>
@@ -575,9 +431,12 @@ export default function ResultPage() {
             <button onClick={handleCopy} className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
               <Copy className="w-4 h-4" />Copy {tabLabel}
             </button>
-            <button onClick={() => window.print()} className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl transition-all shadow-md shadow-teal-500/20">
-              <Download className="w-4 h-4" />Download PDF
-            </button>
+            <div className="flex flex-col items-end gap-1">
+              <button onClick={() => window.print()} className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl transition-all shadow-md shadow-teal-500/20">
+                <Download className="w-4 h-4" />Download PDF
+              </button>
+              <p className="text-xs text-slate-400">In the dialog, choose &quot;Save as PDF&quot;</p>
+            </div>
           </div>
         </div>
       </div>
