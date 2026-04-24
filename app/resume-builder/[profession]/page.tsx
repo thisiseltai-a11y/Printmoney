@@ -54,12 +54,12 @@ export default function ProfessionPage({ params }: { params: { profession: strin
 
             <Link
               href={orderUrl}
-              className={`inline-flex items-center gap-2 px-8 py-4 rounded-2xl text-white font-bold text-lg bg-gradient-to-r ${p.color} shadow-lg hover:opacity-90 transition-opacity`}
+              className="flex items-center justify-center gap-2 w-full max-w-xs mx-auto px-8 py-4 rounded-2xl text-white font-bold text-lg bg-gradient-to-r from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/30 hover:opacity-90 transition-opacity"
             >
-              Build My {p.title} Resume — $12
-              <ArrowRight className="w-5 h-5" />
+              Build My Resume — $12
+              <ArrowRight className="w-5 h-5 flex-shrink-0" />
             </Link>
-            <p className="text-slate-600 text-xs mt-4">One-time payment · No subscription · No login required</p>
+            <p className="text-slate-500 text-xs mt-4">One-time payment · No subscription · No login required</p>
           </div>
         </section>
 
@@ -160,10 +160,10 @@ export default function ProfessionPage({ params }: { params: { profession: strin
             </p>
             <Link
               href={orderUrl}
-              className={`inline-flex items-center gap-2 px-8 py-4 rounded-2xl text-white font-bold text-lg bg-gradient-to-r ${p.color} shadow-lg hover:opacity-90 transition-opacity`}
+              className="inline-flex items-center justify-center gap-2 w-full max-w-xs mx-auto px-8 py-4 rounded-2xl text-white font-bold text-lg bg-gradient-to-r from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/30 hover:opacity-90 transition-opacity"
             >
               Build My Resume — $12
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-5 h-5 flex-shrink-0" />
             </Link>
             <div className="flex items-center justify-center gap-2 mt-4 text-slate-500 text-sm">
               <Shield className="w-4 h-4 text-emerald-400" />
