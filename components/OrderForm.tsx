@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation'
 import { Plus, Trash2, Rocket, ChevronRight, ChevronLeft, Loader2, CheckCircle } from 'lucide-react'
 import type { ResumeFormData, WorkExperience, Education } from '@/lib/types'
 import type { Template } from '@/components/ResumeTemplates'
+import FormResumePreview from '@/components/FormResumePreview'
 
 const STEP_LABELS = ['Personal Info', 'Target Job', 'Experience', 'Education', 'Skills', 'Choose Style']
 
@@ -206,7 +207,8 @@ function OrderFormInner() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="max-w-2xl mx-auto px-4 py-12">
+      <div className="max-w-5xl mx-auto px-4 py-12 lg:flex lg:gap-10 lg:items-start">
+      <div className="flex-1 min-w-0">
         {/* Progress */}
         <div className="mb-10">
           <div className="flex items-center justify-between mb-3">
@@ -578,6 +580,13 @@ function OrderFormInner() {
           </p>
         )}
       </div>
+
+      {/* Live preview panel — desktop only */}
+      <div className="hidden lg:block w-80 flex-shrink-0">
+        <FormResumePreview data={data} />
+      </div>
+
+    </div>
     </div>
   )
 }
