@@ -7,7 +7,7 @@ import {
   RefreshCw, Send,
 } from 'lucide-react'
 import type { GeneratedContent } from '@/lib/types'
-import { ResumeRenderer, TemplatePicker, ACCENT_COLORS, DEFAULT_ACCENT } from '@/components/ResumeTemplates'
+import { ResumeRenderer, TemplatePicker } from '@/components/ResumeTemplates'
 import type { Template } from '@/components/ResumeTemplates'
 
 // Resume rendering is handled by components/ResumeTemplates.tsx
@@ -58,9 +58,6 @@ export default function ResultPage() {
   const [bundleUsesRemaining, setBundleUsesRemaining] = useState(0)
   const [template, setTemplate] = useState<Template>(
     () => (typeof window !== 'undefined' ? (localStorage.getItem('selected_template') as Template) || 'sharp' : 'sharp')
-  )
-  const [accentColor, setAccentColor] = useState<string>(
-    () => (typeof window !== 'undefined' ? localStorage.getItem('selected_color') || DEFAULT_ACCENT : DEFAULT_ACCENT)
   )
   const emailSentRef = useRef(false)
 
@@ -382,31 +379,17 @@ export default function ResultPage() {
           </button>
         </div>
 
-        {/* Template + color picker — only shown on resume tab */}
+        {/* Template picker — only shown on resume tab */}
         {activeTab === 'resume' && (
-          <div className="mb-4 print:hidden flex flex-wrap items-center gap-x-6 gap-y-3">
+          <div className="mb-4 print:hidden">
             <TemplatePicker current={template} onChange={setTemplate} />
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-slate-400">Color:</span>
-              {ACCENT_COLORS.map(c => (
-                <button
-                  key={c.hex}
-                  onClick={() => setAccentColor(c.hex)}
-                  title={c.name}
-                  className={`w-6 h-6 rounded-full ring-offset-2 transition-all ${
-                    accentColor === c.hex ? 'ring-2 ring-indigo-500 scale-110' : 'hover:scale-105'
-                  }`}
-                  style={{ backgroundColor: c.hex }}
-                />
-              ))}
-            </div>
           </div>
         )}
 
         {/* Content card */}
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm print:shadow-none print:border-none print:rounded-none">
           <div className="p-8 sm:p-12 print:p-8">
-            {activeTab === 'resume' && <ResumeRenderer text={content.resume} template={template} accentColor={accentColor} />}
+            {activeTab === 'resume' && <ResumeRenderer text={content.resume} template={template} />}
             {activeTab === 'cover' && <CoverLetterRenderer text={content.coverLetter} />}
             {activeTab === 'linkedin' && <LinkedInRenderer text={content.linkedinSummary || 'LinkedIn summary not available. Try regenerating.'} />}
           </div>

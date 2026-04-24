@@ -51,8 +51,8 @@ export default function Hero() {
         </div>
 
         {/* Money-back guarantee */}
-        <div className="flex items-center justify-center gap-2 mb-12 text-slate-400 text-sm">
-          <Shield className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+        <div className="flex items-start sm:items-center justify-center gap-2 mb-12 text-slate-400 text-sm max-w-xs sm:max-w-none mx-auto text-center">
+          <Shield className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5 sm:mt-0" />
           <span>Love your resume or we&apos;ll refund every penny — no questions asked</span>
         </div>
 

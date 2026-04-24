@@ -1,42 +1,7 @@
-'use client'
-import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Zap } from 'lucide-react'
-import { ResumeRenderer, ACCENT_COLORS, DEFAULT_ACCENT } from '@/components/ResumeTemplates'
-import type { Template } from '@/components/ResumeTemplates'
-
-const SAMPLE = `Alex Johnson
-alex@email.com · (555) 012-3456 · New York, NY · linkedin.com/in/alexjohnson
-
-PROFESSIONAL SUMMARY
-Results-driven Product Manager with 6+ years of experience leading cross-functional teams to deliver high-impact SaaS products. Proven track record of driving 40%+ revenue growth through data-informed roadmaps and agile execution at Series B and enterprise companies.
-
-WORK EXPERIENCE
-Senior Product Manager | Stripe | Jan 2022 – Present
-• Launched payments dashboard used by 50,000+ merchants, reducing support tickets by 32%
-• Led 0→1 product development for Stripe's invoicing API, generating $4.2M ARR in year one
-• Managed roadmap across 3 engineering squads (18 engineers) using Agile/Scrum
-• Increased feature adoption 28% through A/B testing and targeted onboarding flows
-
-Product Manager | Notion | Mar 2020 – Dec 2021
-• Owned collaboration features roadmap, driving 45% increase in team workspace adoption
-• Partnered with design and engineering to ship 12 features on time and on budget
-
-SKILLS
-Product: Roadmapping, Agile/Scrum, A/B Testing, User Research, OKRs, PRDs
-Tools: Jira, Figma, Amplitude, Mixpanel, SQL, Looker
-Soft Skills: Cross-functional Leadership, Stakeholder Management, Data-Driven Decision Making`
-
-const TEMPLATES: { id: Template; label: string }[] = [
-  { id: 'sharp',     label: 'Sharp' },
-  { id: 'executive', label: 'Executive' },
-  { id: 'minimal',   label: 'Minimal' },
-]
 
 export default function ResumePreview() {
-  const [template, setTemplate] = useState<Template>('sharp')
-  const [color, setColor] = useState(DEFAULT_ACCENT)
-
   return (
     <section className="bg-slate-950 py-20 px-4 overflow-hidden">
       <div className="max-w-4xl mx-auto text-center mb-10">
@@ -52,44 +17,76 @@ export default function ResumePreview() {
         </p>
       </div>
 
-      {/* Template + color controls */}
-      <div className="max-w-2xl mx-auto mb-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-1 p-1 bg-slate-800 rounded-xl">
-          {TEMPLATES.map(t => (
-            <button
-              key={t.id}
-              onClick={() => setTemplate(t.id)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                template === t.id
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-        <div className="flex items-center gap-2.5">
-          <span className="text-xs text-slate-500">Color:</span>
-          {ACCENT_COLORS.map(c => (
-            <button
-              key={c.hex}
-              onClick={() => setColor(c.hex)}
-              title={c.name}
-              className={`w-6 h-6 rounded-full ring-offset-slate-950 transition-all ${
-                color === c.hex ? 'ring-2 ring-white ring-offset-2 scale-110' : 'hover:scale-110'
-              }`}
-              style={{ backgroundColor: c.hex }}
-            />
-          ))}
-        </div>
-      </div>
-
       {/* Resume card with blur fade */}
       <div className="max-w-2xl mx-auto relative">
         <div className="bg-white rounded-2xl shadow-2xl shadow-indigo-500/10 overflow-hidden border border-slate-200">
-          <div className="p-8 sm:p-10">
-            <ResumeRenderer text={SAMPLE} template={template} accentColor={color} />
+          <div className="p-8 sm:p-10 font-sans">
+
+            {/* Name + contact */}
+            <div className="border-b-2 border-slate-800 pb-4 mb-5">
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Alex Johnson</h1>
+              <p className="text-sm text-slate-500 mt-1">alex@email.com · (555) 012-3456 · New York, NY · linkedin.com/in/alexjohnson</p>
+            </div>
+
+            {/* Summary */}
+            <div className="mb-5">
+              <h2 className="text-xs font-bold text-slate-800 uppercase tracking-widest border-l-4 border-slate-800 pl-3 mb-2">Professional Summary</h2>
+              <p className="text-sm text-slate-700 leading-relaxed">Results-driven Product Manager with 6+ years of experience leading cross-functional teams to deliver high-impact SaaS products. Proven track record of driving 40%+ revenue growth through data-informed roadmaps and agile execution at Series B and enterprise companies.</p>
+            </div>
+
+            {/* Experience */}
+            <div className="mb-5">
+              <h2 className="text-xs font-bold text-slate-800 uppercase tracking-widest border-l-4 border-slate-800 pl-3 mb-3">Work Experience</h2>
+              <div className="mb-4">
+                <div className="flex justify-between items-start mb-1">
+                  <div>
+                    <span className="text-sm font-semibold text-slate-900">Senior Product Manager</span>
+                    <span className="text-sm text-slate-500"> · Stripe</span>
+                  </div>
+                  <span className="text-xs text-slate-400 whitespace-nowrap ml-2">Jan 2022 – Present</span>
+                </div>
+                <ul className="space-y-1 ml-3">
+                  {['Launched payments dashboard used by 50,000+ merchants, reducing support tickets by 32%',
+                    'Led 0→1 product development for Stripe\'s invoicing API, generating $4.2M ARR in year one',
+                    'Managed roadmap across 3 engineering squads (18 engineers) using Agile/Scrum methodology',
+                    'Increased feature adoption by 28% through A/B testing and targeted onboarding flows'].map((b, i) => (
+                    <li key={i} className="text-sm text-slate-700 flex gap-2"><span className="text-slate-400 flex-shrink-0">▸</span>{b}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <div className="flex justify-between items-start mb-1">
+                  <div>
+                    <span className="text-sm font-semibold text-slate-900">Product Manager</span>
+                    <span className="text-sm text-slate-500"> · Notion</span>
+                  </div>
+                  <span className="text-xs text-slate-400 whitespace-nowrap ml-2">Mar 2020 – Dec 2021</span>
+                </div>
+                <ul className="space-y-1 ml-3">
+                  {['Owned Notion\'s collaboration features roadmap, driving 45% increase in team workspace adoption',
+                    'Partnered with design and engineering to ship 12 features across 4 quarters on time and on budget'].map((b, i) => (
+                    <li key={i} className="text-sm text-slate-700 flex gap-2"><span className="text-slate-400 flex-shrink-0">▸</span>{b}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Skills */}
+            <div>
+              <h2 className="text-xs font-bold text-slate-800 uppercase tracking-widest border-l-4 border-slate-800 pl-3 mb-3">Skills</h2>
+              <div className="space-y-1.5">
+                {[
+                  { label: 'Product', skills: ['Roadmapping', 'Agile/Scrum', 'A/B Testing', 'User Research', 'OKRs', 'PRDs'] },
+                  { label: 'Tools', skills: ['Jira', 'Figma', 'Amplitude', 'Mixpanel', 'SQL', 'Looker'] },
+                  { label: 'Soft Skills', skills: ['Cross-functional Leadership', 'Stakeholder Management', 'Data-Driven Decision Making'] },
+                ].map((group) => (
+                  <p key={group.label} className="text-sm text-slate-700">
+                    <span className="font-semibold text-slate-900">{group.label}:</span>{' '}
+                    {group.skills.join(', ')}
+                  </p>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 

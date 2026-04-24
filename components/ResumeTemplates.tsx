@@ -12,23 +12,6 @@ interface Parsed  { name: string; contactLine: string; sections: Section[] }
 type ContactIcon = 'email' | 'phone' | 'location' | 'linkedin' | 'globe'
 export type Template = 'sharp' | 'executive' | 'minimal'
 
-export const ACCENT_COLORS = [
-  { name: 'Navy',     hex: '#1e3a5f' },
-  { name: 'Indigo',   hex: '#4338ca' },
-  { name: 'Forest',   hex: '#166534' },
-  { name: 'Burgundy', hex: '#881337' },
-  { name: 'Black',    hex: '#0f172a' },
-] as const
-
-export const DEFAULT_ACCENT = '#1e3a5f'
-
-function hexToRgba(hex: string, alpha: number): string {
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`
-}
-
 // ─── Parser ──────────────────────────────────────────────────────────────────
 
 export function parseResume(text: string): Parsed {
@@ -146,6 +129,7 @@ function extractSkills(sections: Section[]): { skills: string[]; skillGroups: Sk
           if (block.bullets.length) skills.push(...block.bullets)
         } else if (block.type === 'para') {
           const colonIdx = block.text.indexOf(':')
+          // Detect "Category: skill1, skill2" format (label is short, before first colon)
           if (colonIdx > -1 && colonIdx < 20) {
             const label = block.text.slice(0, colonIdx).trim()
             const items = extractSkillItems(block.text.slice(colonIdx + 1))
@@ -164,6 +148,7 @@ function extractSkills(sections: Section[]): { skills: string[]; skillGroups: Sk
 }
 
 // ─── Template 1: Sharp ───────────────────────────────────────────────────────
+// Single column · navy accent · right-aligned dates · ATS-safe
 
 function SharpJobEntry({ entry }: { entry: JobEntry }) {
   const { title, company, datePart } = parseJobHeader(entry.header)
@@ -209,7 +194,7 @@ function SharpSectionBlocks({ section }: { section: Section }) {
   )
 }
 
-function SharpTemplate({ parsed, accentColor }: { parsed: Parsed; accentColor: string }) {
+function SharpTemplate({ parsed }: { parsed: Parsed }) {
   const { name, contactLine, sections } = parsed
   const contacts = parseContact(contactLine)
   const { skills, skillGroups, rest } = extractSkills(sections)
@@ -229,14 +214,14 @@ function SharpTemplate({ parsed, accentColor }: { parsed: Parsed; accentColor: s
             ))}
           </div>
         )}
-        <div className="mt-3 h-[2px]" style={{ backgroundColor: accentColor }} />
+        <div className="mt-3 h-[2px] bg-slate-900" />
       </div>
 
-      {/* Skills */}
+      {/* Skills — grouped if available, flat pills fallback */}
       {skills.length > 0 && (
         <div className="mb-5">
           <div className="flex items-center gap-2 mb-2.5">
-            <div className="w-[3px] h-3.5 rounded-full" style={{ backgroundColor: accentColor }} />
+            <div className="w-[3px] h-3.5 rounded-full bg-blue-800" />
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-700">Skills</p>
           </div>
           {skillGroups.length > 0 ? (
@@ -267,7 +252,7 @@ function SharpTemplate({ parsed, accentColor }: { parsed: Parsed; accentColor: s
         {rest.map((sec, i) => (
           <div key={i}>
             <div className="flex items-center gap-2 mb-2.5">
-              <div className="w-[3px] h-3.5 rounded-full" style={{ backgroundColor: accentColor }} />
+              <div className="w-[3px] h-3.5 rounded-full bg-blue-800" />
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-700">{sec.title}</p>
             </div>
             <SharpSectionBlocks section={sec} />
@@ -279,6 +264,8 @@ function SharpTemplate({ parsed, accentColor }: { parsed: Parsed; accentColor: s
 }
 
 // ─── Template 2: Executive ───────────────────────────────────────────────────
+// Dark sidebar · white content · premium visual appeal
+// Note: sidebar layouts have reduced ATS compatibility
 
 function ExecJobEntry({ entry }: { entry: JobEntry }) {
   const { title, company, datePart } = parseJobHeader(entry.header)
@@ -303,7 +290,7 @@ function ExecJobEntry({ entry }: { entry: JobEntry }) {
   )
 }
 
-function ExecutiveTemplate({ parsed, accentColor }: { parsed: Parsed; accentColor: string }) {
+function ExecutiveTemplate({ parsed }: { parsed: Parsed }) {
   const { name, contactLine, sections } = parsed
   const contacts = parseContact(contactLine)
   const { skills, skillGroups, rest } = extractSkills(sections)
@@ -312,13 +299,10 @@ function ExecutiveTemplate({ parsed, accentColor }: { parsed: Parsed; accentColo
   return (
     <div className="font-sans flex [print-color-adjust:exact] [-webkit-print-color-adjust:exact]">
       {/* Sidebar */}
-      <div className="w-[200px] flex-shrink-0 p-6 flex flex-col gap-6" style={{ backgroundColor: accentColor }}>
+      <div className="w-[200px] flex-shrink-0 bg-slate-900 p-6 flex flex-col gap-6">
         {/* Avatar + name */}
         <div>
-          <div
-            className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-lg mb-3"
-            style={{ backgroundColor: hexToRgba('#ffffff', 0.2) }}
-          >
+          <div className="w-14 h-14 rounded-xl bg-blue-700 flex items-center justify-center text-white font-bold text-lg mb-3">
             {initials}
           </div>
           <h1 className="text-[15px] font-bold text-white leading-snug">{name}</h1>
@@ -327,29 +311,29 @@ function ExecutiveTemplate({ parsed, accentColor }: { parsed: Parsed; accentColo
         {/* Contact */}
         {contacts.length > 0 && (
           <div className="space-y-2.5">
-            <p className="text-[8px] font-bold uppercase tracking-[0.2em]" style={{ color: hexToRgba('#ffffff', 0.6) }}>Contact</p>
+            <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-slate-400">Contact</p>
             {contacts.map((c, i) => (
               <div key={i} className="flex items-start gap-2">
-                <span style={{ color: hexToRgba('#ffffff', 0.6) }} className="mt-px">{CONTACT_ICONS[c.icon]}</span>
-                <span className="text-[10px] leading-tight break-all" style={{ color: hexToRgba('#ffffff', 0.85) }}>{c.text}</span>
+                <span className="text-slate-400 mt-px">{CONTACT_ICONS[c.icon]}</span>
+                <span className="text-[10px] text-slate-300 leading-tight break-all">{c.text}</span>
               </div>
             ))}
           </div>
         )}
 
-        {/* Skills */}
+        {/* Skills — grouped if available */}
         {skills.length > 0 && (
           <div>
             {skillGroups.length > 0 ? (
               <div className="space-y-3">
                 {skillGroups.map((g, i) => (
                   <div key={i}>
-                    <p className="text-[8px] font-bold uppercase tracking-[0.18em] mb-1.5" style={{ color: hexToRgba('#ffffff', 0.6) }}>{g.label}</p>
+                    <p className="text-[8px] font-bold uppercase tracking-[0.18em] text-slate-400 mb-1.5">{g.label}</p>
                     <div className="space-y-1">
                       {g.items.map((s, j) => (
                         <div key={j} className="flex items-center gap-2">
-                          <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ backgroundColor: hexToRgba('#ffffff', 0.6) }} />
-                          <span className="text-[10px] leading-tight" style={{ color: hexToRgba('#ffffff', 0.85) }}>{s}</span>
+                          <span className="w-1 h-1 rounded-full bg-blue-500 flex-shrink-0" />
+                          <span className="text-[10px] text-slate-300 leading-tight">{s}</span>
                         </div>
                       ))}
                     </div>
@@ -358,12 +342,12 @@ function ExecutiveTemplate({ parsed, accentColor }: { parsed: Parsed; accentColo
               </div>
             ) : (
               <div>
-                <p className="text-[8px] font-bold uppercase tracking-[0.2em] mb-2" style={{ color: hexToRgba('#ffffff', 0.6) }}>Skills</p>
+                <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-2">Skills</p>
                 <div className="space-y-1.5">
                   {skills.map((s, i) => (
                     <div key={i} className="flex items-center gap-2">
-                      <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ backgroundColor: hexToRgba('#ffffff', 0.6) }} />
-                      <span className="text-[10px] leading-tight" style={{ color: hexToRgba('#ffffff', 0.85) }}>{s}</span>
+                      <span className="w-1 h-1 rounded-full bg-blue-500 flex-shrink-0" />
+                      <span className="text-[10px] text-slate-300 leading-tight">{s}</span>
                     </div>
                   ))}
                 </div>
@@ -407,6 +391,7 @@ function ExecutiveTemplate({ parsed, accentColor }: { parsed: Parsed; accentColo
 }
 
 // ─── Template 3: Minimal ─────────────────────────────────────────────────────
+// No color · font-light name · elegant spacing · right-aligned dates
 
 function MinimalJobEntry({ entry }: { entry: JobEntry }) {
   const { title, company, datePart } = parseJobHeader(entry.header)
@@ -431,7 +416,7 @@ function MinimalJobEntry({ entry }: { entry: JobEntry }) {
   )
 }
 
-function MinimalTemplate({ parsed, accentColor }: { parsed: Parsed; accentColor: string }) {
+function MinimalTemplate({ parsed }: { parsed: Parsed }) {
   const { name, contactLine, sections } = parsed
   const contacts = parseContact(contactLine)
 
@@ -450,7 +435,7 @@ function MinimalTemplate({ parsed, accentColor }: { parsed: Parsed; accentColor:
             ))}
           </div>
         )}
-        <div className="mt-4 h-px" style={{ backgroundColor: hexToRgba(accentColor, 0.25) }} />
+        <div className="mt-4 h-px bg-slate-200" />
       </div>
 
       {/* Sections */}
@@ -470,8 +455,8 @@ function MinimalTemplate({ parsed, accentColor }: { parsed: Parsed; accentColor:
 
           return (
             <div key={i}>
-              <p className="text-[9px] font-semibold uppercase tracking-[0.22em] mb-2" style={{ color: accentColor }}>{sec.title}</p>
-              <div className="h-px mb-3" style={{ backgroundColor: hexToRgba(accentColor, 0.15) }} />
+              <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-400 mb-2">{sec.title}</p>
+              <div className="h-px bg-slate-100 mb-3" />
               {isSkills && skills.length > 0 ? (
                 <p className="text-[12px] text-slate-600 leading-relaxed font-light">
                   {skills.join('  ·  ')}
@@ -504,19 +489,11 @@ function MinimalTemplate({ parsed, accentColor }: { parsed: Parsed; accentColor:
 
 // ─── Main exports ─────────────────────────────────────────────────────────────
 
-export function ResumeRenderer({
-  text,
-  template = 'sharp',
-  accentColor = DEFAULT_ACCENT,
-}: {
-  text: string
-  template?: Template
-  accentColor?: string
-}) {
+export function ResumeRenderer({ text, template = 'sharp' }: { text: string; template?: Template }) {
   const parsed = parseResume(text)
-  if (template === 'executive') return <ExecutiveTemplate parsed={parsed} accentColor={accentColor} />
-  if (template === 'minimal')   return <MinimalTemplate   parsed={parsed} accentColor={accentColor} />
-  return <SharpTemplate parsed={parsed} accentColor={accentColor} />
+  if (template === 'executive') return <ExecutiveTemplate parsed={parsed} />
+  if (template === 'minimal')   return <MinimalTemplate   parsed={parsed} />
+  return <SharpTemplate parsed={parsed} />
 }
 
 const TEMPLATES: { id: Template; label: string; desc: string }[] = [

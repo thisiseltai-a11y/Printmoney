@@ -35,7 +35,7 @@ LinkedIn: ${data.linkedin || ''}
 TARGET JOB: ${data.targetJob}${data.targetCompany ? ` at ${data.targetCompany}` : ''}
 
 JOB DESCRIPTION:
-${data.jobDescription}
+${data.jobDescription?.trim() || `No job description provided. Infer typical responsibilities, required skills, and keywords for a "${data.targetJob}" role based on industry standards. Write the resume and cover letter as if you had a detailed job description for this exact role.`}
 
 WORK EXPERIENCE:
 ${expSection || 'None provided'}
@@ -43,11 +43,11 @@ ${expSection || 'None provided'}
 EDUCATION:
 ${eduSection || 'None provided'}
 
-SKILLS:
-Technical: ${data.technicalSkills || ''}
-Soft: ${data.softSkills || ''}
-Certifications: ${data.certifications || ''}
-Languages: ${data.languages || ''}
+SKILLS PROVIDED BY CANDIDATE:
+Technical: ${data.technicalSkills || 'none provided'}
+Soft: ${data.softSkills || 'none provided'}
+Certifications: ${data.certifications || 'none provided'}
+Languages: ${data.languages || 'none provided'}
 
 INSTRUCTIONS:
 1. Write a 2-sentence professional summary tailored to the job
@@ -55,7 +55,9 @@ INSTRUCTIONS:
 3. Quantify achievements with numbers/percentages where possible
 4. Include keywords from the job description naturally (ATS optimization)
 5. Use clean plain-text formatting, all-caps section headers
-6. Label the skills section exactly "SKILLS" — do NOT use "CORE COMPETENCIES" or any other label
+6. SKILLS SECTION: Always include a "SKILLS" section with 10–15 skills minimum. Group them into exactly 3 lines using industry-appropriate category names that make sense for the target role (e.g. for tech: "Technical / Tools / Soft Skills"; for hospitality: "Service Skills / Food & Beverage / Interpersonal"; for healthcare: "Clinical Skills / Medical Tools / Patient Care"; for sales: "Sales Skills / CRM & Tools / Communication" — choose whatever 3 labels fit the job best). Format each group on its own line as:
+   [Category Label]: [comma-separated skills]
+   Use the candidate's provided skills as a base and expand with highly relevant skills inferred from the job description. If they provided nothing, infer all skills from the job description and experience. Do NOT use | separators. Label the section exactly "SKILLS".
 7. Cover letter: open with a hook (not "I am writing to apply"), 3 short paragraphs
 8. LinkedIn summary: write a 3-paragraph first-person About section (no "I am a..." opener), ~200 words, professional but human tone
 
@@ -87,7 +89,7 @@ async function generateWithRetry(client: Anthropic, prompt: string, attempts = 3
     try {
       const message = await client.messages.create({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 3000,
+        max_tokens: 4096,
         messages: [{ role: 'user', content: prompt }],
       })
 
