@@ -118,8 +118,8 @@ export default function Pricing() {
           ))}
         </div>
 
-        <div className="flex items-center justify-center gap-3 mt-10 p-4 rounded-2xl bg-slate-800/50 border border-slate-700 max-w-md mx-auto">
-          <Shield className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+        <div className="flex items-start sm:items-center justify-center gap-3 mt-10 p-4 rounded-2xl bg-slate-800/50 border border-slate-700 max-w-md mx-auto">
+          <Shield className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5 sm:mt-0" />
           <p className="text-slate-300 text-sm">
             <span className="font-semibold text-white">100% money-back guarantee.</span>{' '}
             Not happy with your resume? We&apos;ll refund every penny. No questions asked.
