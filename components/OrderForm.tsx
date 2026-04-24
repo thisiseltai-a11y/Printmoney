@@ -1,10 +1,11 @@
 'use client'
 import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Plus, Trash2, Rocket, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react'
+import { Plus, Trash2, Rocket, ChevronRight, ChevronLeft, Loader2, CheckCircle } from 'lucide-react'
 import type { ResumeFormData, WorkExperience, Education } from '@/lib/types'
+import type { Template } from '@/components/ResumeTemplates'
 
-const STEP_LABELS = ['Personal Info', 'Target Job', 'Experience', 'Education', 'Skills']
+const STEP_LABELS = ['Personal Info', 'Target Job', 'Experience', 'Education', 'Skills', 'Choose Style']
 
 const emptyExp = (): WorkExperience => ({
   id: crypto.randomUUID(),
@@ -105,6 +106,7 @@ function OrderFormInner() {
 
   const [step, setStep] = useState(0)
   const [data, setData] = useState<ResumeFormData>({ ...initialData, targetJob: prefilledJob })
+  const [template, setTemplate] = useState<Template>('sharp')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [stepError, setStepError] = useState('')
@@ -167,6 +169,7 @@ function OrderFormInner() {
     setError('')
     try {
       localStorage.setItem('pending_form_data', JSON.stringify(data))
+      localStorage.setItem('selected_template', template)
 
       if (bundleToken) {
         // Redeeming a bundle credit — skip Stripe
@@ -461,6 +464,62 @@ function OrderFormInner() {
               {error && (
                 <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-sm text-rose-700">{error}</div>
               )}
+            </div>
+          )}
+
+          {/* Step 5: Choose Style */}
+          {step === 5 && (
+            <div className="animate-fade-in">
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">Choose Your Style</h2>
+              <p className="text-sm text-slate-500 mb-6">Pick the resume design that fits your industry best. You can switch after too.</p>
+              <div className="space-y-4">
+                {([
+                  {
+                    id: 'sharp' as Template,
+                    name: 'Sharp',
+                    desc: 'Bold navy accents, strong section headers. Best for corporate, finance, and management roles.',
+                    preview: ['█████████████████████', '── EXPERIENCE ────────', '▸ Led team of 12 engineers', '▸ Increased revenue 40%', '', '── SKILLS ────────────', 'Python · SQL · Leadership'],
+                  },
+                  {
+                    id: 'executive' as Template,
+                    name: 'Executive',
+                    desc: 'Dark sidebar with grouped skills. Best for senior, director, and executive roles.',
+                    preview: ['█ NAME          ██████', '█ Skills        Role 1', '█ ─────────     ──────', '█ Python        Led 50+', '█ Leadership    Built $2M', '█ Strategy      pipeline'],
+                  },
+                  {
+                    id: 'minimal' as Template,
+                    name: 'Minimal',
+                    desc: 'Clean and light with hairline rules. Best for tech, creative, and modern workplaces.',
+                    preview: ['Name', '─────────────────────', 'Experience', 'Role · Company · 2023', 'Delivered X, achieved Y', '', 'Skills', 'Python · React · SQL'],
+                  },
+                ] as const).map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setTemplate(t.id)}
+                    className={`w-full text-left rounded-2xl border-2 p-4 transition-all ${
+                      template === t.id
+                        ? 'border-indigo-500 bg-indigo-50'
+                        : 'border-slate-200 hover:border-slate-300 bg-white'
+                    }`}
+                  >
+                    <div className="flex items-start gap-4">
+                      {/* Mini preview */}
+                      <div className="flex-shrink-0 w-32 bg-white border border-slate-200 rounded-lg p-2 font-mono text-[6px] leading-relaxed text-slate-600 shadow-sm">
+                        {t.preview.map((line, i) => (
+                          <div key={i} className={line.startsWith('──') || line.startsWith('─') ? 'text-slate-400' : line.startsWith('█') ? 'text-slate-800' : ''}>{line || ' '}</div>
+                        ))}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold text-slate-900">{t.name}</span>
+                          {template === t.id && <CheckCircle className="w-4 h-4 text-indigo-500" />}
+                        </div>
+                        <p className="text-sm text-slate-500 leading-relaxed">{t.desc}</p>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>

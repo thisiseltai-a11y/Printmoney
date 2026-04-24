@@ -56,7 +56,9 @@ export default function ResultPage() {
   const [sendingEmail, setSendingEmail] = useState(false)
   const [bundleUrl, setBundleUrl] = useState('')
   const [bundleUsesRemaining, setBundleUsesRemaining] = useState(0)
-  const [template, setTemplate] = useState<Template>('sharp')
+  const [template, setTemplate] = useState<Template>(
+    () => (typeof window !== 'undefined' ? (localStorage.getItem('selected_template') as Template) || 'sharp' : 'sharp')
+  )
   const emailSentRef = useRef(false)
 
   const saveAndEmail = async (result: GeneratedContent, formDataStr: string) => {
