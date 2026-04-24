@@ -165,8 +165,8 @@ export default function ProfessionPage({ params }: { params: { profession: strin
               Build My Resume — $12
               <ArrowRight className="w-5 h-5 flex-shrink-0" />
             </Link>
-            <div className="flex items-center justify-center gap-2 mt-4 text-slate-500 text-sm">
-              <Shield className="w-4 h-4 text-emerald-400" />
+            <div className="flex items-start sm:items-center justify-center gap-2 mt-4 text-slate-500 text-sm max-w-xs mx-auto">
+              <Shield className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5 sm:mt-0" />
               <span>Love your resume or we refund every penny — no questions asked</span>
             </div>
           </div>
