@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation'
 import { Plus, Trash2, Rocket, ChevronRight, ChevronLeft, Loader2, CheckCircle } from 'lucide-react'
 import type { ResumeFormData, WorkExperience, Education } from '@/lib/types'
 import type { Template } from '@/components/ResumeTemplates'
+import { ACCENT_COLORS, DEFAULT_ACCENT } from '@/components/ResumeTemplates'
 import FormResumePreview from '@/components/FormResumePreview'
 
 const STEP_LABELS = ['Personal Info', 'Target Job', 'Experience', 'Education', 'Skills', 'Choose Style']
@@ -108,6 +109,7 @@ function OrderFormInner() {
   const [step, setStep] = useState(0)
   const [data, setData] = useState<ResumeFormData>({ ...initialData, targetJob: prefilledJob })
   const [template, setTemplate] = useState<Template>('sharp')
+  const [accentColor, setAccentColor] = useState(DEFAULT_ACCENT)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [stepError, setStepError] = useState('')
@@ -171,6 +173,7 @@ function OrderFormInner() {
     try {
       localStorage.setItem('pending_form_data', JSON.stringify(data))
       localStorage.setItem('selected_template', template)
+      localStorage.setItem('selected_color', accentColor)
 
       if (bundleToken) {
         // Redeeming a bundle credit — skip Stripe
@@ -521,6 +524,27 @@ function OrderFormInner() {
                     </div>
                   </button>
                 ))}
+              </div>
+
+              {/* Color picker */}
+              <div className="mt-6 pt-5 border-t border-slate-100">
+                <p className="text-sm font-semibold text-slate-700 mb-3">Accent Color</p>
+                <div className="flex items-center gap-3">
+                  {ACCENT_COLORS.map((c) => (
+                    <button
+                      key={c.hex}
+                      onClick={() => setAccentColor(c.hex)}
+                      title={c.name}
+                      className={`w-9 h-9 rounded-full ring-offset-2 transition-all ${
+                        accentColor === c.hex ? 'ring-2 ring-indigo-500 scale-110' : 'hover:scale-105'
+                      }`}
+                      style={{ backgroundColor: c.hex }}
+                    />
+                  ))}
+                  <span className="text-xs text-slate-400 ml-1">
+                    {ACCENT_COLORS.find(c => c.hex === accentColor)?.name}
+                  </span>
+                </div>
               </div>
             </div>
           )}
