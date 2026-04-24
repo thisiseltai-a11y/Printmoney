@@ -100,10 +100,11 @@ function OrderFormInner() {
   const searchParams = useSearchParams()
   const plan = searchParams.get('plan') || 'single'
   const bundleToken = searchParams.get('bundle_token')
+  const prefilledJob = searchParams.get('job') || ''
   const isBundle = plan === 'bundle' || !!bundleToken
 
   const [step, setStep] = useState(0)
-  const [data, setData] = useState<ResumeFormData>(initialData)
+  const [data, setData] = useState<ResumeFormData>({ ...initialData, targetJob: prefilledJob })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [stepError, setStepError] = useState('')
