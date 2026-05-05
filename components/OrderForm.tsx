@@ -360,6 +360,7 @@ function OrderFormInner() {
                         placeholder="Describe your role, key projects, and achievements. Include numbers where possible (e.g., 'Increased revenue by 30%', 'Led team of 8 engineers', 'Reduced load time by 40%')..."
                         rows={4}
                       />
+                      <p className="text-xs text-slate-400 mt-1.5">Not sure what to write? Don&apos;t worry — we&apos;ll do it for you.</p>
                     </div>
                   </div>
                 ))}
