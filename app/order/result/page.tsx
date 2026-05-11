@@ -172,15 +172,22 @@ export default function ResultPage() {
           } catch { /* non-blocking */ }
         }
 
-        const genRes = await fetch('/api/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: formDataStr,
-        })
-
-        const result = await genRes.json()
-        if (!genRes.ok || result.error) throw new Error(result.error || `Generation failed (${genRes.status})`)
-        if (!result.resume) throw new Error('Resume missing from AI response. Please try again.')
+        // Use pre-generated preview if available (same device), otherwise regenerate
+        const previewStr = sessionStorage.getItem('resume_preview')
+        let result: GeneratedContent
+        if (previewStr) {
+          result = JSON.parse(previewStr)
+          sessionStorage.removeItem('resume_preview')
+        } else {
+          const genRes = await fetch('/api/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: formDataStr,
+          })
+          result = await genRes.json()
+          if (!genRes.ok || (result as any).error) throw new Error((result as any).error || `Generation failed (${genRes.status})`)
+          if (!result.resume) throw new Error('Resume missing from AI response. Please try again.')
+        }
 
         setContent(result)
         sessionStorage.setItem('resume_result', JSON.stringify(result))
@@ -269,8 +276,8 @@ export default function ResultPage() {
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-teal-100 mb-6">
           <Loader2 className="w-8 h-8 text-teal-600 animate-spin" />
         </div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Writing your resume...</h2>
-        <p className="text-slate-500">Payment confirmed. AI is crafting your documents now.</p>
+        <h2 className="text-2xl font-bold text-slate-900 mb-2">Confirming your payment...</h2>
+        <p className="text-slate-500">Just a moment while we verify and unlock your resume.</p>
       </div>
     </div>
   )

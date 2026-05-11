@@ -189,18 +189,16 @@ function OrderFormInner() {
         const { sessionId } = await res.json()
         window.location.href = `/order/result?session_id=${sessionId}`
       } else {
-        // Normal Stripe checkout
-        const res = await fetch('/api/checkout', {
+        // Generate resume first, then show preview before payment
+        const genRes = await fetch('/api/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ plan, formData: data }),
+          body: JSON.stringify(data),
         })
-        if (!res.ok) {
-          const body = await res.json()
-          throw new Error(body.error || 'Failed to start checkout')
-        }
-        const { url } = await res.json()
-        window.location.href = url
+        const result = await genRes.json()
+        if (!genRes.ok || result.error) throw new Error(result.error || 'Generation failed. Please try again.')
+        sessionStorage.setItem('resume_preview', JSON.stringify(result))
+        window.location.href = '/order/preview'
       }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Something went wrong. Please try again.')
@@ -585,12 +583,12 @@ function OrderFormInner() {
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  {bundleToken ? 'Generating...' : 'Redirecting to checkout...'}
+                  {bundleToken ? 'Generating...' : 'Building your resume...'}
                 </>
               ) : (
                 <>
                   <Rocket className="w-4 h-4" />
-                  {bundleToken ? 'Generate My Resume (Bundle)' : isBundle ? 'Get the Bundle — $29' : 'Generate My Resume — $12'}
+                  {bundleToken ? 'Generate My Resume (Bundle)' : 'Preview My Resume — Free'}
                 </>
               )}
             </button>
