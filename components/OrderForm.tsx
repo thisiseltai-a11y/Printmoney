@@ -208,7 +208,7 @@ function OrderFormInner() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="max-w-5xl mx-auto px-4 py-12 lg:flex lg:gap-10 lg:items-start">
+      <div className="max-w-5xl mx-auto px-4 py-12 pb-28 sm:pb-12 lg:flex lg:gap-10 lg:items-start">
       <div className="flex-1 min-w-0">
         {/* Progress */}
         <div className="mb-10">
@@ -556,7 +556,7 @@ function OrderFormInner() {
             <span>{stepError}</span>
           </div>
         )}
-        <div className="flex items-center justify-between mt-4">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-3 z-20 flex items-center justify-between sm:static sm:bg-transparent sm:border-0 sm:px-0 sm:py-0 sm:mt-4">
           <button
             onClick={() => { setStepError(''); setStep((s) => s - 1) }}
             disabled={step === 0}
