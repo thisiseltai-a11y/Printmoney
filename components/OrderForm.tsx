@@ -210,6 +210,12 @@ function OrderFormInner() {
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-5xl mx-auto px-4 py-12 pb-28 sm:pb-12 lg:flex lg:gap-10 lg:items-start">
       <div className="flex-1 min-w-0">
+        {/* Free preview banner */}
+        <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 mb-6 text-sm">
+          <span className="text-emerald-600 font-bold flex-shrink-0">FREE</span>
+          <p className="text-emerald-800">Fill in your details and we&apos;ll generate a free preview of your resume. Pay only if you love it.</p>
+        </div>
+
         {/* Progress */}
         <div className="mb-10">
           <div className="flex items-center justify-between mb-3">

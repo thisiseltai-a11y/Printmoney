@@ -98,12 +98,12 @@ export default function ResumePreview() {
 
         {/* CTA over the fade */}
         <div className="absolute bottom-6 left-0 right-0 flex flex-col items-center gap-3 px-4">
-          <p className="text-white font-semibold text-sm">Your resume. Your experience. Your job. $12.</p>
+          <p className="text-white font-semibold text-sm">See your resume before you pay. Free preview, then $12 to unlock.</p>
           <Link
             href="/order"
             className="flex items-center gap-2 px-8 py-3 rounded-xl text-white font-bold text-sm bg-gradient-to-r from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/30 hover:opacity-90 transition-opacity"
           >
-            Build Mine Now
+            Preview Mine Free
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
