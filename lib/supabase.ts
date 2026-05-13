@@ -1,16 +1,19 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+// Server-side client (service role)
+export const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
-export const supabase = createClient(supabaseUrl, supabaseServiceKey)
-
-export interface ResumeRecord {
-  id: string
-  email: string
-  name: string
-  resume: string
-  cover_letter: string
-  linkedin_summary: string
-  created_at: string
+// Client-side Supabase — lazy singleton so it only initializes in the browser
+let _client: SupabaseClient | null = null
+export function supabaseClient(): SupabaseClient {
+  if (!_client) {
+    _client = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+  }
+  return _client
 }
