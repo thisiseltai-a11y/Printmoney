@@ -3,9 +3,11 @@ export const dynamic = 'force-dynamic'
 import { useState } from 'react'
 import Link from 'next/link'
 import { BookOpen, Loader2, Eye, EyeOff } from 'lucide-react'
-import { supabaseClient } from '@/lib/supabase'
+import { signUp } from '@/lib/auth'
+import { useRouter } from 'next/navigation'
 
 export default function SignupPage() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
@@ -20,13 +22,13 @@ export default function SignupPage() {
     setLoading(true)
     setError('')
     try {
-      const { error } = await supabaseClient().auth.signUp({
-        email,
-        password,
-        options: { data: { full_name: name } },
-      })
-      if (error) throw error
-      setDone(true)
+      await signUp(email, password, name)
+      // If Supabase is configured it requires email confirmation; otherwise go straight to dashboard
+      if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL !== 'undefined') {
+        setDone(true)
+      } else {
+        router.push('/dashboard')
+      }
     } catch (e: any) {
       setError(e.message || 'Something went wrong. Please try again.')
     } finally {

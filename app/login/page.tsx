@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { BookOpen, Loader2, Eye, EyeOff } from 'lucide-react'
-import { supabaseClient } from '@/lib/supabase'
+import { signIn } from '@/lib/auth'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -19,8 +19,7 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
     try {
-      const { error } = await supabaseClient().auth.signInWithPassword({ email, password })
-      if (error) throw error
+      await signIn(email, password)
       router.push('/dashboard')
     } catch (e: any) {
       setError(e.message || 'Invalid email or password.')

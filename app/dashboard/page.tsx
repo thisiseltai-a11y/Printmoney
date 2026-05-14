@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { BookOpen, LogOut, BarChart3, CheckCircle, Clock, ArrowRight, Trophy } from 'lucide-react'
-import { supabaseClient } from '@/lib/supabase'
 import { SUBJECTS } from '@/lib/questions'
 import { hasFreeAccess } from '@/lib/access'
+import { getUser, signOut as authSignOut } from '@/lib/auth'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -17,7 +17,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const init = async () => {
-      const { data: { user } } = await supabaseClient().auth.getUser()
+      const user = await getUser()
       if (!user) { router.push('/login'); return }
       setUser(user)
       setFreeAccess(hasFreeAccess(user.email))
@@ -31,7 +31,7 @@ export default function DashboardPage() {
   }, [router])
 
   const handleLogout = async () => {
-    await supabaseClient().auth.signOut()
+    await authSignOut()
     router.push('/')
   }
 

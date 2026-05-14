@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight, BookOpen, Loader2, Flag, CheckCircle, XCircle } from 'lucide-react'
 import { SAMPLE_QUESTIONS, SUBJECTS, type Question, type Subject } from '@/lib/questions'
-import { supabaseClient } from '@/lib/supabase'
+import { getUser } from '@/lib/auth'
 
 function PracticeContent() {
   const router = useRouter()
@@ -22,7 +22,7 @@ function PracticeContent() {
   const [flagged, setFlagged] = useState<Set<number>>(new Set())
 
   useEffect(() => {
-    supabaseClient().auth.getUser().then(({ data: { user } }) => {
+    getUser().then(user => {
       if (!user) router.push('/login')
     })
     const filtered = subject
