@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { hasFreeAccess } from '@/lib/access'
 
 export async function GET(req: NextRequest) {
+  const email = req.nextUrl.searchParams.get('email')
+  if (hasFreeAccess(email)) {
+    return NextResponse.json({ paid: true })
+  }
+
   if (!process.env.STRIPE_SECRET_KEY) {
     return NextResponse.json({ error: 'Payments are not configured.' }, { status: 503 })
   }

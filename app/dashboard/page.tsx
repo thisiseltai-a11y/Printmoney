@@ -6,18 +6,21 @@ import Link from 'next/link'
 import { BookOpen, LogOut, BarChart3, CheckCircle, Clock, ArrowRight, Trophy } from 'lucide-react'
 import { supabaseClient } from '@/lib/supabase'
 import { SUBJECTS } from '@/lib/questions'
+import { hasFreeAccess } from '@/lib/access'
 
 export default function DashboardPage() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({ totalAnswered: 0, correct: 0, streak: 0 })
+  const [freeAccess, setFreeAccess] = useState(false)
 
   useEffect(() => {
     const init = async () => {
       const { data: { user } } = await supabaseClient().auth.getUser()
       if (!user) { router.push('/login'); return }
       setUser(user)
+      setFreeAccess(hasFreeAccess(user.email))
 
       // Load stats from localStorage for now
       const stored = localStorage.getItem('nurseedge_stats')
