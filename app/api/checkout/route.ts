@@ -46,8 +46,8 @@ export async function POST(req: NextRequest) {
     // Save form data server-side so it survives browser/device changes
     if (formData && session.id && process.env.NEXT_PUBLIC_SUPABASE_URL) {
       try {
-        const { supabase } = await import('@/lib/supabase')
-        await supabase.from('pending_sessions').insert({
+        const { getSupabase } = await import('@/lib/supabase')
+        await getSupabase().from('pending_sessions').insert({
           stripe_session_id: session.id,
           form_data: formData,
         })

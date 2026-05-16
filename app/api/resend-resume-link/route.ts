@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { getSupabase } from '@/lib/supabase'
 import { Resend } from 'resend'
 
 export async function POST(req: NextRequest) {
@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Database not configured.' }, { status: 503 })
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('resumes')
     .select('id, name, created_at')
     .eq('email', email.toLowerCase().trim())

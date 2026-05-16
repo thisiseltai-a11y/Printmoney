@@ -9,8 +9,9 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const { supabase } = await import('@/lib/supabase')
-    const { data, error } = await supabase
+    const { getSupabase } = await import('@/lib/supabase')
+    const sb = getSupabase()
+    const { data, error } = await sb
       .from('pending_sessions')
       .select('form_data')
       .eq('stripe_session_id', sessionId)
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest) {
     if (error || !data) return NextResponse.json({ formData: null })
 
     // Clean up after retrieval
-    await supabase.from('pending_sessions').delete().eq('stripe_session_id', sessionId)
+    await sb.from('pending_sessions').delete().eq('stripe_session_id', sessionId)
 
     return NextResponse.json({ formData: data.form_data })
   } catch {

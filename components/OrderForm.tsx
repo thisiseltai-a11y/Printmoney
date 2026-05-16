@@ -387,7 +387,7 @@ function OrderFormInner() {
                 </div>
               </div>
               <ExistingResumeUpload
-                value={data.existingResume}
+                value={data.existingResume ?? ''}
                 onChange={(v) => set('existingResume', v)}
                 onAutoFill={(fields) => setData(d => ({ ...d, ...fields }))}
               />

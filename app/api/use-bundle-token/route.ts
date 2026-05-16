@@ -11,9 +11,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing token or form data.' }, { status: 400 })
     }
 
-    const { supabase } = await import('@/lib/supabase')
+    const { getSupabase } = await import('@/lib/supabase')
+    const sb = getSupabase()
 
-    const { data: bundle, error } = await supabase
+    const { data: bundle, error } = await sb
       .from('bundle_tokens')
       .select('*')
       .eq('token', token)
@@ -27,14 +28,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Decrement uses
-    await supabase
+    await sb
       .from('bundle_tokens')
       .update({ uses_remaining: bundle.uses_remaining - 1 })
       .eq('token', token)
 
     // Save form data so result page can retrieve it
     const sessionId = `bundle:${crypto.randomUUID()}`
-    await supabase.from('pending_sessions').insert({
+    await sb.from('pending_sessions').insert({
       stripe_session_id: sessionId,
       form_data: formData,
     })

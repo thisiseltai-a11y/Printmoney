@@ -11,11 +11,11 @@ export async function POST(req: NextRequest) {
 
     if (!email) return NextResponse.json({ ok: false }, { status: 400 })
 
-    const { supabase } = await import('@/lib/supabase')
+    const { getSupabase } = await import('@/lib/supabase')
     const base = (process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000').replace(/\/$/, '')
 
     // Create token with 4 uses (first resume was just generated)
-    const { data: bundle, error } = await supabase
+    const { data: bundle, error } = await getSupabase()
       .from('bundle_tokens')
       .insert({ email, uses_remaining: 4 })
       .select('token')
