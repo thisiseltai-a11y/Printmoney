@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { Lock, Rocket, FileText, Mail, Linkedin, Loader2 } from 'lucide-react'
 import { ResumeRenderer, DEFAULT_ACCENT } from '@/components/ResumeTemplates'
@@ -8,12 +8,17 @@ import type { GeneratedContent } from '@/lib/types'
 
 type Tab = 'resume' | 'cover' | 'linkedin'
 
+const PAPER_WIDTH = 794
+const PAPER_HEIGHT = 1056
+
 export default function PreviewPage() {
   const [content, setContent] = useState<GeneratedContent | null>(null)
   const [activeTab, setActiveTab] = useState<Tab>('resume')
   const [template, setTemplate] = useState<Template>('sharp')
   const [accentColor, setAccentColor] = useState(DEFAULT_ACCENT)
   const [loading, setLoading] = useState(false)
+  const [containerWidth, setContainerWidth] = useState(PAPER_WIDTH)
+  const paperContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const stored = sessionStorage.getItem('resume_preview')
@@ -22,6 +27,17 @@ export default function PreviewPage() {
     if (tmpl) setTemplate(tmpl)
     const color = localStorage.getItem('selected_color')
     if (color) setAccentColor(color)
+  }, [])
+
+  useEffect(() => {
+    const measure = () => {
+      if (paperContainerRef.current) {
+        setContainerWidth(paperContainerRef.current.offsetWidth)
+      }
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
   }, [])
 
   const handleUnlock = async (plan: 'single' | 'bundle') => {
@@ -51,6 +67,8 @@ export default function PreviewPage() {
   )
 
   const firstPara = (text: string) => text.split(/\n{2,}/)[0] ?? ''
+  const scale = Math.min(1, containerWidth / PAPER_WIDTH)
+  const scaledHeight = Math.round(PAPER_HEIGHT * scale)
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -91,35 +109,53 @@ export default function PreviewPage() {
           ))}
         </div>
 
-        {/* Content card with blur */}
+        {/* Content */}
         <div className="relative">
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-            <div className="p-5 sm:p-10">
-              {activeTab === 'resume' && (
+          {activeTab === 'resume' ? (
+            /* Paper document view */
+            <div
+              ref={paperContainerRef}
+              className="overflow-hidden rounded-2xl shadow-2xl bg-white"
+              style={{ height: `${scaledHeight}px` }}
+            >
+              <div
+                style={{
+                  width: `${PAPER_WIDTH}px`,
+                  minHeight: `${PAPER_HEIGHT}px`,
+                  transform: `scale(${scale})`,
+                  transformOrigin: 'top left',
+                }}
+              >
                 <ResumeRenderer text={content.resume} template={template} accentColor={accentColor} />
-              )}
-              {activeTab === 'cover' && (
-                <div className="space-y-4">
-                  <p className="text-[13px] text-slate-700 leading-relaxed">{firstPara(content.coverLetter)}</p>
-                  <div className="space-y-4 select-none pointer-events-none" style={{ filter: 'blur(4px)' }}>
-                    {content.coverLetter.split(/\n{2,}/).slice(1).map((p, i) => (
-                      <p key={i} className="text-[13px] text-slate-700 leading-relaxed">{p}</p>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {activeTab === 'linkedin' && (
-                <div className="space-y-4">
-                  <p className="text-[13px] text-slate-700 leading-relaxed">{firstPara(content.linkedinSummary || '')}</p>
-                  <div className="space-y-4 select-none pointer-events-none" style={{ filter: 'blur(4px)' }}>
-                    {(content.linkedinSummary || '').split(/\n{2,}/).slice(1).map((p, i) => (
-                      <p key={i} className="text-[13px] text-slate-700 leading-relaxed">{p}</p>
-                    ))}
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
-          </div>
+          ) : (
+            /* Cover letter / LinkedIn card view */
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+              <div className="p-5 sm:p-10">
+                {activeTab === 'cover' && (
+                  <div className="space-y-4">
+                    <p className="text-[13px] text-slate-700 leading-relaxed">{firstPara(content.coverLetter)}</p>
+                    <div className="space-y-4 select-none pointer-events-none" style={{ filter: 'blur(4px)' }}>
+                      {content.coverLetter.split(/\n{2,}/).slice(1).map((p, i) => (
+                        <p key={i} className="text-[13px] text-slate-700 leading-relaxed">{p}</p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {activeTab === 'linkedin' && (
+                  <div className="space-y-4">
+                    <p className="text-[13px] text-slate-700 leading-relaxed">{firstPara(content.linkedinSummary || '')}</p>
+                    <div className="space-y-4 select-none pointer-events-none" style={{ filter: 'blur(4px)' }}>
+                      {(content.linkedinSummary || '').split(/\n{2,}/).slice(1).map((p, i) => (
+                        <p key={i} className="text-[13px] text-slate-700 leading-relaxed">{p}</p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Gradient fade — only on resume tab */}
           {activeTab === 'resume' && (

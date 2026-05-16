@@ -1,7 +1,7 @@
 'use client'
 import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Plus, Trash2, Rocket, ChevronRight, ChevronLeft, Loader2, CheckCircle } from 'lucide-react'
+import { Plus, Trash2, Rocket, ChevronRight, ChevronLeft, Loader2, CheckCircle, Upload, FileText, X } from 'lucide-react'
 import type { ResumeFormData, WorkExperience, Education } from '@/lib/types'
 import type { Template } from '@/components/ResumeTemplates'
 import { ACCENT_COLORS, DEFAULT_ACCENT } from '@/components/ResumeTemplates'
@@ -44,6 +44,129 @@ const initialData: ResumeFormData = {
   softSkills: '',
   certifications: '',
   languages: '',
+  existingResume: '',
+}
+
+function ExistingResumeUpload({ value, onChange, onAutoFill }: { value: string; onChange: (v: string) => void; onAutoFill?: (fields: Partial<ResumeFormData>) => void }) {
+  const [uploading, setUploading] = useState(false)
+  const [fileName, setFileName] = useState('')
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
+  const [showPaste, setShowPaste] = useState(false)
+  const [extracting, setExtracting] = useState(false)
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setError('')
+    setSuccess(false)
+    const inputEl = e.target
+    try {
+      let text = ''
+      if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+        const arrayBuffer = await file.arrayBuffer()
+        text = new TextDecoder().decode(arrayBuffer)
+      } else {
+        const arrayBuffer = await file.arrayBuffer()
+        const pdfjsLib = await import('pdfjs-dist')
+        pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js'
+        const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise
+        const pages: string[] = []
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i)
+          const content = await page.getTextContent()
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          pages.push(content.items.map((item: any) => item.str ?? '').join(' '))
+        }
+        text = pages.join('\n')
+      }
+      if (!text.trim()) {
+        setError('Could not read text from this file. Try pasting your resume instead.')
+        setUploading(false)
+        return
+      }
+      onChange(text)
+      setFileName(file.name)
+      setUploading(false)
+      if (onAutoFill) {
+        setExtracting(true)
+        try {
+          const res = await fetch('/api/extract-resume-fields', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text }),
+          })
+          const data = await res.json()
+          if (res.ok && data.fields) {
+            const fields = data.fields
+            if (fields.experience) fields.experience = fields.experience.map((e: { id?: string } & Record<string, unknown>) => ({ ...e, id: crypto.randomUUID() }))
+            if (fields.education) fields.education = fields.education.map((e: { id?: string } & Record<string, unknown>) => ({ ...e, id: crypto.randomUUID() }))
+            onAutoFill(fields)
+            setSuccess(true)
+          } else {
+            setError('Auto-fill failed. Your resume was saved — fill in your details manually.')
+          }
+        } catch {
+          setError('Auto-fill failed. Your resume was saved — fill in your details manually.')
+        } finally {
+          setExtracting(false)
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed. Try pasting your resume instead.')
+      setUploading(false)
+    } finally {
+      inputEl.value = ''
+    }
+  }
+
+  const clear = () => { onChange(''); setFileName(''); setError(''); setSuccess(false) }
+
+  return (
+    <div className="mt-2 pt-5 border-t border-slate-100">
+      <div className="flex items-center justify-between mb-1">
+        <FieldLabel>Already have a resume? <span className="font-normal text-slate-400">optional</span></FieldLabel>
+        {!fileName && (
+          <button type="button" onClick={() => setShowPaste(p => !p)} className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">
+            {showPaste ? 'Upload instead' : 'Paste instead'}
+          </button>
+        )}
+      </div>
+      <p className="text-xs text-slate-500 mb-3">Upload your old resume and we&apos;ll auto-fill your info and use it to make your new one more accurate.</p>
+      {fileName ? (
+        <div className="space-y-2">
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-200">
+            <FileText className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+            <span className="text-sm text-emerald-800 font-medium flex-1 truncate">{fileName}</span>
+            <button type="button" onClick={clear} className="text-emerald-600 hover:text-emerald-800"><X className="w-4 h-4" /></button>
+          </div>
+          {extracting && (
+            <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-50 border border-indigo-100">
+              <Loader2 className="w-3.5 h-3.5 text-indigo-500 animate-spin flex-shrink-0" />
+              <span className="text-xs text-indigo-700 font-medium">Filling in your info automatically...</span>
+            </div>
+          )}
+          {success && !extracting && (
+            <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-50 border border-emerald-200">
+              <CheckCircle className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+              <span className="text-xs text-emerald-700 font-medium">Info filled in! Scroll up to check your details.</span>
+            </div>
+          )}
+        </div>
+      ) : showPaste ? (
+        <Textarea value={value} onChange={onChange} placeholder="Paste your existing resume text here..." rows={6} />
+      ) : (
+        <label className={`flex flex-col items-center justify-center gap-2 px-4 py-6 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${uploading ? 'border-indigo-300 bg-indigo-50' : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50'}`}>
+          {uploading ? <Loader2 className="w-6 h-6 text-indigo-500 animate-spin" /> : <Upload className="w-6 h-6 text-slate-400" />}
+          <span className="text-sm font-medium text-slate-600">{uploading ? 'Reading your resume...' : 'Tap to upload PDF or TXT'}</span>
+          <span className="text-xs text-slate-400">PDF or TXT files supported</span>
+          <input type="file" accept=".pdf,.txt" onChange={handleFile} className="hidden" disabled={uploading} />
+        </label>
+      )}
+      {error && <p className="mt-2 text-xs text-rose-500">{error}</p>}
+    </div>
+  )
 }
 
 function FieldLabel({ children, required }: { children: React.ReactNode; required?: boolean }) {
@@ -263,6 +386,11 @@ function OrderFormInner() {
                   <Input value={data.portfolio} onChange={(v) => set('portfolio', v)} placeholder="janedoe.com" />
                 </div>
               </div>
+              <ExistingResumeUpload
+                value={data.existingResume}
+                onChange={(v) => set('existingResume', v)}
+                onAutoFill={(fields) => setData(d => ({ ...d, ...fields }))}
+              />
             </div>
           )}
 

@@ -33,6 +33,7 @@ export interface ResumeFormData {
   softSkills: string
   certifications: string
   languages: string
+  existingResume?: string
 }
 
 export interface GeneratedContent {
