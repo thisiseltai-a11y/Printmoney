@@ -73,7 +73,7 @@ export default function ResumeLookupPage() {
               href="/order"
               className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold text-sm hover:opacity-90 transition-opacity"
             >
-              Build a New Resume $8
+              Build a New Resume $5
               <ArrowRight className="w-4 h-4" />
             </Link>
           </>

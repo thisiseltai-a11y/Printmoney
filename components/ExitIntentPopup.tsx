@@ -79,7 +79,7 @@ export default function ExitIntentPopup() {
               </h3>
               <p className="text-slate-400 text-sm leading-relaxed mb-6">
                 Not ready right now? Drop your email and we&apos;ll send you a private link to get your AI resume for{' '}
-                <span className="text-white font-semibold">$6 instead of $8</span>. No spam, use it whenever you&apos;re ready.
+                <span className="text-white font-semibold">$4 instead of $5</span>. No spam, use it whenever you&apos;re ready.
               </p>
 
               <form onSubmit={handleSubmit} className="space-y-3">

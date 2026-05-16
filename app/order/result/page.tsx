@@ -194,7 +194,7 @@ export default function ResultPage() {
 
         // Fire Facebook Purchase event
         if (!isBundleSession) {
-          const value = plan === 'bundle' ? 29.00 : 8.00
+          const value = plan === 'bundle' ? 29.00 : 5.00
           if (typeof window !== 'undefined' && (window as any).fbq) {
             (window as any).fbq('track', 'Purchase', { value, currency: 'USD' })
           }

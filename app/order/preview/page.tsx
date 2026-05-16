@@ -68,7 +68,7 @@ export default function PreviewPage() {
             className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 rounded-xl shadow-lg shadow-indigo-500/25 hover:opacity-90 transition-opacity disabled:opacity-60"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
-            Unlock $8
+            Unlock $5
           </button>
         </div>
       </header>

@@ -4,10 +4,10 @@ import { CheckCircle, Zap, Shield } from 'lucide-react'
 const plans = [
   {
     name: 'Single',
-    price: '$8',
+    price: '$5',
     period: 'one-time',
     description: 'Applying to 1–2 jobs? Get a tailored resume and cover letter fast.',
-    cta: 'Get Started $8',
+    cta: 'Get Started $5',
     href: '/order',
     popular: false,
     features: [
@@ -51,7 +51,7 @@ export default function Pricing() {
             </span>
           </h2>
           <p className="text-lg text-slate-400 max-w-xl mx-auto">
-            Professional resume writers charge $150–$800. We charge a fraction and deliver in seconds.
+            Professional resume writers charge $150–$500. We charge a fraction and deliver in seconds.
           </p>
         </div>
 

@@ -56,7 +56,7 @@ export default function ProfessionPage({ params }: { params: { profession: strin
               href={orderUrl}
               className="flex items-center justify-center gap-2 w-full max-w-xs mx-auto px-8 py-4 rounded-2xl text-white font-bold text-lg bg-gradient-to-r from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/30 hover:opacity-90 transition-opacity"
             >
-              Build My Resume $8
+              Build My Resume $5
               <ArrowRight className="w-5 h-5 flex-shrink-0" />
             </Link>
             <p className="text-slate-500 text-xs mt-4">One-time payment · No subscription · No login required</p>
@@ -66,7 +66,7 @@ export default function ProfessionPage({ params }: { params: { profession: strin
         {/* What you get */}
         <section className="bg-slate-900 py-16 px-4">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold text-white text-center mb-10">What You Get for $8</h2>
+            <h2 className="text-2xl font-bold text-white text-center mb-10">What You Get for $5</h2>
             <div className="grid sm:grid-cols-3 gap-6">
               {[
                 { icon: <FileText className="w-6 h-6" />, title: 'ATS-Optimized Resume', desc: `Tailored to ${p.title} roles with the exact keywords recruiters and ATS systems scan for.` },
@@ -156,13 +156,13 @@ export default function ProfessionPage({ params }: { params: { profession: strin
             </h2>
             <p className="text-slate-400 mb-8">
               Join thousands of job seekers who got more callbacks with ResumeRocket.
-              One-time $8 — your resume in 60 seconds.
+              One-time $5 — your resume in 60 seconds.
             </p>
             <Link
               href={orderUrl}
               className="inline-flex items-center justify-center gap-2 w-full max-w-xs mx-auto px-8 py-4 rounded-2xl text-white font-bold text-lg bg-gradient-to-r from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/30 hover:opacity-90 transition-opacity"
             >
-              Build My Resume $8
+              Build My Resume $5
               <ArrowRight className="w-5 h-5 flex-shrink-0" />
             </Link>
             <div className="flex items-start sm:items-center justify-center gap-2 mt-4 text-slate-500 text-sm max-w-xs mx-auto">

@@ -45,7 +45,7 @@ const jsonLd = {
         {
           '@type': 'Offer',
           name: 'Single Resume',
-          price: '8.00',
+          price: '5.00',
           priceCurrency: 'USD',
           description: '1 ATS-optimized resume + cover letter',
         },

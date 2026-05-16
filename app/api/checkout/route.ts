@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 const PLANS = {
-  single:    { amount: 800, label: '1 Resume + Cover Letter' },
+  single:    { amount: 500, label: '1 Resume + Cover Letter' },
   bundle:    { amount: 2900, label: '5 Resume + Cover Letter Sets + LinkedIn Summary' },
   unlimited: { amount: 1900, label: 'Unlimited Resumes & Cover Letters (Monthly)' },
 }
