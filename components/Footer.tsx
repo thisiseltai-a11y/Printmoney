@@ -9,7 +9,7 @@ const links = {
     { label: 'Reviews', href: '/#testimonials' },
   ],
   'Get Started': [
-    { label: 'Build My Resume — $8', href: '/order' },
+    { label: 'Build My Resume $8', href: '/order' },
     { label: 'Resume + 5 Applications', href: '/order?plan=bundle' },
     { label: 'View My Saved Resume', href: '/resume' },
   ],

@@ -56,7 +56,7 @@ export default function ProfessionPage({ params }: { params: { profession: strin
               href={orderUrl}
               className="flex items-center justify-center gap-2 w-full max-w-xs mx-auto px-8 py-4 rounded-2xl text-white font-bold text-lg bg-gradient-to-r from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/30 hover:opacity-90 transition-opacity"
             >
-              Build My Resume — $8
+              Build My Resume $8
               <ArrowRight className="w-5 h-5 flex-shrink-0" />
             </Link>
             <p className="text-slate-500 text-xs mt-4">One-time payment · No subscription · No login required</p>
@@ -162,7 +162,7 @@ export default function ProfessionPage({ params }: { params: { profession: strin
               href={orderUrl}
               className="inline-flex items-center justify-center gap-2 w-full max-w-xs mx-auto px-8 py-4 rounded-2xl text-white font-bold text-lg bg-gradient-to-r from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/30 hover:opacity-90 transition-opacity"
             >
-              Build My Resume — $8
+              Build My Resume $8
               <ArrowRight className="w-5 h-5 flex-shrink-0" />
             </Link>
             <div className="flex items-start sm:items-center justify-center gap-2 mt-4 text-slate-500 text-sm max-w-xs mx-auto">

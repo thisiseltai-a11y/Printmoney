@@ -7,7 +7,7 @@ const plans = [
     price: '$8',
     period: 'one-time',
     description: 'Applying to 1–2 jobs? Get a tailored resume and cover letter fast.',
-    cta: 'Get Started — $8',
+    cta: 'Get Started $8',
     href: '/order',
     popular: false,
     features: [
