@@ -4,10 +4,10 @@ import { CheckCircle, Zap, Shield } from 'lucide-react'
 const plans = [
   {
     name: 'Single',
-    price: '$12',
+    price: '$8',
     period: 'one-time',
     description: 'Applying to 1–2 jobs? Get a tailored resume and cover letter fast.',
-    cta: 'Get Started — $12',
+    cta: 'Get Started — $8',
     href: '/order',
     popular: false,
     features: [
