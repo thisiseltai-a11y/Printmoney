@@ -37,7 +37,7 @@ export default function Navbar() {
               href="/order"
               className="text-sm px-5 py-2.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors font-medium"
             >
-              Build My Resume — $12
+              Build My Resume — $8
             </Link>
           </div>
 
@@ -62,7 +62,7 @@ export default function Navbar() {
             href="/order"
             className="block text-sm px-4 py-3 rounded-lg bg-indigo-600 text-white text-center font-medium mt-2"
           >
-            Build My Resume — $12
+            Build My Resume — $8
           </Link>
         </div>
       )}

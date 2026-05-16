@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     template: '%s — ResumeRocket',
   },
   description:
-    'Get an ATS-optimized resume and cover letter in under 60 seconds. AI-powered, tailored to every job you apply for. One-time payment from $12.',
+    'Get an ATS-optimized resume and cover letter in under 60 seconds. AI-powered, tailored to every job you apply for. One-time payment from $8.',
   keywords:
     'AI resume builder, ATS optimized resume, cover letter generator, resume writing service, AI resume writer, resume builder online, job application resume',
   authors: [{ name: 'ResumeRocket' }],
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'ResumeRocket — AI Resume Builder That Lands Interviews',
     description:
-      'ATS-optimized resume + cover letter in 60 seconds. AI-powered, tailored to every job. From $12.',
+      'ATS-optimized resume + cover letter in 60 seconds. AI-powered, tailored to every job. From $8.',
     url: BASE_URL,
     siteName: 'ResumeRocket',
     type: 'website',
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'ResumeRocket — AI Resume Builder That Lands Interviews',
-    description: 'ATS-optimized resume + cover letter in 60 seconds. From $12.',
+    description: 'ATS-optimized resume + cover letter in 60 seconds. From $8.',
   },
   alternates: {
     canonical: BASE_URL,
