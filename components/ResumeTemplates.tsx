@@ -307,8 +307,8 @@ function ExecutiveTemplate({ parsed, accentColor }: { parsed: Parsed; accentColo
   const initials = name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
 
   return (
-    <div className="font-sans flex [print-color-adjust:exact] [-webkit-print-color-adjust:exact]">
-      <div className="w-[200px] flex-shrink-0 p-6 flex flex-col gap-6" style={{ backgroundColor: accentColor }}>
+    <div className="font-sans flex flex-col sm:flex-row [print-color-adjust:exact] [-webkit-print-color-adjust:exact]">
+      <div className="w-full sm:w-[200px] sm:flex-shrink-0 p-6 flex flex-col gap-6" style={{ backgroundColor: accentColor }}>
         <div>
           <div
             className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-lg mb-3"
