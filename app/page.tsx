@@ -60,7 +60,7 @@ export default function Home() {
                 Start Free — 7 Days Free
                 <ArrowRight className="w-5 h-5" />
               </Link>
-              <p className="text-slate-500 text-sm">Then $19/month. Cancel anytime.</p>
+              <p className="text-slate-500 text-sm">Then $8/month. Cancel anytime.</p>
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-slate-400">
@@ -180,7 +180,7 @@ export default function Home() {
             <div className="bg-gradient-to-b from-blue-600 to-teal-700 rounded-3xl p-8 border border-blue-500/30 shadow-2xl shadow-blue-500/20">
               <p className="text-blue-200 text-sm font-semibold uppercase tracking-wider mb-2">Full Access</p>
               <div className="flex items-end justify-center gap-1 mb-2">
-                <span className="text-6xl font-extrabold text-white">$19</span>
+                <span className="text-6xl font-extrabold text-white">$8</span>
                 <span className="text-blue-200 text-lg mb-2">/month</span>
               </div>
               <p className="text-blue-200 text-sm mb-8">7-day free trial. Cancel anytime.</p>
@@ -227,7 +227,7 @@ export default function Home() {
               Start Free — 7 Days Free
               <ArrowRight className="w-5 h-5" />
             </Link>
-            <p className="text-slate-500 text-sm mt-4">Then $19/month. Cancel anytime.</p>
+            <p className="text-slate-500 text-sm mt-4">Then $8/month. Cancel anytime.</p>
           </div>
         </section>
 

@@ -47,7 +47,7 @@ export default function SignupPage() {
             <span className="font-bold text-white text-xl">NurseEdge</span>
           </Link>
           <h1 className="text-3xl font-extrabold text-white mb-2">Start your free trial</h1>
-          <p className="text-slate-400">7 days free. Then $19/month. Cancel anytime.</p>
+          <p className="text-slate-400">7 days free. Then $8/month. Cancel anytime.</p>
         </div>
 
         {done ? (

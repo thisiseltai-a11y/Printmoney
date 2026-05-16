@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
             name: 'NurseEdge — Full Access',
             description: 'Unlimited TEAS practice questions, mock exams, and AI explanations.',
           },
-          unit_amount: 1900,
+          unit_amount: 800,
           recurring: { interval: 'month' },
         },
         quantity: 1,
