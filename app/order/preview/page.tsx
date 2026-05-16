@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Lock, Rocket, FileText, Mail, Linkedin, Loader2 } from 'lucide-react'
 import { ResumeRenderer, DEFAULT_ACCENT } from '@/components/ResumeTemplates'
@@ -17,8 +17,7 @@ export default function PreviewPage() {
   const [template, setTemplate] = useState<Template>('sharp')
   const [accentColor, setAccentColor] = useState(DEFAULT_ACCENT)
   const [loading, setLoading] = useState(false)
-  const [containerWidth, setContainerWidth] = useState(PAPER_WIDTH)
-  const paperContainerRef = useRef<HTMLDivElement>(null)
+  const [vpWidth, setVpWidth] = useState(375)
 
   useEffect(() => {
     const stored = sessionStorage.getItem('resume_preview')
@@ -30,14 +29,10 @@ export default function PreviewPage() {
   }, [])
 
   useEffect(() => {
-    const measure = () => {
-      if (paperContainerRef.current) {
-        setContainerWidth(paperContainerRef.current.offsetWidth)
-      }
-    }
-    measure()
-    window.addEventListener('resize', measure)
-    return () => window.removeEventListener('resize', measure)
+    setVpWidth(window.innerWidth)
+    const handle = () => setVpWidth(window.innerWidth)
+    window.addEventListener('resize', handle)
+    return () => window.removeEventListener('resize', handle)
   }, [])
 
   const handleUnlock = async (plan: 'single' | 'bundle') => {
@@ -67,7 +62,12 @@ export default function PreviewPage() {
   )
 
   const firstPara = (text: string) => text.split(/\n{2,}/)[0] ?? ''
-  const scale = Math.min(1, containerWidth / PAPER_WIDTH)
+
+  // Horizontal padding: px-4 (16px each side) on mobile, sm:px-6 (24px) on desktop
+  const hPad = vpWidth < 640 ? 32 : 48
+  // Constrain to max-w-4xl (896px)
+  const containerW = Math.min(vpWidth - hPad, 896 - hPad)
+  const scale = Math.min(1, containerW / PAPER_WIDTH)
   const scaledHeight = Math.round(PAPER_HEIGHT * scale)
 
   return (
@@ -112,11 +112,10 @@ export default function PreviewPage() {
         {/* Content */}
         <div className="relative">
           {activeTab === 'resume' ? (
-            /* Paper document view */
+            /* Paper document view — full-width at 794px scaled to fit viewport */
             <div
-              ref={paperContainerRef}
-              className="overflow-hidden rounded-2xl shadow-2xl bg-white"
-              style={{ height: `${scaledHeight}px` }}
+              className="overflow-hidden rounded-2xl shadow-2xl"
+              style={{ height: `${scaledHeight}px`, width: `${containerW}px` }}
             >
               <div
                 style={{
@@ -124,6 +123,7 @@ export default function PreviewPage() {
                   minHeight: `${PAPER_HEIGHT}px`,
                   transform: `scale(${scale})`,
                   transformOrigin: 'top left',
+                  backgroundColor: 'white',
                 }}
               >
                 <ResumeRenderer text={content.resume} template={template} accentColor={accentColor} />
@@ -157,14 +157,14 @@ export default function PreviewPage() {
             </div>
           )}
 
-          {/* Gradient fade — only on resume tab */}
+          {/* Gradient fade on resume tab */}
           {activeTab === 'resume' && (
             <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-slate-50 to-transparent rounded-b-2xl pointer-events-none" />
           )}
         </div>
       </div>
 
-      {/* Sticky bottom CTA — mobile-first */}
+      {/* Sticky bottom CTA — mobile */}
       <div className="fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-slate-200 px-4 py-4 sm:hidden">
         <button
           onClick={() => handleUnlock('single')}
