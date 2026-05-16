@@ -64,22 +64,21 @@ export default function ExitIntentPopup() {
               <div className="text-4xl mb-4">📬</div>
               <h3 className="text-xl font-bold text-white mb-2">Already sent!</h3>
               <p className="text-slate-400 text-sm">
-                We already sent a discount link to <span className="text-white font-medium">{email}</span>. Check your inbox!
+                We already sent a link to <span className="text-white font-medium">{email}</span>. Check your inbox!
               </p>
             </div>
           ) : !submitted ? (
             <>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold mb-5">
                 <Zap className="w-3 h-3" />
-                Limited Offer
+                Save Your Spot
               </div>
 
               <h3 className="text-2xl font-extrabold text-white mb-2 leading-tight">
-                Wait, grab $2 off before you go
+                Come back when you&apos;re ready
               </h3>
               <p className="text-slate-400 text-sm leading-relaxed mb-6">
-                Not ready right now? Drop your email and we&apos;ll send you a private link to get your AI resume for{' '}
-                <span className="text-white font-semibold">$4 instead of $5</span>. No spam, use it whenever you&apos;re ready.
+                Drop your email and we&apos;ll send you a private link so you can pick up right where you left off. No spam, use it whenever you&apos;re ready.
               </p>
 
               <form onSubmit={handleSubmit} className="space-y-3">
@@ -99,7 +98,7 @@ export default function ExitIntentPopup() {
                   disabled={loading}
                   className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-sm transition-all shadow-lg shadow-indigo-500/20 disabled:opacity-60"
                 >
-                  {loading ? 'Sending...' : 'Send My $10 Link →'}
+                  {loading ? 'Sending...' : 'Send My Link →'}
                 </button>
               </form>
 
@@ -114,7 +113,7 @@ export default function ExitIntentPopup() {
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Check your inbox!</h3>
               <p className="text-slate-400 text-sm">
-                Your $10 link is on its way to <span className="text-white font-medium">{email}</span>. Use it whenever you&apos;re ready.
+                Your link is on its way to <span className="text-white font-medium">{email}</span>. Use it whenever you&apos;re ready.
               </p>
             </div>
           ) : null}
