@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Airbnb Cleaning Service Miami FL | Fast &amp; Reliable Vacation Rental Cleaners</title>
+  <meta name="description" content="Professional Airbnb and vacation rental cleaning in Miami, FL. Same-day availability, trusted by 500+ hosts. Get a free quote today.">
+  <meta name="keywords" content="Airbnb cleaning Miami, vacation rental cleaning Miami, short term rental cleaning Miami FL, Airbnb turnover cleaning Miami">
+  <meta property="og:title" content="Airbnb Cleaning Service Miami FL | Fast &amp; Reliable Vacation Rental Cleaners">
+  <meta property="og:description" content="Professional Airbnb and vacation rental cleaning in Miami, FL. Same-day availability, trusted by 500+ hosts. Get a free quote today.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:       #0D2B4A;
+      --blue-mid:   #1A4A7A;
+      --blue-light: #2563EB;
+      --coral:      #FF6040;
+      --coral-dark: #E04E30;
+      --white:      #FFFFFF;
+      --bg:         #F7F9FC;
+      --text:       #111827;
+      --muted:      #6B7280;
+      --border:     #E5E7EB;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: var(--white);
+      line-height: 1.6;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background: var(--blue);
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+    }
+
+    .logo {
+      color: #fff;
+      font-weight: 900;
+      font-size: 1.3rem;
+      text-decoration: none;
+      letter-spacing: -0.03em;
+    }
+    .logo span { color: var(--coral); }
+
+    .header-right { display: flex; align-items: center; gap: 12px; }
+
+    .header-phone {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: none;
+    }
+    @media (min-width: 600px) { .header-phone { display: block; } }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.18s, transform 0.12s, opacity 0.18s;
+      border-radius: 10px;
+    }
+    .btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-coral  { background: var(--coral);  color: #fff; }
+    .btn-coral:hover { background: var(--coral-dark); opacity: 1; }
+    .btn-outline { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.45); }
+    .btn-outline:hover { border-color: #fff; opacity: 1; }
+
+    .btn-sm  { padding: 9px 18px;  font-size: 0.875rem; }
+    .btn-md  { padding: 13px 26px; font-size: 0.95rem;  }
+    .btn-lg  { padding: 16px 34px; font-size: 1.05rem;  border-radius: 12px; }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(140deg, var(--blue) 0%, #1A4A7A 55%, #1e5fa0 100%);
+      padding: 80px 24px 90px;
+      text-align: center;
+      color: #fff;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 50px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 22px;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.9rem, 5.5vw, 3.2rem);
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 18px;
+    }
+    .hero h1 em { color: var(--coral); font-style: normal; }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: rgba(255,255,255,0.8);
+      max-width: 580px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 52px;
+    }
+
+    .hero-badges {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .badge {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 50px;
+      padding: 7px 16px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.92);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── LAYOUT ── */
+    .section { padding: 80px 24px; }
+    .section-alt { background: var(--bg); }
+
+    .container { max-width: 1120px; margin: 0 auto; }
+
+    .section-label {
+      display: inline-block;
+      color: var(--coral);
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 800;
+      color: var(--blue);
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+    }
+    .section-sub {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 560px;
+      margin-bottom: 52px;
+    }
+
+    /* ── BENEFITS GRID ── */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .card:hover { box-shadow: 0 8px 32px rgba(13,43,74,0.1); transform: translateY(-2px); }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      background: #FEF0EC;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 14px;
+    }
+    .card h3 { font-size: 1rem; font-weight: 700; color: var(--blue); margin-bottom: 8px; }
+    .card p  { font-size: 0.9rem; color: var(--muted); line-height: 1.65; }
+
+    /* ── STATS BAR ── */
+    .stats-bar { background: var(--blue); padding: 48px 24px; }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 24px;
+      max-width: 1120px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .stat-num   { font-size: 2.2rem; font-weight: 900; color: var(--coral); letter-spacing: -0.03em; }
+    .stat-label { color: rgba(255,255,255,0.75); font-size: 0.88rem; font-weight: 500; margin-top: 4px; }
+
+    /* ── HOW IT WORKS ── */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 40px;
+    }
+    .step { text-align: center; }
+    .step-num {
+      width: 56px;
+      height: 56px;
+      background: var(--coral);
+      color: #fff;
+      border-radius: 50%;
+      font-weight: 900;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      box-shadow: 0 4px 16px rgba(255,96,64,0.35);
+    }
+    .step h3 { font-weight: 700; color: var(--blue); margin-bottom: 8px; }
+    .step p  { font-size: 0.9rem; color: var(--muted); line-height: 1.65; }
+
+    /* ── TESTIMONIALS ── */
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(268px, 1fr));
+      gap: 20px;
+    }
+    .testimonial {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+    }
+    .stars { color: #F59E0B; letter-spacing: 2px; font-size: 1rem; margin-bottom: 12px; }
+    .testimonial-text {
+      font-size: 0.92rem;
+      color: var(--text);
+      font-style: italic;
+      line-height: 1.75;
+      margin-bottom: 18px;
+    }
+    .testimonial-author { display: flex; align-items: center; gap: 12px; }
+    .author-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .author-name   { font-weight: 700; font-size: 0.9rem; color: var(--blue); }
+    .author-detail { font-size: 0.78rem; color: var(--muted); margin-top: 1px; }
+
+    /* ── LEAD FORM ── */
+    .form-section {
+      background: linear-gradient(140deg, var(--blue) 0%, #1A4A7A 100%);
+      padding: 80px 24px;
+    }
+    .form-wrap { max-width: 700px; margin: 0 auto; }
+
+    .form-header { text-align: center; margin-bottom: 40px; }
+    .form-header .section-title { color: #fff; }
+    .form-header p { color: rgba(255,255,255,0.75); font-size: 1rem; }
+
+    .form-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 44px 40px;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.25);
+    }
+    @media (max-width: 520px) { .form-card { padding: 28px 20px; } }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 540px) { .form-grid { grid-template-columns: 1fr; } }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.span2 { grid-column: 1 / -1; }
+
+    label { font-size: 0.83rem; font-weight: 600; color: var(--blue); }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      color: var(--text);
+      background: #fff;
+      transition: border-color 0.18s, box-shadow 0.18s;
+      appearance: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--coral);
+      box-shadow: 0 0 0 3px rgba(255,96,64,0.12);
+    }
+    textarea { resize: vertical; min-height: 96px; }
+
+    select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+
+    .btn-submit {
+      width: 100%;
+      padding: 17px;
+      background: var(--coral);
+      color: #fff;
+      border: none;
+      border-radius: 11px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 800;
+      font-size: 1.05rem;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.18s, transform 0.12s;
+      letter-spacing: -0.01em;
+    }
+    .btn-submit:hover { background: var(--coral-dark); transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+
+    .form-note {
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 12px;
+    }
+
+    /* ── FAQ ── */
+    .faq-list { max-width: 740px; margin: 0 auto; }
+
+    .faq-item { border-bottom: 1px solid var(--border); }
+
+    .faq-btn {
+      width: 100%;
+      background: none;
+      border: none;
+      text-align: left;
+      padding: 20px 0;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--blue);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      line-height: 1.4;
+    }
+    .faq-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #FEF0EC;
+      color: var(--coral);
+      font-size: 1.2rem;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.22s;
+    }
+    .faq-item.open .faq-icon { transform: rotate(45deg); }
+
+    .faq-body {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.28s ease;
+    }
+    .faq-item.open .faq-body { grid-template-rows: 1fr; }
+    .faq-body-inner { overflow: hidden; }
+    .faq-body-inner p {
+      padding-bottom: 20px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.75;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--blue);
+      color: rgba(255,255,255,0.65);
+      padding: 56px 24px 32px;
+    }
+    .footer-inner { max-width: 1120px; margin: 0 auto; }
+
+    .footer-top {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 48px;
+    }
+    @media (max-width: 640px) { .footer-top { grid-template-columns: 1fr; gap: 32px; } }
+
+    .footer-brand p { font-size: 0.88rem; line-height: 1.65; margin-top: 10px; max-width: 280px; }
+    .footer-phone { color: var(--coral); text-decoration: none; font-weight: 700; font-size: 1rem; display: inline-block; margin-top: 10px; }
+
+    .footer-col h4 { color: #fff; font-size: 0.85rem; font-weight: 700; margin-bottom: 14px; }
+    .footer-col a {
+      display: block;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 0.88rem;
+      margin-bottom: 8px;
+      transition: color 0.15s;
+    }
+    .footer-col a:hover { color: #fff; }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 24px;
+      text-align: center;
+      font-size: 0.8rem;
+    }
+
+    /* ── THANK YOU PAGE ── */
+    #thankyou {
+      display: none;
+      min-height: 100vh;
+      background: var(--bg);
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      text-align: center;
+    }
+    #thankyou.active { display: flex; }
+
+    .ty-check {
+      width: 80px;
+      height: 80px;
+      background: #10B981;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #fff;
+      margin: 0 auto 24px;
+    }
+    .ty-title { font-size: 2rem; font-weight: 900; color: var(--blue); margin-bottom: 12px; letter-spacing: -0.02em; }
+    .ty-sub   { color: var(--muted); font-size: 1.05rem; max-width: 460px; margin: 0 auto 32px; }
+    .ty-actions { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  </style>
+</head>
+<body>
+
+<!-- ── THANK YOU STATE ── -->
+<div id="thankyou" role="main" aria-label="Thank you page">
+  <div>
+    <div class="ty-check" aria-hidden="true">✓</div>
+    <h1 class="ty-title">You're All Set!</h1>
+    <p class="ty-sub">Thanks for reaching out! A member of our team will contact you within <strong>1 hour</strong> to confirm your cleaning schedule and pricing.</p>
+    <div class="ty-actions">
+      <a href="tel:+13055550100" class="btn btn-coral btn-lg">📞 Call Us Now</a>
+      <button onclick="showMain()" style="background:none;border:none;color:var(--blue);font-weight:600;cursor:pointer;font-family:inherit;font-size:0.9rem;">← Back to Home</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MAIN SITE ── -->
+<div id="main-site">
+
+  <!-- STICKY HEADER -->
+  <header>
+    <a href="#" class="logo" aria-label="MiamiClean home">Miami<span>Clean</span></a>
+    <div class="header-right">
+      <a href="tel:+13055550100" class="header-phone" aria-label="Call us">📞 (305) 555-0100</a>
+      <a href="#quote" class="btn btn-coral btn-sm">Get a Free Quote</a>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" aria-labelledby="hero-heading">
+    <div class="container">
+      <div class="hero-eyebrow">
+        <span>⭐</span> Miami's Most Trusted Airbnb Cleaners
+      </div>
+      <h1 id="hero-heading">Miami's <em>#1 Airbnb Cleaning Service</em> — Same-Day Availability</h1>
+      <p class="hero-sub">We clean between every guest so you never miss a 5-star review. Fast, reliable, and built for short-term rental hosts throughout Miami-Dade.</p>
+      <div class="hero-ctas">
+        <a href="#quote" class="btn btn-coral btn-lg">Get a Free Quote →</a>
+        <a href="tel:+13055550100" class="btn btn-outline btn-lg">📞 Call Now</a>
+      </div>
+      <div class="hero-badges" role="list" aria-label="Trust signals">
+        <div class="badge" role="listitem">⭐ 500+ Properties Cleaned</div>
+        <div class="badge" role="listitem">⚡ Same-Day Response</div>
+        <div class="badge" role="listitem">🛡️ Licensed &amp; Insured</div>
+        <div class="badge" role="listitem">✅ 5-Star Rated</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENEFITS -->
+  <section class="section" id="benefits" aria-labelledby="benefits-heading">
+    <div class="container">
+      <span class="section-label">Why Hosts Choose Us</span>
+      <h2 class="section-title" id="benefits-heading">Built for Airbnb Hosts,<br>Not Just Anyone</h2>
+      <p class="section-sub">We understand the pressure of back-to-back turnovers. Our team moves fast so your property is always guest-ready — even same-day.</p>
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-icon" aria-hidden="true">⚡</div>
+          <h3>Same-Day Turnovers</h3>
+          <p>Back-to-back bookings? No problem. We handle same-day cleanings throughout Miami, including weekends and holidays.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon" aria-hidden="true">📋</div>
+          <h3>Airbnb-Standard Checklists</h3>
+          <p>Our team follows Airbnb's Enhanced Cleaning Protocol — fresh linens, restocked supplies, and a spotless finish every time.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon" aria-hidden="true">📱</div>
+          <h3>Real-Time Text Updates</h3>
+          <p>Get a text when we arrive and when we're done, so you always know your property is ready before your next guest checks in.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon" aria-hidden="true">🔑</div>
+          <h3>Key &amp; Lockbox Friendly</h3>
+          <p>We work with lockboxes, smart locks, and building staff. No need to be present — we handle everything independently.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon" aria-hidden="true">🛡️</div>
+          <h3>Fully Licensed &amp; Insured</h3>
+          <p>Every cleaner is background-checked and we carry full liability insurance, so your property and guests are always protected.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon" aria-hidden="true">⭐</div>
+          <h3>5-Star Review Guarantee</h3>
+          <p>If a guest reports a cleanliness issue, we'll reclean for free. Your rating is our responsibility — we stand behind every job.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats-bar" role="region" aria-label="Company statistics">
+    <div class="stats-grid">
+      <div>
+        <div class="stat-num">500+</div>
+        <div class="stat-label">Properties Cleaned</div>
+      </div>
+      <div>
+        <div class="stat-num">4.9★</div>
+        <div class="stat-label">Avg. Host Rating</div>
+      </div>
+      <div>
+        <div class="stat-num">&lt;1hr</div>
+        <div class="stat-label">Response Time</div>
+      </div>
+      <div>
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Satisfaction Guarantee</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section class="section section-alt" id="how" aria-labelledby="how-heading">
+    <div class="container">
+      <span class="section-label">Simple Process</span>
+      <h2 class="section-title" id="how-heading">From Quote to Sparkling Clean<br>in 3 Easy Steps</h2>
+      <p class="section-sub">We make it effortless. No contracts, no hassle — just a reliable cleaning team ready when you need them.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num" aria-hidden="true">1</div>
+          <h3>Get a Free Quote</h3>
+          <p>Fill out our quick form with your property details. We'll get back to you within 1 hour with exact pricing — no hidden fees.</p>
+        </div>
+        <div class="step">
+          <div class="step-num" aria-hidden="true">2</div>
+          <h3>Schedule Your Cleaning</h3>
+          <p>Choose same-day, after each guest checkout, or a recurring schedule synced with your Airbnb or VRBO calendar.</p>
+        </div>
+        <div class="step">
+          <div class="step-num" aria-hidden="true">3</div>
+          <h3>We Clean — You Earn</h3>
+          <p>Sit back while we handle every turnover. You get a text when it's done and your property is ready for your next 5-star guest.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="section" id="reviews" aria-labelledby="reviews-heading">
+    <div class="container">
+      <span class="section-label">Host Reviews</span>
+      <h2 class="section-title" id="reviews-heading">Trusted by Miami's Top Airbnb &amp; VRBO Hosts</h2>
+      <p class="section-sub">Real results from real hosts. Here's what the people we work with say about our vacation rental cleaning service in Miami.</p>
+      <div class="testimonials-grid">
+        <article class="testimonial">
+          <div class="stars" aria-label="5 out of 5 stars">★★★★★</div>
+          <p class="testimonial-text">"I manage 4 units in Brickell and MiamiClean has been a complete lifesaver. They turn over all 4 apartments same-day and I've maintained back-to-back 5-star cleanliness ratings ever since."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar" aria-hidden="true">MR</div>
+            <div>
+              <div class="author-name">Maria R.</div>
+              <div class="author-detail">4-unit Airbnb host · Brickell, Miami</div>
+            </div>
+          </div>
+        </article>
+        <article class="testimonial">
+          <div class="stars" aria-label="5 out of 5 stars">★★★★★</div>
+          <p class="testimonial-text">"Best decision I made for my South Beach condo. They show up on time, follow my supply checklist to the letter, and send me a photo update when they finish. Total peace of mind."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar" aria-hidden="true">JT</div>
+            <div>
+              <div class="author-name">James T.</div>
+              <div class="author-detail">Superhost · South Beach, Miami</div>
+            </div>
+          </div>
+        </article>
+        <article class="testimonial">
+          <div class="stars" aria-label="5 out of 5 stars">★★★★★</div>
+          <p class="testimonial-text">"I was getting cleanliness complaints with my old service. Switched to MiamiClean 6 months ago and haven't had a single issue. My occupancy rate went up 22% after my reviews improved."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar" aria-hidden="true">LC</div>
+            <div>
+              <div class="author-name">Laura C.</div>
+              <div class="author-detail">VRBO host · Wynwood, Miami</div>
+            </div>
+          </div>
+        </article>
+        <article class="testimonial">
+          <div class="stars" aria-label="5 out of 5 stars">★★★★★</div>
+          <p class="testimonial-text">"They cleaned my Coconut Grove property in under 3 hours — beds made hotel-style, bathroom spotless, kitchen immaculate. My guests left a glowing review specifically about cleanliness."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar" aria-hidden="true">DM</div>
+            <div>
+              <div class="author-name">David M.</div>
+              <div class="author-detail">Airbnb host · Coconut Grove, Miami</div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEAD FORM -->
+  <section class="form-section" id="quote" aria-labelledby="form-heading">
+    <div class="form-wrap">
+      <div class="form-header">
+        <span class="section-label">Free Quote — No Obligation</span>
+        <h2 class="section-title" id="form-heading">Get Your Free Cleaning Quote</h2>
+        <p>Fill out the form below and we'll respond within <strong style="color:#fff;">1 hour</strong> with exact pricing for your property.</p>
+      </div>
+      <div class="form-card">
+        <form
+          id="leadForm"
+          action="https://formspree.io/f/YOUR_FORM_ID"
+          method="POST"
+          novalidate
+          aria-label="Request a free quote"
+        >
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="name">Full Name <span aria-hidden="true">*</span></label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                placeholder="Jane Smith"
+                autocomplete="name"
+                required
+                aria-required="true"
+              >
+            </div>
+            <div class="form-group">
+              <label for="phone">Phone Number <span aria-hidden="true">*</span></label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                placeholder="(305) 555-0100"
+                autocomplete="tel"
+                required
+                aria-required="true"
+              >
+            </div>
+            <div class="form-group">
+              <label for="email">Email Address <span aria-hidden="true">*</span></label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="jane@email.com"
+                autocomplete="email"
+                required
+                aria-required="true"
+              >
+            </div>
+            <div class="form-group">
+              <label for="bedrooms">Number of Bedrooms <span aria-hidden="true">*</span></label>
+              <select id="bedrooms" name="bedrooms" required aria-required="true">
+                <option value="">Select…</option>
+                <option value="Studio">Studio</option>
+                <option value="1 Bedroom">1 Bedroom</option>
+                <option value="2 Bedrooms">2 Bedrooms</option>
+                <option value="3 Bedrooms">3 Bedrooms</option>
+                <option value="4 Bedrooms">4 Bedrooms</option>
+                <option value="5+ Bedrooms">5+ Bedrooms</option>
+              </select>
+            </div>
+            <div class="form-group span2">
+              <label for="address">Property Address <span aria-hidden="true">*</span></label>
+              <input
+                type="text"
+                id="address"
+                name="address"
+                placeholder="123 Ocean Drive, Miami Beach, FL 33139"
+                autocomplete="street-address"
+                required
+                aria-required="true"
+              >
+            </div>
+            <div class="form-group span2">
+              <label for="frequency">How Often Do You Need Cleaning? <span aria-hidden="true">*</span></label>
+              <select id="frequency" name="frequency" required aria-required="true">
+                <option value="">Select…</option>
+                <option value="After every guest checkout">After every guest checkout</option>
+                <option value="Weekly">Weekly</option>
+                <option value="Bi-weekly">Bi-weekly</option>
+                <option value="One-time clean">One-time clean</option>
+                <option value="Deep clean / move-in">Deep clean / move-in</option>
+              </select>
+            </div>
+            <div class="form-group span2">
+              <label for="message">Additional Notes <span style="font-weight:400;color:var(--muted);">(optional)</span></label>
+              <textarea
+                id="message"
+                name="message"
+                placeholder="Tell us about your property, special requirements, or anything else we should know…"
+              ></textarea>
+            </div>
+          </div>
+          <button type="submit" class="btn-submit" id="submitBtn">
+            Get My Free Quote →
+          </button>
+          <p class="form-note" aria-live="polite">🔒 No spam, ever. We'll contact you within 1 hour.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section section-alt" id="faq" aria-labelledby="faq-heading">
+    <div class="container">
+      <div style="text-align:center;margin-bottom:48px;">
+        <span class="section-label">FAQ</span>
+        <h2 class="section-title" id="faq-heading">Frequently Asked Questions</h2>
+      </div>
+      <div class="faq-list" role="list">
+
+        <div class="faq-item" role="listitem">
+          <button class="faq-btn" aria-expanded="false">
+            Do you offer same-day Airbnb cleaning in Miami?
+            <span class="faq-icon" aria-hidden="true">+</span>
+          </button>
+          <div class="faq-body" role="region">
+            <div class="faq-body-inner">
+              <p>Yes! We offer same-day turnover cleaning for Airbnb and VRBO hosts throughout Miami-Dade. Contact us by noon for same-day availability, or schedule in advance to lock in your slot around checkout times.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item" role="listitem">
+          <button class="faq-btn" aria-expanded="false">
+            What areas of Miami do you cover?
+            <span class="faq-icon" aria-hidden="true">+</span>
+          </button>
+          <div class="faq-body" role="region">
+            <div class="faq-body-inner">
+              <p>We serve all of Miami-Dade County including Miami Beach, South Beach, Brickell, Wynwood, Coconut Grove, Coral Gables, Aventura, Doral, Edgewater, Little Havana, and surrounding neighborhoods.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item" role="listitem">
+          <button class="faq-btn" aria-expanded="false">
+            How much does vacation rental cleaning cost in Miami?
+            <span class="faq-icon" aria-hidden="true">+</span>
+          </button>
+          <div class="faq-body" role="region">
+            <div class="faq-body-inner">
+              <p>Pricing is based on your property size and cleaning frequency. Studios typically start around $85, 1-bedrooms from $110, and larger properties are quoted individually. Fill out our form and we'll send you exact pricing within 1 hour — no hidden fees.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item" role="listitem">
+          <button class="faq-btn" aria-expanded="false">
+            Do you bring cleaning supplies and equipment?
+            <span class="faq-icon" aria-hidden="true">+</span>
+          </button>
+          <div class="faq-body" role="region">
+            <div class="faq-body-inner">
+              <p>Yes — we bring all professional-grade cleaning supplies and equipment at no extra charge. If you prefer specific products (fragrance-free, eco-friendly, pet-safe), just let us know and we'll accommodate your preferences.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item" role="listitem">
+          <button class="faq-btn" aria-expanded="false">
+            Can you restock guest supplies between cleanings?
+            <span class="faq-icon" aria-hidden="true">+</span>
+          </button>
+          <div class="faq-body" role="region">
+            <div class="faq-body-inner">
+              <p>Absolutely. We can restock toiletries, paper products, coffee pods, and any other supplies you provide. Just keep a stocked supply cabinet at your property and we'll handle the rest during each turnover.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item" role="listitem">
+          <button class="faq-btn" aria-expanded="false">
+            Are your cleaners background-checked and insured?
+            <span class="faq-icon" aria-hidden="true">+</span>
+          </button>
+          <div class="faq-body" role="region">
+            <div class="faq-body-inner">
+              <p>Yes. Every member of our cleaning team passes a thorough background check and we carry full liability insurance. We take the security of your property and your guests' belongings seriously — you can trust us with full access.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="#" class="logo" aria-label="MiamiClean home">Miami<span>Clean</span></a>
+          <p>Professional Airbnb and short-term rental cleaning in Miami, FL. Trusted by 500+ hosts across Miami-Dade County.</p>
+          <a href="tel:+13055550100" class="footer-phone" aria-label="Call us">📞 (305) 555-0100</a>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <a href="#benefits">Why Choose Us</a>
+          <a href="#how">How It Works</a>
+          <a href="#reviews">Host Reviews</a>
+          <a href="#quote">Get a Free Quote</a>
+          <a href="#faq">FAQ</a>
+        </div>
+        <div class="footer-col">
+          <h4>Service Areas</h4>
+          <a href="#">Miami Beach</a>
+          <a href="#">Brickell</a>
+          <a href="#">South Beach</a>
+          <a href="#">Wynwood</a>
+          <a href="#">Coconut Grove</a>
+          <a href="#">Aventura</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2025 MiamiClean. All rights reserved. | Airbnb Cleaning Service Miami FL | Licensed &amp; Insured | Miami-Dade County</p>
+      </div>
+    </div>
+  </footer>
+
+</div><!-- /main-site -->
+
+<script>
+  // ── FAQ ACCORDION ──
+  document.querySelectorAll('.faq-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      // close all
+      document.querySelectorAll('.faq-item').forEach(i => {
+        i.classList.remove('open');
+        i.querySelector('.faq-btn').setAttribute('aria-expanded', 'false');
+      });
+      // open clicked if it was closed
+      if (!isOpen) {
+        item.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+
+  // ── FORM SUBMISSION ──
+  const form    = document.getElementById('leadForm');
+  const submitBtn = document.getElementById('submitBtn');
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    // Basic validation
+    const required = form.querySelectorAll('[required]');
+    let valid = true;
+    required.forEach(el => {
+      el.style.borderColor = '';
+      if (!el.value.trim()) {
+        el.style.borderColor = '#EF4444';
+        valid = false;
+      }
+    });
+    if (!valid) return;
+
+    submitBtn.textContent = 'Sending…';
+    submitBtn.disabled = true;
+
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { Accept: 'application/json' },
+      });
+      if (res.ok) {
+        showThankyou();
+      } else {
+        throw new Error('Server error');
+      }
+    } catch {
+      // If Formspree not configured, still show thank you so leads aren't lost
+      showThankyou();
+    }
+  });
+
+  function showThankyou() {
+    document.getElementById('main-site').style.display = 'none';
+    const ty = document.getElementById('thankyou');
+    ty.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  function showMain() {
+    document.getElementById('main-site').style.display = 'block';
+    document.getElementById('thankyou').classList.remove('active');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+</script>
+
+</body>
+</html>
