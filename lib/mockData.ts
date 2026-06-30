@@ -95,7 +95,7 @@ export const MOCK_WARNING: Pick = {
   research: 'Sharp money moving Cowboys +3 despite Eagles being favored. Key Cowboys players returning from injury. Line movement suspicious — possible sharp fade.',
   warning: '⚠️ DO NOT PARLAY — Public heavily on Eagles. Reverse line movement on Cowboys. Fade the public or sit this one out.',
   result: 'pending',
-  gameDate: new Date().toISOString(),
+  gameDate: new Date(Date.now() + 86400000).toISOString(),
   isWarning: true,
 }
 

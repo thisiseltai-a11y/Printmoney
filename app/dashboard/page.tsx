@@ -216,23 +216,26 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* Warning post */}
+        {/* Tomorrow's warning */}
         <div className="bg-orange-500/5 border border-orange-500/30 rounded-2xl p-5 mb-8">
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 rounded-xl bg-orange-500/20 flex items-center justify-center flex-shrink-0">
               <AlertTriangle className="w-4 h-4 text-orange-400" />
             </div>
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs font-black text-orange-400 tracking-widest uppercase">⚠ Warning Post</span>
-                <span className="text-xs text-white/30 font-mono">{MOCK_WARNING.sport}</span>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs font-black text-orange-400 tracking-widest uppercase">⚠ Tomorrow — 1 Game Alert</span>
+                <span className="text-xs bg-orange-500/20 text-orange-300 border border-orange-500/30 px-2 py-0.5 rounded-full font-mono">AVOID</span>
               </div>
-              <h3 className="font-bold mb-1">
-                {MOCK_WARNING.awayTeam} @ {MOCK_WARNING.homeTeam} — AVOID
+              <h3 className="font-bold mb-1.5">
+                {MOCK_WARNING.awayTeam} @ {MOCK_WARNING.homeTeam}
               </h3>
-              <p className="text-sm text-white/50 leading-relaxed">{MOCK_WARNING.warning}</p>
+              <p className="text-sm text-orange-200/60 leading-relaxed">{MOCK_WARNING.warning}</p>
+              <div className="flex items-center gap-4 mt-3 pt-3 border-t border-orange-500/15">
+                <span className="text-xs text-white/30 font-mono">{MOCK_WARNING.sport} · {MOCK_WARNING.line} ({MOCK_WARNING.odds})</span>
+                <span className="text-xs text-white/30 font-mono">AI Confidence: {MOCK_WARNING.confidence}%</span>
+              </div>
             </div>
-            <CopyButton pick={MOCK_WARNING} />
           </div>
         </div>
 
