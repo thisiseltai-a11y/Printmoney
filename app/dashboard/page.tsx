@@ -1,7 +1,7 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Navbar from '@/components/Navbar'
-import { Copy, AlertTriangle, Check, TrendingUp, Zap, Bell } from 'lucide-react'
+import { Copy, AlertTriangle, Check, TrendingUp, Zap, Bell, Loader2 } from 'lucide-react'
 import { MOCK_PICKS, MOCK_WARNING } from '@/lib/mockData'
 import type { Pick, Tier } from '@/lib/types'
 
@@ -182,6 +182,27 @@ function ParlayBuilder({ picks }: { picks: Pick[] }) {
 
 export default function DashboardPage() {
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+  const [picks, setPicks] = useState<Pick[]>(MOCK_PICKS)
+  const [warning, setWarning] = useState<Pick>(MOCK_WARNING)
+  const [isLive, setIsLive] = useState(false)
+  const [loadingPicks, setLoadingPicks] = useState(false)
+
+  useEffect(() => {
+    setLoadingPicks(true)
+    fetch('/api/generate-picks')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data.picks) && data.picks.length > 0) {
+          const warnPick = data.picks.find((p: Pick) => p.isWarning)
+          const regularPicks = data.picks.filter((p: Pick) => !p.isWarning)
+          if (warnPick) setWarning(warnPick)
+          if (regularPicks.length) setPicks(regularPicks)
+          setIsLive(!!data.liveData)
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingPicks(false))
+  }, [])
 
   return (
     <>
@@ -194,16 +215,19 @@ export default function DashboardPage() {
             <h1 className="text-2xl font-black tracking-tight">Dashboard</h1>
             <p className="text-sm text-white/40 mt-0.5">{today}</p>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-neon/10 border border-neon/20 text-neon text-xs font-bold">
-            <div className="w-1.5 h-1.5 rounded-full bg-neon animate-pulse" />
-            Live Picks Active
+          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold ${isLive ? 'bg-neon/10 border-neon/20 text-neon' : 'bg-white/5 border-dim text-white/40'}`}>
+            {loadingPicks
+              ? <Loader2 className="w-3 h-3 animate-spin" />
+              : <div className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-neon animate-pulse' : 'bg-white/30'}`} />
+            }
+            {loadingPicks ? 'Loading picks...' : isLive ? 'Live Picks Active' : 'Demo Mode'}
           </div>
         </div>
 
         {/* Stats row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
           {[
-            { label: "Today's Picks", value: '6', sub: '3 sports' },
+            { label: "Today's Picks", value: String(picks.length), sub: `${Array.from(new Set(picks.map(p => p.sport))).length} sports` },
             { label: 'Win Rate (L30)', value: '72%', sub: '↑ 4% this week' },
             { label: 'Tier 1 Record', value: '18-7', sub: '72% hit rate' },
             { label: 'Avg Parlay Odds', value: '+380', sub: '3-leg average' },
@@ -228,12 +252,12 @@ export default function DashboardPage() {
                 <span className="text-xs bg-orange-500/20 text-orange-300 border border-orange-500/30 px-2 py-0.5 rounded-full font-mono">AVOID</span>
               </div>
               <h3 className="font-bold mb-1.5">
-                {MOCK_WARNING.awayTeam} @ {MOCK_WARNING.homeTeam}
+                {warning.awayTeam} @ {warning.homeTeam}
               </h3>
-              <p className="text-sm text-orange-200/60 leading-relaxed">{MOCK_WARNING.warning}</p>
+              <p className="text-sm text-orange-200/60 leading-relaxed">{warning.warning}</p>
               <div className="flex items-center gap-4 mt-3 pt-3 border-t border-orange-500/15">
-                <span className="text-xs text-white/30 font-mono">{MOCK_WARNING.sport} · {MOCK_WARNING.line} ({MOCK_WARNING.odds})</span>
-                <span className="text-xs text-white/30 font-mono">AI Confidence: {MOCK_WARNING.confidence}%</span>
+                <span className="text-xs text-white/30 font-mono">{warning.sport} · {warning.line} ({warning.odds})</span>
+                <span className="text-xs text-white/30 font-mono">AI Confidence: {warning.confidence}%</span>
               </div>
             </div>
           </div>
@@ -246,11 +270,11 @@ export default function DashboardPage() {
               <h2 className="font-bold text-lg">Today&apos;s Picks</h2>
               <a href="/picks" className="text-xs text-neon hover:underline">See all picks →</a>
             </div>
-            {MOCK_PICKS.map(pick => <PickCard key={pick.id} pick={pick} />)}
+            {picks.map(pick => <PickCard key={pick.id} pick={pick} />)}
           </div>
 
           <div className="space-y-5">
-            <ParlayBuilder picks={MOCK_PICKS} />
+            <ParlayBuilder picks={picks} />
 
             {/* Lineup alert */}
             <div className="bg-card border border-dim rounded-2xl p-5">

@@ -1,8 +1,8 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import { Copy, Check, AlertTriangle, Filter } from 'lucide-react'
+import { Copy, Check, AlertTriangle, Filter, Loader2 } from 'lucide-react'
 import { MOCK_PICKS, MOCK_WARNING } from '@/lib/mockData'
 import type { Pick, Sport, Tier } from '@/lib/types'
 
@@ -98,8 +98,24 @@ function PickCard({ pick }: { pick: Pick }) {
 export default function PicksPage() {
   const [sport, setSport] = useState<Sport | 'All'>('All')
   const [tierFilter, setTierFilter] = useState<Tier | 0>(0)
+  const [allPicks, setAllPicks] = useState<Pick[]>([MOCK_WARNING, ...MOCK_PICKS])
+  const [isLive, setIsLive] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  const allPicks = [MOCK_WARNING, ...MOCK_PICKS]
+  useEffect(() => {
+    setLoading(true)
+    fetch('/api/generate-picks')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data.picks) && data.picks.length > 0) {
+          setAllPicks(data.picks)
+          setIsLive(!!data.liveData)
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
   const filtered = allPicks.filter(p =>
     (sport === 'All' || p.sport === sport) &&
     (tierFilter === 0 || p.tier === tierFilter)
@@ -110,9 +126,15 @@ export default function PicksPage() {
       <Navbar />
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
 
-        <div className="mb-8">
-          <h1 className="text-3xl font-black tracking-tight mb-1">Today&apos;s Picks</h1>
-          <p className="text-white/40 text-sm">AI-generated picks updated every morning · {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+        <div className="flex items-start justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-black tracking-tight mb-1">Today&apos;s Picks</h1>
+            <p className="text-white/40 text-sm">AI-generated picks updated every morning · {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+          </div>
+          <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold mt-1 ${isLive ? 'bg-neon/10 border-neon/20 text-neon' : 'bg-white/5 border-dim text-white/30'}`}>
+            {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <div className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-neon animate-pulse' : 'bg-white/30'}`} />}
+            {loading ? 'Loading...' : isLive ? 'Live Data' : 'Demo'}
+          </div>
         </div>
 
         {/* Filters */}
