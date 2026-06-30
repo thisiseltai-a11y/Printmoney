@@ -4,6 +4,7 @@ export const SPORT_LABEL: Record<string, string> = {
   basketball_nba: 'NBA',
   soccer_epl: 'Soccer',
   icehockey_nhl: 'NHL',
+  soccer_fifa_world_cup: 'World Cup',
 }
 
 export interface NormalizedGame {

@@ -6,7 +6,7 @@ import { Plus, Trash2, TrendingUp, TrendingDown, Target, DollarSign, X } from 'l
 import { MOCK_BETS } from '@/lib/mockData'
 import type { Bet, Sport, Tier, BetResult } from '@/lib/types'
 
-const SPORTS: Sport[] = ['NFL', 'MLB', 'NBA', 'Soccer', 'NHL']
+const SPORTS: Sport[] = ['NFL', 'MLB', 'NBA', 'Soccer', 'NHL', 'World Cup']
 
 function calcStats(bets: Bet[]) {
   const settled = bets.filter(b => b.result !== 'pending')

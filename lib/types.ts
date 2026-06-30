@@ -1,5 +1,5 @@
 export type Tier = 1 | 2 | 3
-export type Sport = 'NFL' | 'MLB' | 'NBA' | 'Soccer' | 'NHL'
+export type Sport = 'NFL' | 'MLB' | 'NBA' | 'Soccer' | 'NHL' | 'World Cup'
 export type BetResult = 'pending' | 'win' | 'loss' | 'push'
 export type SubTier = 'free' | 'premium' | 'vip'
 

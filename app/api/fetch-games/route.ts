@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { SPORT_LABEL, type NormalizedGame } from '@/lib/oddsApi'
 
 const SPORT_KEYS = [
+  'soccer_fifa_world_cup',
   'americanfootball_nfl',
   'baseball_mlb',
   'basketball_nba',
