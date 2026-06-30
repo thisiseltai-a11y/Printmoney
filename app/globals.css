@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --neon: #7CFC00;
+  --dark: #0a0a0a;
+  --card: #111111;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: #0a0a0a;
+  color: white;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+html { scroll-behavior: smooth; }
+
+/* Neon glow utilities */
+.glow-neon { box-shadow: 0 0 20px rgba(124,252,0,0.3); }
+.glow-neon-sm { box-shadow: 0 0 10px rgba(124,252,0,0.2); }
+.text-neon-glow { text-shadow: 0 0 20px rgba(124,252,0,0.5); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #111; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #555; }
+
+/* Confidence bar animation */
+@keyframes fillBar {
+  from { width: 0; }
+  to { width: var(--target-width); }
+}
+
+.confidence-fill {
+  animation: fillBar 0.8s ease-out forwards;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #7CFC00, #a8ff3e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Card hover */
+.card-hover {
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.card-hover:hover {
+  border-color: rgba(124,252,0,0.3);
+  box-shadow: 0 0 24px rgba(124,252,0,0.08);
+  transform: translateY(-1px);
+}
+
+/* Grid pattern background */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(124,252,0,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124,252,0,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
