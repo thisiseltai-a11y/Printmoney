@@ -58,6 +58,13 @@ html { scroll-behavior: smooth; }
   transform: translateY(-1px);
 }
 
+/* Hide scrollbar but keep scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+
 /* Grid pattern background */
 .bg-grid {
   background-image:

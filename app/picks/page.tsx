@@ -1,8 +1,8 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import { Copy, Check, AlertTriangle, Flame } from 'lucide-react'
+import { Copy, Check, AlertTriangle, Flame, Heart } from 'lucide-react'
 import { MOCK_PICKS, MOCK_WARNING } from '@/lib/mockData'
 import type { Pick, Sport, Tier } from '@/lib/types'
 
@@ -106,6 +106,8 @@ export default function PicksPage() {
   const [allPicks, setAllPicks] = useState<Pick[]>(MOCK_PICKS)
   const [warning, setWarning] = useState<Pick>(MOCK_WARNING)
   const [isLive, setIsLive] = useState(false)
+  const [activeSection, setActiveSection] = useState<string | null>(null)
+  const pillRowRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch('/api/generate-picks')
@@ -131,13 +133,24 @@ export default function PicksPage() {
 
   const activeSections = SECTIONS.filter(s => (picksBySport[s.sport]?.length ?? 0) > 0)
 
+  const scrollToSection = (sport: string) => {
+    setActiveSection(sport)
+    const el = document.getElementById(`section-${sport}`)
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  const scrollToTop = () => {
+    setActiveSection(null)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   return (
     <>
       <Navbar />
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
 
         {/* Header */}
-        <div className="flex items-start justify-between mb-8">
+        <div className="flex items-start justify-between mb-6">
           <div>
             <h1 className="text-3xl font-black tracking-tight mb-1">Today&apos;s Picks</h1>
             <p className="text-white/40 text-sm">
@@ -147,6 +160,36 @@ export default function PicksPage() {
           <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold mt-1 shrink-0 ${isLive ? 'bg-neon/10 border-neon/20 text-neon' : 'bg-white/5 border-dim text-white/30'}`}>
             <div className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-neon animate-pulse' : 'bg-white/30'}`} />
             {isLive ? 'Live Data' : 'Demo'}
+          </div>
+        </div>
+
+        {/* Trending Now pill strip */}
+        <div className="mb-8">
+          <p className="text-lg font-black mb-3">Trending Now</p>
+          <div ref={pillRowRef} className="flex gap-2.5 overflow-x-auto scrollbar-hide pb-1">
+            {/* All / heart pill */}
+            <button
+              onClick={scrollToTop}
+              className={`flex items-center justify-center w-11 h-11 rounded-full border shrink-0 transition-all ${activeSection === null ? 'bg-neon/15 border-neon/50 text-neon' : 'bg-elevated border-dim text-white/40 hover:text-white hover:border-white/20'}`}
+            >
+              <Heart className="w-4 h-4" fill={activeSection === null ? 'currentColor' : 'none'} />
+            </button>
+
+            {activeSections.map(section => (
+              <button
+                key={section.sport}
+                onClick={() => scrollToSection(section.sport as string)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-full border text-sm font-bold whitespace-nowrap shrink-0 transition-all ${
+                  activeSection === section.sport
+                    ? 'bg-neon/15 border-neon/60 text-neon'
+                    : 'bg-elevated border-dim text-white/70 hover:text-white hover:border-white/20'
+                }`}
+              >
+                <span>{section.emoji}</span>
+                <span>{section.label}</span>
+                {section.trending && <Flame className="w-3 h-3 text-orange-400" />}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -176,7 +219,7 @@ export default function PicksPage() {
           {activeSections.map(section => {
             const sectionPicks = picksBySport[section.sport] ?? []
             return (
-              <div key={section.sport}>
+              <div key={section.sport} id={`section-${section.sport}`} className="scroll-mt-6">
                 <SectionHeader section={section} count={sectionPicks.length} />
                 <div className="space-y-4">
                   {sectionPicks.map(pick => <PickCard key={pick.id} pick={pick} />)}
