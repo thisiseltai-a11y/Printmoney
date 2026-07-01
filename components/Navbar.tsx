@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { Menu, X, TrendingUp, LogOut } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 const NAV_LINKS = [
   { href: '/dashboard', label: 'Dashboard' },
@@ -22,11 +23,18 @@ export default function Navbar() {
   const [loggedIn, setLoggedIn] = useState(false)
 
   useEffect(() => {
-    setLoggedIn(document.cookie.split(';').some(c => c.trim().startsWith('hp_auth=')))
-  }, [path])
+    const supabase = createClient()
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setLoggedIn(!!session)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setLoggedIn(!!session)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
 
   const signOut = async () => {
-    await fetch('/api/auth/signout', { method: 'POST' })
+    await createClient().auth.signOut()
     setLoggedIn(false)
     router.push('/')
   }
@@ -75,7 +83,7 @@ export default function Navbar() {
             </button>
           ) : (
             <>
-              <Link href="/subscribe" className="text-sm text-white/60 hover:text-white transition-colors">
+              <Link href="/login" className="text-sm text-white/60 hover:text-white transition-colors">
                 Log in
               </Link>
               <Link

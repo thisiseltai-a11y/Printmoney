@@ -1,30 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+
+export const runtime = 'nodejs'
 
 const PROTECTED = ['/dashboard', '/picks', '/tracker']
 
-export function middleware(req: NextRequest) {
-  const { pathname, searchParams } = req.nextUrl
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl
   const isProtected = PROTECTED.some(p => pathname.startsWith(p))
-
   if (!isProtected) return NextResponse.next()
 
-  // Coming back from Stripe — grant access and stamp the cookie
-  if (searchParams.get('subscribed') === '1') {
-    const res = NextResponse.next()
-    res.cookies.set('hp_auth', '1', {
-      path: '/',
-      maxAge: 60 * 60 * 24 * 365,
-      sameSite: 'lax',
-    })
-    return res
+  let res = NextResponse.next({ request: req })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return req.cookies.getAll() },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value))
+          res = NextResponse.next({ request: req })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            res.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return NextResponse.redirect(new URL('/login', req.url))
   }
 
-  const session = req.cookies.get('hp_auth')
-  if (!session?.value) {
-    return NextResponse.redirect(new URL('/subscribe', req.url))
-  }
-
-  return NextResponse.next()
+  return res
 }
 
 export const config = {
