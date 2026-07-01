@@ -71,14 +71,14 @@ export default function LandingPage() {
               <div>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-neon/10 border border-neon/20 text-neon text-xs font-bold tracking-widest uppercase mb-6">
                   <Zap className="w-3 h-3" />
-                  AI-Powered · Research Backed · No Cap
+                  Research · Analyze · Win
                 </div>
                 <h1 className="text-5xl sm:text-6xl font-black tracking-tight leading-[1.05] mb-5">
                   Stop <span className="gradient-text">Guessing.</span><br />
                   Start <span className="gradient-text">Winning.</span>
                 </h1>
                 <p className="text-lg text-white/60 leading-relaxed mb-8 max-w-lg">
-                  HeyParlay uses Claude AI and real-time research to generate Tier 1, 2, and 3 parlay picks — with copy-ready posts for Threads and Telegram.
+                  GambitParlay uses Claude AI and real-time research to generate Tier 1, 2, and 3 parlay picks — with copy-ready posts for Threads and Telegram.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 mb-10">
                   <Link
@@ -146,7 +146,7 @@ export default function LandingPage() {
         <section className="py-24 px-4 bg-card border-t border-b border-dim">
           <div className="max-w-4xl mx-auto text-center">
             <p className="text-xs font-bold text-neon tracking-widest uppercase mb-3">Process</p>
-            <h2 className="text-4xl font-black tracking-tight mb-14">How HeyParlay Works</h2>
+            <h2 className="text-4xl font-black tracking-tight mb-14">How GambitParlay Works</h2>
             <div className="grid sm:grid-cols-3 gap-8">
               {[
                 { num: '01', title: 'Sign Up Free', desc: 'Create your account in 30 seconds. No credit card required for the free tier.' },
@@ -259,7 +259,7 @@ export default function LandingPage() {
               Ready to <span className="gradient-text">Stop Guessing?</span>
             </h2>
             <p className="text-white/50 mb-8 text-lg">
-              Join 10,000+ bettors using HeyParlay to research smarter, bet less, and win more.
+              Join 10,000+ bettors using GambitParlay to research smarter, bet less, and win more.
             </p>
             <Link
               href="/subscribe"

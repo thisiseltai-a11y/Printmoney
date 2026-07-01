@@ -9,11 +9,11 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'HeyParlay — AI-Powered Picks. Research Backed. No Cap.',
+  title: 'GambitParlay — Research. Analyze. Win.',
   description: 'Stop guessing. Start winning. AI-powered sports picks with tier system, bet tracker, and copy-ready posts for Threads & Telegram.',
   keywords: 'parlay, sports picks, AI sports betting, NFL picks, MLB picks, soccer picks, bet tracker',
   openGraph: {
-    title: 'HeyParlay — AI-Powered Picks',
+    title: 'GambitParlay — AI-Powered Picks',
     description: 'Stop guessing. Start winning.',
     type: 'website',
   },

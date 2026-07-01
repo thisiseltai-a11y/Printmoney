@@ -42,7 +42,7 @@ export default function Navbar() {
             <TrendingUp className="w-4 h-4 text-black" strokeWidth={3} />
           </div>
           <span className="font-black text-lg tracking-tight">
-            Hey<span className="text-neon">Parlay</span>
+            Gambit<span className="text-neon">Parlay</span>
           </span>
         </Link>
 
