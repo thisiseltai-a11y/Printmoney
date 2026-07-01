@@ -1,8 +1,8 @@
 'use client'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { useState } from 'react'
-import { Menu, X, TrendingUp } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { Menu, X, TrendingUp, LogOut } from 'lucide-react'
 
 const NAV_LINKS = [
   { href: '/dashboard', label: 'Dashboard' },
@@ -11,9 +11,27 @@ const NAV_LINKS = [
   { href: '/pricing', label: 'Pricing' },
 ]
 
+const PUBLIC_NAV = [
+  { href: '/pricing', label: 'Pricing' },
+]
+
 export default function Navbar() {
   const path = usePathname()
+  const router = useRouter()
   const [open, setOpen] = useState(false)
+  const [loggedIn, setLoggedIn] = useState(false)
+
+  useEffect(() => {
+    setLoggedIn(document.cookie.split(';').some(c => c.trim().startsWith('hp_auth=')))
+  }, [path])
+
+  const signOut = async () => {
+    await fetch('/api/auth/signout', { method: 'POST' })
+    setLoggedIn(false)
+    router.push('/')
+  }
+
+  const links = loggedIn ? NAV_LINKS : PUBLIC_NAV
 
   return (
     <header className="sticky top-0 z-50 border-b border-dim bg-dark/90 backdrop-blur-md">
@@ -30,7 +48,7 @@ export default function Navbar() {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1">
-          {NAV_LINKS.map(l => (
+          {links.map(l => (
             <Link
               key={l.href}
               href={l.href}
@@ -47,15 +65,27 @@ export default function Navbar() {
 
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-3">
-          <Link href="/dashboard" className="text-sm text-white/60 hover:text-white transition-colors">
-            Log in
-          </Link>
-          <Link
-            href="/subscribe"
-            className="px-4 py-2 rounded-lg bg-neon text-black text-sm font-bold hover:bg-neon/90 transition-all hover:shadow-neon"
-          >
-            Get Started Free
-          </Link>
+          {loggedIn ? (
+            <button
+              onClick={signOut}
+              className="flex items-center gap-1.5 text-sm text-white/50 hover:text-white transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign Out
+            </button>
+          ) : (
+            <>
+              <Link href="/subscribe" className="text-sm text-white/60 hover:text-white transition-colors">
+                Log in
+              </Link>
+              <Link
+                href="/subscribe"
+                className="px-4 py-2 rounded-lg bg-neon text-black text-sm font-bold hover:bg-neon/90 transition-all hover:shadow-neon"
+              >
+                Get Started Free
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile menu button */}
@@ -72,7 +102,7 @@ export default function Navbar() {
       {open && (
         <div className="md:hidden border-t border-dim bg-card">
           <div className="px-4 py-3 space-y-1">
-            {NAV_LINKS.map(l => (
+            {links.map(l => (
               <Link
                 key={l.href}
                 href={l.href}
@@ -85,13 +115,23 @@ export default function Navbar() {
               </Link>
             ))}
             <div className="pt-2 pb-1 flex flex-col gap-2">
-              <Link
-                href="/subscribe"
-                onClick={() => setOpen(false)}
-                className="block text-center px-4 py-3 rounded-lg bg-neon text-black font-bold text-sm"
-              >
-                Get Started Free
-              </Link>
+              {loggedIn ? (
+                <button
+                  onClick={() => { setOpen(false); signOut() }}
+                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-dim text-white/60 font-bold text-sm"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </button>
+              ) : (
+                <Link
+                  href="/subscribe"
+                  onClick={() => setOpen(false)}
+                  className="block text-center px-4 py-3 rounded-lg bg-neon text-black font-bold text-sm"
+                >
+                  Get Started Free
+                </Link>
+              )}
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 'use client'
-import { useState, useEffect, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import { Check, Lock, Zap, Loader2 } from 'lucide-react'
 
@@ -15,9 +15,9 @@ function SubscribeForm() {
   const planKey = (params.get('plan') ?? 'free') as keyof typeof PLANS
   const plan = PLANS[planKey] ?? PLANS.free
 
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
-  const [done, setDone] = useState(false)
   const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,9 +27,12 @@ function SubscribeForm() {
     setError('')
 
     if (planKey === 'free') {
-      await new Promise(r => setTimeout(r, 800))
-      setDone(true)
-      setLoading(false)
+      await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      router.push('/dashboard')
       return
     }
 
@@ -50,21 +53,6 @@ function SubscribeForm() {
       setError('Something went wrong. Please try again.')
       setLoading(false)
     }
-  }
-
-  if (done) {
-    return (
-      <div className="text-center py-12">
-        <div className="w-16 h-16 rounded-full bg-neon/20 border border-neon/40 flex items-center justify-center mx-auto mb-5">
-          <Check className="w-8 h-8 text-neon" />
-        </div>
-        <h2 className="text-2xl font-black mb-2">You&apos;re In!</h2>
-        <p className="text-white/50 mb-6 text-sm">Welcome to HeyParlay. Your free account is ready.</p>
-        <a href="/dashboard" className="inline-block px-6 py-3 rounded-xl bg-neon text-black font-bold text-sm hover:bg-neon/90 transition-all">
-          Go to Dashboard →
-        </a>
-      </div>
-    )
   }
 
   return (
