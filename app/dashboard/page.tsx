@@ -87,77 +87,98 @@ function GameCard({ game, isMember, onUnlock }: {
   const pickParts = game.pick?.split('—') ?? []
   const pickTeam = pickParts[0]?.trim()
   const pickDesc = pickParts[1]?.trim()
+  const hasScore = game.isLive && game.homeScore !== undefined && game.awayScore !== undefined
+
+  const homeSide = { name: game.homeTeam, record: game.homeRecord, score: game.homeScore }
+  const awaySide = { name: game.awayTeam, record: game.awayRecord, score: game.awayScore }
 
   return (
     <div
-      className="bg-card border border-dim rounded-2xl overflow-hidden cursor-pointer active:scale-[0.985] transition-transform select-none"
+      className="rounded-2xl overflow-hidden cursor-pointer active:scale-[0.985] transition-transform select-none"
+      style={{
+        background: '#111',
+        border: game.isLive ? '1px solid rgba(249,115,22,0.25)' : '1px solid rgba(255,255,255,0.07)',
+        boxShadow: game.isLive ? '0 0 0 1px rgba(249,115,22,0.08) inset' : 'none',
+      }}
       onClick={!isMember ? onUnlock : undefined}
     >
-      {/* Header row */}
-      <div className="px-4 pt-3.5 pb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded border text-white/40 bg-white/5 border-white/10">
-            {game.sport}
-          </span>
-          {!game.isLive && (
-            <span className="text-[11px] font-medium text-white/40 font-mono tabular-nums">{game.gameTime}</span>
-          )}
-        </div>
-        {game.isLive && (
+      {/* Top accent bar */}
+      <div className="h-[3px]" style={{
+        background: game.isLive
+          ? 'linear-gradient(90deg,#f97316,#fb923c)'
+          : 'linear-gradient(90deg,rgba(255,255,255,0.06),transparent)',
+      }} />
+
+      {/* Header */}
+      <div className="px-4 pt-3 pb-2.5 flex items-center justify-between">
+        <span className="text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded"
+          style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          {game.sport}
+        </span>
+        {game.isLive ? (
           <span className="flex items-center gap-1.5 text-[10px] font-bold text-orange-400">
             <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse shrink-0" />
-            {game.gameClock ? `LIVE · ${game.gameClock}` : 'LIVE'}
+            {game.gameClock ?? 'LIVE'}
+          </span>
+        ) : (
+          <span className="text-[11px] font-medium font-mono tabular-nums" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            {game.gameTime}
           </span>
         )}
       </div>
 
-      {/* Matchup — shows score when live */}
-      <div className="px-4 pb-3.5 flex items-center gap-2.5">
-        <div className="flex-1">
-          <div className="text-[15px] font-black tracking-tight text-white leading-tight">{game.homeTeam}</div>
-          {game.isLive && game.homeScore !== undefined
-            ? <div className="text-[22px] font-black font-mono tabular-nums text-neon leading-tight mt-0.5">{game.homeScore}</div>
-            : game.homeRecord
-              ? <div className="text-[11px] text-white/40 font-medium mt-0.5">{game.homeRecord}</div>
-              : null
-          }
-        </div>
-        <span className="text-[11px] font-bold text-white/20 shrink-0">{game.isLive ? '—' : 'VS'}</span>
-        <div className="flex-1 text-right">
-          <div className="text-[15px] font-black tracking-tight text-white leading-tight">{game.awayTeam}</div>
-          {game.isLive && game.awayScore !== undefined
-            ? <div className="text-[22px] font-black font-mono tabular-nums text-neon leading-tight mt-0.5">{game.awayScore}</div>
-            : game.awayRecord
-              ? <div className="text-[11px] text-white/40 font-medium mt-0.5">{game.awayRecord}</div>
-              : null
-          }
-        </div>
+      {/* Scoreboard — stacked rows */}
+      <div className="px-4 pb-4 space-y-1">
+        {[awaySide, homeSide].map((team, i) => (
+          <div key={i} className="flex items-center justify-between py-1.5 px-3 rounded-xl"
+            style={{ background: 'rgba(255,255,255,0.03)' }}>
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="text-[9px] font-bold uppercase tracking-wider shrink-0"
+                style={{ color: 'rgba(255,255,255,0.22)' }}>
+                {i === 0 ? 'AWY' : 'HME'}
+              </span>
+              <span className="text-[14px] font-black text-white truncate">{team.name}</span>
+            </div>
+            <div className="shrink-0 ml-3">
+              {hasScore
+                ? <span className={`text-[22px] font-black font-mono tabular-nums leading-none ${
+                    Number(team.score) > Number(i === 0 ? homeSide.score : awaySide.score)
+                      ? 'text-neon' : 'text-white/50'
+                  }`}>{team.score}</span>
+                : <span className="text-[11px] font-medium" style={{ color: 'rgba(255,255,255,0.30)' }}>
+                    {team.record}
+                  </span>
+              }
+            </div>
+          </div>
+        ))}
       </div>
+
+      {/* Divider */}
+      <div className="mx-4 mb-3" style={{ height: '1px', background: 'rgba(255,255,255,0.06)' }} />
 
       {/* Free — locked */}
       {!isMember && (
-        <div
-          className="mx-4 mb-3.5 rounded-xl overflow-hidden px-4 py-3.5 flex items-center justify-between"
+        <div className="mx-4 mb-4 rounded-xl px-4 py-3 flex items-center justify-between"
           style={{
-            background: '#0c0c0c',
-            border: '1px solid rgba(255,255,255,0.08)',
-            backgroundImage: 'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.012) 3px,rgba(255,255,255,0.012) 4px)',
-          }}
-        >
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            backgroundImage: 'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.010) 3px,rgba(255,255,255,0.010) 4px)',
+          }}>
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid #252525' }}>
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)' }}>
               <LockSVG />
             </div>
             <div>
-              <div className="text-[12px] font-bold tracking-widest uppercase" style={{ color: 'rgba(240,240,240,0.35)' }}>Members Only</div>
-              <div className="text-[10px] font-medium mt-0.5" style={{ color: 'rgba(240,240,240,0.2)' }}>Pick + full analysis</div>
+              <div className="text-[11px] font-bold tracking-wider uppercase" style={{ color: 'rgba(255,255,255,0.30)' }}>Members Only</div>
+              <div className="text-[9px] mt-0.5" style={{ color: 'rgba(255,255,255,0.18)' }}>Pick · Analysis · Confidence</div>
             </div>
           </div>
           <button
             onClick={e => { e.stopPropagation(); onUnlock() }}
-            className="text-[11px] font-black text-neon px-3 py-1.5 rounded-lg shrink-0 transition-colors hover:bg-neon/18"
-            style={{ background: 'rgba(124,252,0,0.10)', border: '1px solid rgba(124,252,0,0.20)' }}
+            className="text-[11px] font-black text-neon px-3 py-1.5 rounded-lg shrink-0 transition-colors"
+            style={{ background: 'rgba(124,252,0,0.10)', border: '1px solid rgba(124,252,0,0.22)' }}
           >
             Unlock
           </button>
@@ -167,29 +188,31 @@ function GameCard({ game, isMember, onUnlock }: {
       {/* Member — pick */}
       {isMember && game.pick && game.tier && game.confidence !== undefined && (
         <>
-          <div className="mx-4 mb-2.5 rounded-xl p-3 pb-3.5"
-            style={{ background: 'rgba(124,252,0,0.08)', border: '1px solid rgba(124,252,0,0.18)' }}>
-            <div className="text-[9px] font-black tracking-widest uppercase mb-1" style={{ color: 'rgba(124,252,0,0.6)' }}>
-              Our Pick
-            </div>
-            <div className="text-[16px] font-black tracking-tight">
-              {pickTeam && <span className="text-neon">{pickTeam}</span>}
-              {pickDesc && <span className="text-white"> — {pickDesc}</span>}
-              {!pickParts[1] && <span className="text-white">{game.pick}</span>}
-            </div>
-            <div className="flex items-center gap-2.5 mt-2.5">
+          <div className="mx-4 mb-3 rounded-xl p-3.5"
+            style={{ background: 'rgba(124,252,0,0.07)', border: '1px solid rgba(124,252,0,0.16)' }}>
+            <div className="flex items-start justify-between gap-3 mb-2.5">
+              <div>
+                <div className="text-[9px] font-black tracking-widest uppercase mb-1" style={{ color: 'rgba(124,252,0,0.55)' }}>
+                  Our Pick
+                </div>
+                <div className="text-[15px] font-black tracking-tight leading-snug">
+                  {pickTeam && <span className="text-neon">{pickTeam}</span>}
+                  {pickDesc && <span className="text-white"> — {pickDesc}</span>}
+                  {!pickParts[1] && <span className="text-white">{game.pick}</span>}
+                </div>
+              </div>
               <TierBadge tier={game.tier as Tier} />
-              <ConfBar value={game.confidence} tier={game.tier as Tier} />
             </div>
+            <ConfBar value={game.confidence} tier={game.tier as Tier} />
           </div>
 
           {game.analysis && (
-            <div className="mx-4 mb-3.5 rounded-xl p-3"
-              style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="mx-4 mb-4 rounded-xl p-3.5"
+              style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)' }}>
               <div className="text-[9px] font-black tracking-widest uppercase mb-1.5" style={{ color: 'rgba(255,255,255,0.20)' }}>
                 Analysis
               </div>
-              <p className="text-[12px] leading-relaxed" style={{ color: 'rgba(240,240,240,0.55)' }}>{game.analysis}</p>
+              <p className="text-[12px] leading-relaxed" style={{ color: 'rgba(240,240,240,0.52)' }}>{game.analysis}</p>
               {game.factors && game.factors.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-2.5">
                   {game.factors.map(f => (

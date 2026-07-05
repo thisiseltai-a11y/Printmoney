@@ -87,22 +87,23 @@ export async function fetchEspnGames(sportKey: string): Promise<EspnGame[]> {
         const displayClock = (statusObj.displayClock as string) ?? ''
         const period = statusObj.period as number | undefined
 
-        // Build a human-readable clock string per sport
+        // shortDetail is the most human-readable status e.g. "Top 7th", "74'", "3rd Qtr 4:22"
+        const shortDetail = (statusType.shortDetail as string) ?? ''
+
         let gameClock: string | undefined
-        if (isLive && period) {
-          if (config.key === 'wc' || config.key === 'soccer') {
+        if (isLive) {
+          if (shortDetail && shortDetail !== 'In Progress') {
+            gameClock = shortDetail
+          } else if (config.key === 'wc') {
             gameClock = displayClock ? `${displayClock}'` : undefined
-          } else if (config.key === 'mlb') {
-            gameClock = displayClock || undefined
-          } else if (config.key === 'nba') {
-            const qtr = ['1st', '2nd', '3rd', '4th'][period - 1] ?? `Q${period}`
-            gameClock = displayClock ? `${displayClock} · ${qtr}` : qtr
-          } else if (config.key === 'nfl') {
-            const qtr = ['1st', '2nd', '3rd', '4th'][period - 1] ?? `Q${period}`
-            gameClock = displayClock ? `${displayClock} · ${qtr}` : qtr
+          } else if (config.key === 'nba' || config.key === 'nfl') {
+            const qtr = ['1st', '2nd', '3rd', '4th'][( period ?? 1) - 1] ?? `Q${period}`
+            gameClock = displayClock && displayClock !== '0:00' ? `${displayClock} · ${qtr}` : qtr
           } else if (config.key === 'nhl') {
-            const per = ['1st', '2nd', '3rd'][period - 1] ?? `P${period}`
-            gameClock = displayClock ? `${displayClock} · ${per}` : per
+            const per = ['1st', '2nd', '3rd'][( period ?? 1) - 1] ?? `P${period}`
+            gameClock = displayClock && displayClock !== '0:00' ? `${displayClock} · ${per}` : per
+          } else if (config.key === 'mlb' && period) {
+            gameClock = `Inning ${period}`
           }
         }
 
