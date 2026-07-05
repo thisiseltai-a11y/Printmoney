@@ -473,17 +473,8 @@ export default function DashboardPage() {
           isMember={!authLoading && isMember}
           onClose={() => setSelectedGame(null)}
           onUnlock={() => { setSelectedGame(null); setShowModal(true) }}
-        />}
-
-      <style jsx global>{`
-        @keyframes slideUp {
-          from { transform: translateY(40px); opacity: 0; }
-          to   { transform: translateY(0);    opacity: 1; }
-        }
-        .animate-slideUp { animation: slideUp 0.22s ease; }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { scrollbar-width: none; }
-      `}</style>
+        />
+      )}
     </>
   )
 }

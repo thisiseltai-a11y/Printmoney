@@ -65,6 +65,13 @@ html { scroll-behavior: smooth; }
 }
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 
+/* Slide up animation (game detail panel) */
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.animate-slideUp { animation: slideUp 0.22s ease; }
+
 /* Grid pattern background */
 .bg-grid {
   background-image:
