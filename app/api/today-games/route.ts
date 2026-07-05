@@ -109,13 +109,20 @@ async function saveCache(dateStr: string, picks: GamePick[]): Promise<void> {
   } catch {}
 }
 
+function toETDateString(date: Date): string {
+  return date.toLocaleDateString('en-US', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' })
+}
+
 export async function GET() {
-  const dateStr = new Date().toISOString().slice(0, 10) // YYYY-MM-DD
+  // Use ET date as cache key so midnight ET triggers a fresh day
+  const nowET = toETDateString(new Date())
+  const dateStr = nowET // e.g. "07/05/2026"
 
   // 1. Try Supabase cache first
   const cached = await loadCache(dateStr)
   if (cached?.length) {
-    return NextResponse.json({ games: cached, cached: true })
+    const sportsWithGames = Array.from(new Set(cached.map((g: GamePick) => g.sportKey)))
+    return NextResponse.json({ games: cached, cached: true, sportsWithGames })
   }
 
   // 2. Fetch live ESPN data
@@ -123,27 +130,26 @@ export async function GET() {
   const flatGames = Object.values(allGames).flat()
 
   if (!flatGames.length) {
-    return NextResponse.json({ games: [], cached: false })
+    return NextResponse.json({ games: [], cached: false, sportsWithGames: [] })
   }
 
-  // 3. Only analyze games happening today (not in offseason/no games)
+  // 3. Filter to games on today OR tomorrow in ET (covers late night games that cross midnight UTC)
+  const tomorrowET = toETDateString(new Date(Date.now() + 86400000))
   const todayGames = flatGames.filter(g => {
-    const d = new Date(g.gameDate)
-    const today = new Date()
-    return d.toDateString() === today.toDateString()
+    const gameET = toETDateString(new Date(g.gameDate))
+    return gameET === nowET || gameET === tomorrowET
   })
 
+  const gamesToAnalyze = todayGames.length > 0 ? todayGames : flatGames
+
   // 4. Get Claude analysis
-  const picks = todayGames.length > 0 ? await analyzeWithClaude(todayGames) : flatGames.map(g => ({ ...g }))
+  const picks = await analyzeWithClaude(gamesToAnalyze)
 
   // 5. Save to Supabase cache (fire and forget)
   if (picks.length > 0) saveCache(dateStr, picks)
 
-  return NextResponse.json({
-    games: picks,
-    cached: false,
-    sportsWithGames: Object.entries(allGames)
-      .filter(([, games]) => games.length > 0)
-      .map(([key]) => key),
-  })
+  // sportsWithGames derived from actual picks so tabs only show a dot when cards exist
+  const sportsWithGames = Array.from(new Set(picks.map(g => g.sportKey)))
+
+  return NextResponse.json({ games: picks, cached: false, sportsWithGames })
 }

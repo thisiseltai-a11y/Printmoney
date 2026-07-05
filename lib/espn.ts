@@ -52,7 +52,7 @@ export async function fetchEspnGames(sportKey: string): Promise<EspnGame[]> {
 
   try {
     const res = await fetch(url, {
-      next: { revalidate: 600 },
+      next: { revalidate: 60 },
       headers: { 'User-Agent': 'Mozilla/5.0 GambitParlay/1.0' },
     })
     if (!res.ok) return []
