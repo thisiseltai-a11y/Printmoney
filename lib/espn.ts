@@ -22,7 +22,7 @@ interface SportConfig {
 }
 
 const SPORT_CONFIGS: SportConfig[] = [
-  { key: 'wc',  label: 'World Cup', espnSport: 'soccer',     espnLeague: 'worldcup' },
+  // WC is fetched from football-data.org, not ESPN — see lib/footballData.ts
   { key: 'mlb', label: 'MLB',       espnSport: 'baseball',   espnLeague: 'mlb' },
   { key: 'nfl', label: 'NFL',       espnSport: 'football',   espnLeague: 'nfl' },
   { key: 'nba', label: 'NBA',       espnSport: 'basketball', espnLeague: 'nba' },
@@ -129,16 +129,20 @@ export async function fetchEspnGames(sportKey: string): Promise<EspnGame[]> {
 }
 
 export async function fetchAllSports(): Promise<Record<string, EspnGame[]>> {
-  const results = await Promise.allSettled(
-    SPORT_CONFIGS.map(s =>
-      fetchEspnGames(s.key).then(games => ({ key: s.key, games }))
-    )
-  )
+  const { fetchWorldCupGames } = await import('./footballData')
 
-  const out: Record<string, EspnGame[]> = {}
-  for (const r of results) {
+  const [wcGames, ...espnResults] = await Promise.allSettled([
+    fetchWorldCupGames(),
+    ...SPORT_CONFIGS.map(s => fetchEspnGames(s.key).then(games => ({ key: s.key, games }))),
+  ])
+
+  const out: Record<string, EspnGame[]> = {
+    wc: wcGames.status === 'fulfilled' ? wcGames.value : [],
+  }
+  for (const r of espnResults) {
     if (r.status === 'fulfilled') {
-      out[r.value.key] = r.value.games
+      const val = r.value as { key: string; games: EspnGame[] }
+      out[val.key] = val.games
     }
   }
   return out

@@ -136,7 +136,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing id or sport' }, { status: 400 })
   }
 
-  const summary = await fetchGameSummary(id, sport)
+  let summary
+  if (sport === 'wc') {
+    const { fetchWorldCupMatchSummary } = await import('@/lib/footballData')
+    summary = await fetchWorldCupMatchSummary(id)
+  } else {
+    summary = await fetchGameSummary(id, sport)
+  }
   if (!summary) {
     return NextResponse.json({ error: 'Game not found' }, { status: 404 })
   }
