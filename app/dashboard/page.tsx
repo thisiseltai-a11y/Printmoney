@@ -422,27 +422,62 @@ export default function DashboardPage() {
         )}
 
         {/* Game list */}
-        {!gamesLoading && hasGames && !offSeason && (
-          <>
-            <div className="flex items-baseline justify-between px-5 pt-4 pb-3">
-              <span className="text-[11px] font-bold tracking-widest uppercase text-white/40">{today}</span>
-              <span className="text-[11px] text-white/30">{regularGames.length} game{regularGames.length !== 1 ? 's' : ''} today</span>
-            </div>
+        {!gamesLoading && hasGames && !offSeason && (() => {
+          const todayET = new Date().toLocaleDateString('en-US', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' })
+          const tomorrowDate = new Date(Date.now() + 86400000)
+          const tomorrowET = tomorrowDate.toLocaleDateString('en-US', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' })
 
-            <div className="flex flex-col gap-2.5 px-3.5 pb-6">
-              {warningGame && <WarningCard game={warningGame} isMember={!authLoading && isMember} />}
-              {regularGames.map(game => (
-                <GameCard
-                  key={game.id}
-                  game={game}
-                  isMember={!authLoading && isMember}
-                  onUnlock={() => setShowModal(true)}
-                  onClick={() => setSelectedGame(game)}
-                />
-              ))}
-            </div>
-          </>
-        )}
+          const todayGames = regularGames.filter(g => {
+            const d = new Date(g.gameDate).toLocaleDateString('en-US', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' })
+            return d === todayET
+          })
+          const tomorrowGames = regularGames.filter(g => {
+            const d = new Date(g.gameDate).toLocaleDateString('en-US', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' })
+            return d === tomorrowET
+          })
+          const tomorrowLabel = tomorrowDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'America/New_York' })
+
+          return (
+            <>
+              {warningGame && (
+                <div className="px-3.5 pt-3">
+                  <WarningCard game={warningGame} isMember={!authLoading && isMember} />
+                </div>
+              )}
+
+              {todayGames.length > 0 && (
+                <>
+                  <div className="flex items-baseline justify-between px-5 pt-4 pb-3">
+                    <span className="text-[11px] font-bold tracking-widest uppercase text-white/40">{today}</span>
+                    <span className="text-[11px] text-white/30">{todayGames.length} game{todayGames.length !== 1 ? 's' : ''}</span>
+                  </div>
+                  <div className="flex flex-col gap-2.5 px-3.5">
+                    {todayGames.map(game => (
+                      <GameCard key={game.id} game={game} isMember={!authLoading && isMember}
+                        onUnlock={() => setShowModal(true)} onClick={() => setSelectedGame(game)} />
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {tomorrowGames.length > 0 && (
+                <>
+                  <div className="flex items-baseline justify-between px-5 pt-5 pb-3">
+                    <span className="text-[11px] font-bold tracking-widest uppercase text-white/40">Tomorrow · {tomorrowLabel}</span>
+                    <span className="text-[11px] text-white/30">{tomorrowGames.length} game{tomorrowGames.length !== 1 ? 's' : ''}</span>
+                  </div>
+                  <div className="flex flex-col gap-2.5 px-3.5">
+                    {tomorrowGames.map(game => (
+                      <GameCard key={game.id} game={game} isMember={!authLoading && isMember}
+                        onUnlock={() => setShowModal(true)} onClick={() => setSelectedGame(game)} />
+                    ))}
+                  </div>
+                </>
+              )}
+              <div className="pb-6" />
+            </>
+          )
+        })()}
 
         {/* Bottom CTA */}
         {!authLoading && !isMember && (
