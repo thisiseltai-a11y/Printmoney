@@ -324,7 +324,7 @@ export default function GameDetailPanel({ game, isMember, onClose, onUnlock }: P
               )}
 
               {/* Injuries */}
-              {(s?.homeInjuries?.length > 0 || s?.awayInjuries?.length > 0) && (
+              {((s?.homeInjuries?.length ?? 0) > 0 || (s?.awayInjuries?.length ?? 0) > 0) && (
                 <div className="rounded-2xl p-4"
                   style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.08)' }}>
                   <div className="text-[9px] font-black tracking-widest uppercase mb-3 text-white/25">Injury Report</div>
