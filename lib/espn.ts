@@ -22,7 +22,7 @@ interface SportConfig {
 }
 
 const SPORT_CONFIGS: SportConfig[] = [
-  { key: 'wc',  label: 'World Cup', espnSport: 'soccer',     espnLeague: 'fifa.worldcup' },
+  { key: 'wc',  label: 'World Cup', espnSport: 'soccer',     espnLeague: 'fifa.worldcup.2026' },
   { key: 'mlb', label: 'MLB',       espnSport: 'baseball',   espnLeague: 'mlb' },
   { key: 'nfl', label: 'NFL',       espnSport: 'football',   espnLeague: 'nfl' },
   { key: 'nba', label: 'NBA',       espnSport: 'basketball', espnLeague: 'nba' },

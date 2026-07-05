@@ -144,7 +144,7 @@ function extractInjuries(injuryData: Array<Record<string, unknown>>): { home: In
 
 export async function fetchGameSummary(espnId: string, sportKey: string): Promise<GameSummary | null> {
   const sportMap: Record<string, { sport: string; league: string; label: string }> = {
-    wc:  { sport: 'soccer',     league: 'fifa.worldcup', label: 'World Cup' },
+    wc:  { sport: 'soccer',     league: 'fifa.worldcup.2026', label: 'World Cup' },
     mlb: { sport: 'baseball',   league: 'mlb',           label: 'MLB' },
     nfl: { sport: 'football',   league: 'nfl',           label: 'NFL' },
     nba: { sport: 'basketball', league: 'nba',           label: 'NBA' },
