@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
-export const runtime = 'nodejs'
-
 const PROTECTED = ['/dashboard', '/picks', '/tracker']
 
 export async function middleware(req: NextRequest) {
