@@ -108,6 +108,24 @@ export async function fetchWorldCupMatchSummary(matchId: string): Promise<GameSu
       ? [{ label: 'Half-time', home: String(ht.home), away: String(ht.away) }]
       : []
 
+    // Goal scorers
+    const goalsRaw = (m.goals as Array<Record<string, unknown>>) ?? []
+    const goals = goalsRaw.map(g => {
+      const gTeam = g.team as Record<string, unknown>
+      const scorer = g.scorer as Record<string, unknown>
+      const min = g.minute as number
+      const inj = g.injuryTime as number | undefined
+      const timeStr = inj ? `${min}+${inj}'` : `${min}'`
+      const isHome = String(gTeam?.id) === String((homeTeam as Record<string, unknown>)?.id)
+      const type = (g.type as string) ?? 'REGULAR'
+      return {
+        minute: timeStr,
+        scorer: (scorer?.name as string) ?? '',
+        team: isHome ? 'home' as const : 'away' as const,
+        type,
+      }
+    })
+
     return {
       id: matchId,
       sportKey: 'wc',
@@ -129,6 +147,7 @@ export async function fetchWorldCupMatchSummary(matchId: string): Promise<GameSu
       awayInjuries: [],
       situation: isLive && minute ? `${minute}' in play` : undefined,
       h2hSummary,
+      goals,
     }
   } catch {
     return null

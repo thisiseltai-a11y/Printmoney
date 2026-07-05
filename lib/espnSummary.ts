@@ -40,6 +40,8 @@ export interface GameSummary {
   situation?: string
   // H2H
   h2hSummary?: string
+  // Goal scorers (World Cup / soccer)
+  goals?: { minute: string; scorer: string; team: 'home' | 'away'; type?: string }[]
 }
 
 function safeStr(v: unknown): string {

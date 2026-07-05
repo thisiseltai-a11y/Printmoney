@@ -288,38 +288,73 @@ export default function GameDetailPanel({ game, isMember, onClose, onUnlock }: P
                 </div>
               )}
 
-              {/* Season Records / Recent Form — always shows, game.homeRecord is guaranteed */}
-              <div className="rounded-2xl p-4"
-                style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                <div className="text-[9px] font-black tracking-widest uppercase mb-3 text-white/25">
-                  {s?.homeLastTen || s?.awayLastTen ? 'Recent Form (Last 10)' : 'Season Records'}
-                </div>
-                <div className="space-y-3">
-                  <FormBar
-                    label={s?.homeTeam ?? game.homeTeam}
-                    record={s?.homeLastTen ?? s?.homeHomeRecord ?? s?.homeRecord ?? game.homeRecord}
-                    streak={s?.homeStreak}
-                  />
-                  <FormBar
-                    label={s?.awayTeam ?? game.awayTeam}
-                    record={s?.awayLastTen ?? s?.awayAwayRecord ?? s?.awayRecord ?? game.awayRecord}
-                    streak={s?.awayStreak}
-                  />
-                </div>
-                {(s?.homeHomeRecord || s?.awayAwayRecord) && (s?.homeLastTen || s?.awayLastTen) && (
-                  <div className="mt-3 pt-3 border-t border-white/6 flex justify-between text-[10px] text-white/30">
-                    {s?.homeHomeRecord && <span>{s.homeTeam?.split(' ').pop()} at Home: <span className="text-white/55 font-mono">{s.homeHomeRecord}</span></span>}
-                    {s?.awayAwayRecord && <span>{s.awayTeam?.split(' ').pop()} Away: <span className="text-white/55 font-mono">{s.awayAwayRecord}</span></span>}
+              {/* Season Records — only show when records are in W-L format */}
+              {(game.homeRecord?.includes('-') || game.awayRecord?.includes('-')) && (
+                <div className="rounded-2xl p-4"
+                  style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <div className="text-[9px] font-black tracking-widest uppercase mb-3 text-white/25">
+                    {s?.homeLastTen || s?.awayLastTen ? 'Recent Form (Last 10)' : 'Season Records'}
                   </div>
-                )}
-              </div>
+                  <div className="space-y-3">
+                    <FormBar
+                      label={s?.homeTeam ?? game.homeTeam}
+                      record={s?.homeLastTen ?? s?.homeHomeRecord ?? s?.homeRecord ?? game.homeRecord}
+                      streak={s?.homeStreak}
+                    />
+                    <FormBar
+                      label={s?.awayTeam ?? game.awayTeam}
+                      record={s?.awayLastTen ?? s?.awayAwayRecord ?? s?.awayRecord ?? game.awayRecord}
+                      streak={s?.awayStreak}
+                    />
+                  </div>
+                  {(s?.homeHomeRecord || s?.awayAwayRecord) && (s?.homeLastTen || s?.awayLastTen) && (
+                    <div className="mt-3 pt-3 border-t border-white/6 flex justify-between text-[10px] text-white/30">
+                      {s?.homeHomeRecord && <span>{s.homeTeam?.split(' ').pop()} at Home: <span className="text-white/55 font-mono">{s.homeHomeRecord}</span></span>}
+                      {s?.awayAwayRecord && <span>{s.awayTeam?.split(' ').pop()} Away: <span className="text-white/55 font-mono">{s.awayAwayRecord}</span></span>}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Goal Scorers (soccer / World Cup) */}
+              {s?.goals && s.goals.length > 0 && (
+                <div className="rounded-2xl p-4"
+                  style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <div className="text-[9px] font-black tracking-widest uppercase mb-3 text-white/25">Goals</div>
+                  <div className="space-y-2">
+                    {s.goals.map((g, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <span className="text-[11px] font-black font-mono text-white/35 w-10 shrink-0">{g.minute}</span>
+                        <span className="flex-1 text-[13px] font-bold text-white truncate">{g.scorer}</span>
+                        <span className={`text-[10px] font-black uppercase tracking-wider shrink-0 px-1.5 py-0.5 rounded ${
+                          g.team === 'home' ? 'text-neon bg-neon/10' : 'text-orange-400 bg-orange-400/10'
+                        }`}>
+                          {g.team === 'home'
+                            ? (s.homeTeam?.split(' ').pop() ?? 'HME')
+                            : (s.awayTeam?.split(' ').pop() ?? 'AWY')}
+                        </span>
+                        {g.type && g.type !== 'REGULAR' && (
+                          <span className="text-[9px] text-white/25 shrink-0">
+                            {g.type === 'OWN' ? 'OG' : g.type === 'PENALTY' ? 'PEN' : g.type}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Head to Head */}
-              {detail.h2h && (
+              {(detail.h2h || s?.h2hSummary) && (
                 <div className="rounded-2xl p-4"
                   style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.08)' }}>
                   <div className="text-[9px] font-black tracking-widest uppercase mb-2.5 text-white/25">Head to Head</div>
-                  <p className="text-[12px] leading-relaxed text-white/60">{detail.h2h}</p>
+                  {s?.h2hSummary && (
+                    <p className="text-[12px] font-bold text-white/50 mb-2">{s.h2hSummary}</p>
+                  )}
+                  {detail.h2h && (
+                    <p className="text-[12px] leading-relaxed text-white/60">{detail.h2h}</p>
+                  )}
                 </div>
               )}
 
