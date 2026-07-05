@@ -1,307 +1,473 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Navbar from '@/components/Navbar'
-import { Copy, AlertTriangle, Check, TrendingUp, Zap, Bell, Loader2 } from 'lucide-react'
-import { MOCK_PICKS, MOCK_WARNING } from '@/lib/mockData'
-import type { Pick, Tier } from '@/lib/types'
+import { createClient } from '@/lib/supabase/client'
+import { Lock, X, Zap, AlertTriangle } from 'lucide-react'
+
+// ── Types ────────────────────────────────────────────────────────────────────
+
+type Sentiment = 'positive' | 'negative' | 'neutral'
+type Tier = 1 | 2 | 3
+
+interface Factor {
+  label: string
+  sentiment: Sentiment
+}
+
+interface Game {
+  id: string
+  sport: string
+  homeTeam: string
+  awayTeam: string
+  homeRecord: string
+  awayRecord: string
+  gameTime: string
+  pick?: string
+  tier?: Tier
+  confidence?: number
+  analysis?: string
+  factors?: Factor[]
+  isWarning?: boolean
+  warningText?: string
+}
+
+// ── Mock data (replaced by ESPN API later) ───────────────────────────────────
+
+const GAMES: Record<string, Game[]> = {
+  wc: [
+    {
+      id: 'wc-1',
+      sport: 'World Cup',
+      homeTeam: 'France 🇫🇷',
+      awayTeam: 'Portugal 🇵🇹',
+      homeRecord: '4–0–1',
+      awayRecord: '3–1–1',
+      gameTime: '3:00 PM ET',
+      pick: 'France — Draw No Bet',
+      tier: 1,
+      confidence: 81,
+      analysis: "France unbeaten in last 9 QF appearances. Mbappé fully fit after resting vs Morocco. Portugal missing Dias (hamstring) — exposed at CB. Les Bleus 4–0 in tournament play this year.",
+      factors: [
+        { label: 'France 4–0 form', sentiment: 'positive' },
+        { label: 'Mbappé fit', sentiment: 'positive' },
+        { label: 'Dias injured', sentiment: 'negative' },
+        { label: 'Home advantage: neutral', sentiment: 'neutral' },
+      ],
+    },
+    {
+      id: 'wc-2',
+      sport: 'World Cup',
+      homeTeam: 'Brazil 🇧🇷',
+      awayTeam: 'Argentina 🇦🇷',
+      homeRecord: '4–1–0',
+      awayRecord: '3–1–1',
+      gameTime: '6:00 PM ET',
+      pick: 'Over 2.5 Goals',
+      tier: 2,
+      confidence: 74,
+      analysis: "The Clásico del Continente. 4 of last 5 H2H meetings produced 3+ goals. Both defenses showing fatigue — Brazil conceded in 3 straight. Messi in vintage form, 4 goals this tournament.",
+      factors: [
+        { label: 'High-scoring H2H', sentiment: 'positive' },
+        { label: 'Messi 4 goals', sentiment: 'positive' },
+        { label: 'Brazil defense leaky', sentiment: 'negative' },
+      ],
+    },
+    {
+      id: 'wc-3',
+      sport: 'World Cup',
+      homeTeam: 'Spain 🇪🇸',
+      awayTeam: 'Germany 🇩🇪',
+      homeRecord: '5–0–0',
+      awayRecord: '3–2–0',
+      gameTime: '9:00 PM ET',
+      pick: 'Spain — ML',
+      tier: 1,
+      confidence: 79,
+      analysis: "Spain only team with perfect record this World Cup. Yamal in electric form. Germany vulnerable on the counter — gave up 2 vs Japan. Spain's possession game suffocates high-press teams.",
+      factors: [
+        { label: 'Only perfect record', sentiment: 'positive' },
+        { label: 'Yamal on fire', sentiment: 'positive' },
+        { label: 'Germany press susceptible', sentiment: 'negative' },
+      ],
+    },
+    {
+      id: 'wc-warn',
+      sport: 'World Cup',
+      homeTeam: 'Germany 🇩🇪',
+      awayTeam: 'Portugal 🇵🇹',
+      homeRecord: '3–2–0',
+      awayRecord: '3–1–1',
+      gameTime: 'Tomorrow',
+      isWarning: true,
+      warningText: "Avoid: Germany missing Müller and Gnabry. Facing a motivated Portugal side on a 6-game win streak — line has moved 12 points against them in 48 hours.",
+    },
+  ],
+  mlb: [
+    {
+      id: 'mlb-1',
+      sport: 'MLB',
+      homeTeam: 'Yankees',
+      awayTeam: 'Red Sox',
+      homeRecord: '52–31 · Home',
+      awayRecord: '40–43 · Away',
+      gameTime: '1:10 PM ET',
+      pick: 'Yankees — ML',
+      tier: 1,
+      confidence: 77,
+      analysis: "Yankees 8–2 in last 10 at Yankee Stadium. Gerrit Cole on the mound — 2.18 ERA vs Boston this season. Red Sox bullpen ranks 28th in ERA over last 14 days.",
+      factors: [
+        { label: 'Cole 2.18 ERA vs BOS', sentiment: 'positive' },
+        { label: '8–2 at home L10', sentiment: 'positive' },
+        { label: 'BOS bullpen struggling', sentiment: 'negative' },
+      ],
+    },
+    {
+      id: 'mlb-2',
+      sport: 'MLB',
+      homeTeam: 'Dodgers',
+      awayTeam: 'Giants',
+      homeRecord: '55–28 · Home',
+      awayRecord: '38–45 · Away',
+      gameTime: '4:05 PM ET',
+      pick: 'Under 8 Runs',
+      tier: 2,
+      confidence: 68,
+      analysis: "Ohtani vs Webb — two elite arms. Dodger Stadium plays as pitcher-friendly park in July. Last 6 Ohtani starts: 5 went under. Giants score 2.8 runs/game vs LHP.",
+      factors: [
+        { label: 'Ohtani 5/6 unders', sentiment: 'positive' },
+        { label: "Pitcher's park", sentiment: 'positive' },
+        { label: 'Giants weak vs LHP', sentiment: 'negative' },
+      ],
+    },
+  ],
+}
+
+const OFF_SEASON: Record<string, { emoji: string; message: string }> = {
+  nfl: { emoji: '🏈', message: 'NFL Preseason starts August — picks ready opening week.' },
+  nba: { emoji: '🏀', message: 'NBA Offseason — back in October with opening night picks.' },
+  nhl: { emoji: '🏒', message: 'NHL Offseason — season resumes in October.' },
+}
+
+const SPORT_TABS = [
+  { key: 'wc', label: 'World Cup', live: true },
+  { key: 'mlb', label: 'MLB' },
+  { key: 'nfl', label: 'NFL' },
+  { key: 'nba', label: 'NBA' },
+  { key: 'nhl', label: 'NHL' },
+]
+
+// ── Sub-components ────────────────────────────────────────────────────────────
 
 function TierBadge({ tier }: { tier: Tier }) {
   const styles: Record<Tier, string> = {
-    1: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-    2: 'bg-neon/10 text-neon border-neon/30',
-    3: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
+    1: 'bg-emerald-500/12 text-emerald-400 border-emerald-500/20',
+    2: 'bg-neon/10 text-neon border-neon/20',
+    3: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
   }
-  const labels: Record<Tier, string> = { 1: 'Tier 1 · Safe', 2: 'Tier 2 · Balanced', 3: 'Tier 3 · High Risk' }
+  const labels: Record<Tier, string> = { 1: 'Tier 1', 2: 'Tier 2', 3: 'Tier 3' }
   return (
-    <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold border ${styles[tier]}`}>
+    <span className={`text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded border ${styles[tier]}`}>
       {labels[tier]}
     </span>
   )
 }
 
-function ConfidenceMeter({ value }: { value: number }) {
-  const color = value >= 75 ? '#7CFC00' : value >= 60 ? '#f59e0b' : '#ef4444'
+function FactorChip({ factor }: { factor: Factor }) {
+  const styles: Record<Sentiment, string> = {
+    positive: 'text-emerald-400 bg-emerald-500/7 border-emerald-500/15',
+    negative: 'text-red-400 bg-red-500/7 border-red-500/15',
+    neutral: 'text-white/40 bg-white/4 border-white/10',
+  }
   return (
-    <div>
-      <div className="flex justify-between text-xs mb-1.5">
-        <span className="text-white/40">AI Confidence</span>
-        <span className="font-mono font-bold" style={{ color }}>{value}%</span>
+    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${styles[factor.sentiment]}`}>
+      {factor.label}
+    </span>
+  )
+}
+
+function LockIcon() {
+  return (
+    <svg width="14" height="16" viewBox="0 0 14 16" fill="none" className="opacity-50">
+      <rect x="2" y="7" width="10" height="8" rx="2" stroke="white" strokeWidth="1.4" />
+      <path d="M4 7V5C4 3.3 5.3 2 7 2C8.7 2 10 3.3 10 5V7" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
+      <circle cx="7" cy="11" r="1.2" fill="white" />
+    </svg>
+  )
+}
+
+function ConfidenceBar({ value, tier }: { value: number; tier: Tier }) {
+  const color = tier === 1 ? '#7CFC00' : tier === 2 ? '#7CFC00' : '#f59e0b'
+  const barColor = value >= 75 ? '#7CFC00' : value >= 60 ? '#f59e0b' : '#ef4444'
+  return (
+    <div className="flex-1">
+      <div className="flex justify-between items-center mb-1">
+        <span className="text-[9px] font-bold tracking-widest uppercase text-white/30">Confidence</span>
+        <span className="text-[11px] font-black font-mono" style={{ color }}>{value}%</span>
       </div>
-      <div className="h-1.5 bg-dim rounded-full overflow-hidden">
-        <div
-          className="h-full rounded-full transition-all duration-700"
-          style={{ width: `${value}%`, backgroundColor: color }}
-        />
+      <div className="h-[3px] bg-white/8 rounded-full overflow-hidden">
+        <div className="h-full rounded-full" style={{ width: `${value}%`, background: barColor }} />
       </div>
     </div>
   )
 }
 
-function CopyButton({ pick }: { pick: Pick }) {
-  const [copied, setCopied] = useState(false)
-  const text = `🎯 HeyParlay Pick\n\n📊 ${pick.sport} — ${pick.homeTeam} vs ${pick.awayTeam}\n✅ ${pick.line} (${pick.odds})\n🔥 Tier ${pick.tier} · ${pick.confidence}% Confidence\n\n📝 ${pick.research.slice(0, 120)}...\n\n#HeyParlay #${pick.sport} #SportsPicks`
-  const copy = () => {
-    navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+function GameCard({ game, isMember, onUnlock }: { game: Game; isMember: boolean; onUnlock: () => void }) {
   return (
-    <button
-      onClick={copy}
-      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-        copied ? 'bg-neon/20 text-neon border border-neon/30' : 'bg-dim text-white/60 hover:text-white hover:bg-white/10 border border-transparent'
-      }`}
+    <div
+      className="bg-card border border-dim rounded-2xl overflow-hidden cursor-pointer active:scale-[0.985] transition-transform"
+      onClick={!isMember ? onUnlock : undefined}
     >
-      {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-      {copied ? 'Copied!' : 'Copy Post'}
-    </button>
-  )
-}
+      {/* Top row */}
+      <div className="px-4 pt-3.5 pb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded border text-white/40 bg-white/5 border-white/10">
+            {game.sport}
+          </span>
+          <span className="text-[11px] font-medium text-white/40 font-mono tabular-nums">{game.gameTime}</span>
+        </div>
+      </div>
 
-function PickCard({ pick }: { pick: Pick }) {
-  return (
-    <div className="bg-card border border-dim rounded-2xl p-5 card-hover">
-      <div className="flex items-start justify-between gap-3 mb-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs text-white/30 font-mono uppercase tracking-widest">{pick.sport}</span>
-            <TierBadge tier={pick.tier} />
+      {/* Matchup */}
+      <div className="px-4 pb-3.5 flex items-center gap-2.5">
+        <div className="flex-1">
+          <div className="text-[15px] font-black tracking-tight text-white leading-tight">{game.homeTeam}</div>
+          <div className="text-[11px] text-white/40 font-medium mt-0.5">{game.homeRecord}</div>
+        </div>
+        <span className="text-[11px] font-bold text-white/20 shrink-0">VS</span>
+        <div className="flex-1 text-right">
+          <div className="text-[15px] font-black tracking-tight text-white leading-tight">{game.awayTeam}</div>
+          <div className="text-[11px] text-white/40 font-medium mt-0.5">{game.awayRecord}</div>
+        </div>
+      </div>
+
+      {/* Locked state */}
+      {!isMember && (
+        <div className="mx-4 mb-3.5 rounded-xl overflow-hidden relative bg-[#0c0c0c] border border-white/8 px-4 py-3.5 flex items-center justify-between"
+          style={{ backgroundImage: 'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.012) 3px,rgba(255,255,255,0.012) 4px)' }}
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-white/4 border border-white/10 flex items-center justify-center shrink-0">
+              <LockIcon />
+            </div>
+            <div>
+              <div className="text-[12px] font-bold text-white/35 tracking-widest uppercase">Members Only</div>
+              <div className="text-[10px] text-white/20 font-medium mt-0.5">Pick + full analysis</div>
+            </div>
           </div>
-          <h3 className="font-bold text-base leading-tight">
-            {pick.awayTeam} <span className="text-white/30">@</span> {pick.homeTeam}
-          </h3>
-        </div>
-        <CopyButton pick={pick} />
-      </div>
-
-      <div className="flex items-center gap-3 mb-4">
-        <div className="bg-elevated border border-dim rounded-xl px-4 py-2 flex-1">
-          <p className="text-xs text-white/30 mb-0.5">Line</p>
-          <p className="font-bold text-sm">{pick.line}</p>
-        </div>
-        <div className="bg-elevated border border-dim rounded-xl px-4 py-2 flex-1">
-          <p className="text-xs text-white/30 mb-0.5">Odds</p>
-          <p className="font-mono font-bold text-sm text-neon">{pick.odds}</p>
-        </div>
-      </div>
-
-      <ConfidenceMeter value={pick.confidence} />
-
-      <p className="text-xs text-white/45 leading-relaxed mt-4 line-clamp-3">{pick.research}</p>
-    </div>
-  )
-}
-
-function ParlayBuilder({ picks }: { picks: Pick[] }) {
-  const [legs, setLegs] = useState<Pick[]>([])
-  const [copied, setCopied] = useState(false)
-
-  const toggle = (pick: Pick) => {
-    setLegs(l => l.find(p => p.id === pick.id) ? l.filter(p => p.id !== pick.id) : [...l, pick])
-  }
-
-  const calcOdds = () => {
-    if (!legs.length) return '+000'
-    let mult = 1
-    legs.forEach(leg => {
-      const o = parseInt(leg.odds.replace('+', ''))
-      mult *= o > 0 ? (o / 100) + 1 : (100 / Math.abs(o)) + 1
-    })
-    const combined = Math.round((mult - 1) * 100)
-    return `+${combined}`
-  }
-
-  const copyParlay = () => {
-    const text = `🔥 HeyParlay ${legs.length}-Leg Parlay\n\n` +
-      legs.map(l => `✅ ${l.line} (${l.odds}) — ${l.confidence}% conf`).join('\n') +
-      `\n\nCombined Odds: ${calcOdds()}\n\n#HeyParlay #Parlay`
-    navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  return (
-    <div className="bg-card border border-neon/20 rounded-2xl p-5">
-      <div className="flex items-center gap-2 mb-4">
-        <Zap className="w-4 h-4 text-neon" />
-        <h3 className="font-bold text-sm">Parlay Builder</h3>
-        <span className="ml-auto text-xs text-white/30 font-mono">{legs.length} legs selected</span>
-      </div>
-
-      <div className="space-y-2 mb-4">
-        {picks.slice(0, 4).map(pick => (
           <button
-            key={pick.id}
-            onClick={() => toggle(pick)}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
-              legs.find(l => l.id === pick.id)
-                ? 'border-neon/40 bg-neon/5'
-                : 'border-dim bg-elevated hover:border-dim/60'
-            }`}
+            onClick={(e) => { e.stopPropagation(); onUnlock() }}
+            className="text-[11px] font-black text-neon bg-neon/10 border border-neon/20 px-3 py-1.5 rounded-lg shrink-0 hover:bg-neon/18 transition-colors"
           >
-            <div className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 ${
-              legs.find(l => l.id === pick.id) ? 'border-neon bg-neon' : 'border-dim'
-            }`}>
-              {legs.find(l => l.id === pick.id) && <Check className="w-3 h-3 text-black" />}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate">{pick.line}</p>
-              <p className="text-xs text-white/30">{pick.sport} · Tier {pick.tier}</p>
-            </div>
-            <span className="text-xs font-mono text-neon font-bold">{pick.odds}</span>
+            Unlock
           </button>
-        ))}
-      </div>
-
-      {legs.length >= 2 && (
-        <div className="border-t border-dim pt-4 mb-4">
-          <div className="flex justify-between items-center mb-1">
-            <span className="text-xs text-white/40">Combined Odds</span>
-            <span className="font-mono font-black text-neon text-xl">{calcOdds()}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-white/40">$100 to win</span>
-            <span className="font-mono text-sm text-white">
-              ${Math.round(parseInt(calcOdds().replace('+', '')) + 100)}
-            </span>
-          </div>
         </div>
       )}
 
-      <button
-        onClick={copyParlay}
-        disabled={legs.length < 2}
-        className="w-full py-3 rounded-xl bg-neon text-black font-bold text-sm disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neon/90 transition-all flex items-center justify-center gap-2"
-      >
-        {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-        {copied ? 'Copied!' : legs.length < 2 ? 'Select 2+ legs to build' : `Copy ${legs.length}-Leg Parlay`}
-      </button>
+      {/* Unlocked — pick */}
+      {isMember && game.pick && game.tier !== undefined && game.confidence !== undefined && (
+        <>
+          <div className="mx-4 mb-2.5 rounded-xl bg-neon/8 border border-neon/18 p-3 pb-3.5">
+            <div className="text-[9px] font-black tracking-widest uppercase text-neon/60 mb-1">Our Pick</div>
+            <div className="text-[16px] font-black tracking-tight text-white">
+              {game.pick.split('—')[0] && <span className="text-neon">{game.pick.split('—')[0].trim()}</span>}
+              {game.pick.includes('—') && <span className="text-white"> — {game.pick.split('—')[1]?.trim()}</span>}
+            </div>
+            <div className="flex items-center gap-2.5 mt-2.5">
+              <TierBadge tier={game.tier} />
+              <ConfidenceBar value={game.confidence} tier={game.tier} />
+            </div>
+          </div>
+
+          {game.analysis && (
+            <div className="mx-4 mb-3.5 rounded-xl bg-white/2 border border-white/8 p-3">
+              <div className="text-[9px] font-black tracking-widest uppercase text-white/20 mb-1.5">Analysis</div>
+              <p className="text-[12px] leading-relaxed text-white/55">{game.analysis}</p>
+              {game.factors && (
+                <div className="flex flex-wrap gap-1.5 mt-2.5">
+                  {game.factors.map(f => <FactorChip key={f.label} factor={f} />)}
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
     </div>
   )
 }
 
+function WarningCard({ game, isMember }: { game: Game; isMember: boolean }) {
+  return (
+    <div className="mx-3.5 mb-2.5 bg-orange-500/5 border border-orange-500/22 rounded-2xl p-4 flex items-start gap-2.5">
+      <div className="w-7 h-7 rounded-lg bg-orange-500/15 flex items-center justify-center shrink-0 text-[13px]">⚠️</div>
+      <div>
+        <div className="text-[9px] font-black tracking-widest uppercase text-orange-400 mb-0.5">Avoid · Tomorrow</div>
+        <div className="text-[13px] font-black text-white mb-1">{game.homeTeam} vs {game.awayTeam}</div>
+        <div className="text-[11px] text-orange-400/65 leading-relaxed font-medium">
+          {isMember
+            ? game.warningText
+            : 'Members only — unlock to see why we\'re flagging this game.'}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function SubscribeModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/85"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div className="w-full max-w-md bg-[#111] border border-white/10 rounded-t-3xl px-6 pt-6 pb-10 animate-slideUp">
+        <div className="w-9 h-1 bg-white/20 rounded-full mx-auto mb-5" />
+        <h2 className="text-[22px] font-black tracking-tight text-white mb-1.5">Unlock Every Pick</h2>
+        <p className="text-[13px] text-white/50 leading-relaxed mb-5">
+          Get the full pick, AI analysis, injury report, and team form for every game — every day.
+        </p>
+        <div className="bg-neon/8 border border-neon/20 rounded-xl p-4 flex items-center justify-between mb-4">
+          <div>
+            <div className="text-[15px] font-black text-white">Premium</div>
+            <div className="text-[11px] text-white/40 mt-0.5">All sports · All picks · Cancel anytime</div>
+          </div>
+          <div className="text-[20px] font-black text-neon font-mono">
+            $9.99<span className="text-[12px] font-medium text-white/40">/mo</span>
+          </div>
+        </div>
+        <a
+          href="/subscribe?plan=premium"
+          className="block w-full py-4 text-center rounded-xl bg-neon text-black font-black text-[15px] hover:opacity-90 transition-opacity"
+        >
+          Get Full Access
+        </a>
+        <button
+          onClick={onClose}
+          className="block w-full py-3 text-center text-[13px] font-semibold text-white/40 hover:text-white transition-colors mt-2"
+        >
+          Maybe later
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+
 export default function DashboardPage() {
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
-  const [picks, setPicks] = useState<Pick[]>(MOCK_PICKS)
-  const [warning, setWarning] = useState<Pick>(MOCK_WARNING)
-  const [isLive, setIsLive] = useState(false)
-  const [loadingPicks, setLoadingPicks] = useState(false)
+  const [activeTab, setActiveTab] = useState('wc')
+  const [isMember, setIsMember] = useState(false)
+  const [showModal, setShowModal] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
 
   useEffect(() => {
-    setLoadingPicks(true)
-    fetch('/api/generate-picks')
-      .then(r => r.json())
-      .then(data => {
-        if (Array.isArray(data.picks) && data.picks.length > 0) {
-          const warnPick = data.picks.find((p: Pick) => p.isWarning)
-          const regularPicks = data.picks.filter((p: Pick) => !p.isWarning)
-          if (warnPick) setWarning(warnPick)
-          if (regularPicks.length) setPicks(regularPicks)
-          setIsLive(!!data.liveData)
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoadingPicks(false))
+    const check = async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user?.email) {
+        const { data } = await supabase
+          .from('subscriptions')
+          .select('status, plan')
+          .eq('email', user.email)
+          .eq('status', 'active')
+          .maybeSingle()
+        setIsMember(!!data)
+      }
+      setLoading(false)
+    }
+    check()
   }, [])
+
+  const games = GAMES[activeTab] ?? []
+  const warningGame = games.find(g => g.isWarning)
+  const regularGames = games.filter(g => !g.isWarning)
+  const offSeason = OFF_SEASON[activeTab]
 
   return (
     <>
       <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <main className="max-w-lg mx-auto">
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-black tracking-tight">Dashboard</h1>
-            <p className="text-sm text-white/40 mt-0.5">{today}</p>
-          </div>
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold ${isLive ? 'bg-neon/10 border-neon/20 text-neon' : 'bg-white/5 border-dim text-white/40'}`}>
-            {loadingPicks
-              ? <Loader2 className="w-3 h-3 animate-spin" />
-              : <div className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-neon animate-pulse' : 'bg-white/30'}`} />
-            }
-            {loadingPicks ? 'Loading picks...' : isLive ? 'Live Picks Active' : 'Demo Mode'}
-          </div>
-        </div>
-
-        {/* Stats row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-          {[
-            { label: "Today's Picks", value: String(picks.length), sub: `${Array.from(new Set(picks.map(p => p.sport))).length} sports` },
-            { label: 'Win Rate (L30)', value: '72%', sub: '↑ 4% this week' },
-            { label: 'Tier 1 Record', value: '18-7', sub: '72% hit rate' },
-            { label: 'Avg Parlay Odds', value: '+380', sub: '3-leg average' },
-          ].map(s => (
-            <div key={s.label} className="bg-card border border-dim rounded-2xl p-4">
-              <p className="text-xs text-white/30 mb-1">{s.label}</p>
-              <p className="text-2xl font-black font-mono text-neon">{s.value}</p>
-              <p className="text-xs text-white/30 mt-0.5">{s.sub}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Tomorrow's warning */}
-        <div className="bg-orange-500/5 border border-orange-500/30 rounded-2xl p-5 mb-8">
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-xl bg-orange-500/20 flex items-center justify-center flex-shrink-0">
-              <AlertTriangle className="w-4 h-4 text-orange-400" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-black text-orange-400 tracking-widest uppercase">⚠ Tomorrow — 1 Game Alert</span>
-                <span className="text-xs bg-orange-500/20 text-orange-300 border border-orange-500/30 px-2 py-0.5 rounded-full font-mono">AVOID</span>
-              </div>
-              <h3 className="font-bold mb-1.5">
-                {warning.awayTeam} @ {warning.homeTeam}
-              </h3>
-              <p className="text-sm text-orange-200/60 leading-relaxed">{warning.warning}</p>
-              <div className="flex items-center gap-4 mt-3 pt-3 border-t border-orange-500/15">
-                <span className="text-xs text-white/30 font-mono">{warning.sport} · {warning.line} ({warning.odds})</span>
-                <span className="text-xs text-white/30 font-mono">AI Confidence: {warning.confidence}%</span>
-              </div>
-            </div>
+        {/* Sport tabs */}
+        <div className="overflow-x-auto scrollbar-hide border-b border-dim">
+          <div className="flex px-4 pt-3.5" style={{ width: 'max-content' }}>
+            {SPORT_TABS.map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex items-center gap-1.5 px-3.5 pb-3 text-[13px] font-semibold whitespace-nowrap border-b-2 -mb-px transition-colors ${
+                  activeTab === tab.key
+                    ? 'text-white border-neon'
+                    : 'text-white/40 border-transparent hover:text-white/65'
+                }`}
+              >
+                {tab.live && <span className="w-1.5 h-1.5 rounded-full bg-neon shrink-0" />}
+                {tab.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Main content */}
-        <div className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center justify-between mb-1">
-              <h2 className="font-bold text-lg">Today&apos;s Picks</h2>
-              <a href="/picks" className="text-xs text-neon hover:underline">See all picks →</a>
-            </div>
-            {picks.map(pick => <PickCard key={pick.id} pick={pick} />)}
+        {/* Off-season placeholder */}
+        {offSeason && (
+          <div className="py-14 text-center text-white/40">
+            <div className="text-3xl mb-3">{offSeason.emoji}</div>
+            <p className="text-[13px] leading-relaxed px-8">{offSeason.message}</p>
           </div>
+        )}
 
-          <div className="space-y-5">
-            <ParlayBuilder picks={picks} />
-
-            {/* Lineup alert */}
-            <div className="bg-card border border-dim rounded-2xl p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Bell className="w-4 h-4 text-neon" />
-                <h3 className="font-bold text-sm">Lineup Alerts</h3>
-              </div>
-              <div className="space-y-3">
-                {[
-                  { team: 'Dodgers', note: 'Ohtani confirmed starting', time: '1h before', status: 'green' },
-                  { team: 'Chiefs', note: 'Kelce listed as questionable', time: '2h before', status: 'orange' },
-                  { team: 'Real Madrid', note: 'Bellingham full training', time: '3h before', status: 'green' },
-                ].map((a, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-elevated border border-dim">
-                    <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${a.status === 'green' ? 'bg-neon' : 'bg-orange-400'}`} />
-                    <div>
-                      <p className="text-xs font-bold">{a.team}</p>
-                      <p className="text-xs text-white/40">{a.note}</p>
-                    </div>
-                    <span className="ml-auto text-xs text-white/20 font-mono whitespace-nowrap">{a.time}</span>
-                  </div>
-                ))}
-              </div>
+        {/* Game list */}
+        {!offSeason && (
+          <>
+            <div className="flex items-baseline justify-between px-5 pt-4 pb-3">
+              <span className="text-[11px] font-bold tracking-widest uppercase text-white/40">{today}</span>
+              <span className="text-[11px] text-white/30">{regularGames.length} games today</span>
             </div>
+
+            <div className="flex flex-col gap-2.5 px-3.5 pb-6">
+              {/* Warning card at top */}
+              {warningGame && <WarningCard game={warningGame} isMember={isMember} />}
+
+              {/* Game cards */}
+              {regularGames.map(game => (
+                <GameCard
+                  key={game.id}
+                  game={game}
+                  isMember={loading ? false : isMember}
+                  onUnlock={() => setShowModal(true)}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Member status badge (bottom of page, small) */}
+        {!loading && (
+          <div className="text-center pb-8">
+            {isMember ? (
+              <span className="text-[10px] font-bold tracking-widest uppercase text-neon/60">Member Access Active</span>
+            ) : (
+              <button
+                onClick={() => setShowModal(true)}
+                className="text-[11px] font-bold text-neon/70 hover:text-neon transition-colors"
+              >
+                Unlock all picks — $9.99/mo →
+              </button>
+            )}
           </div>
-        </div>
+        )}
       </main>
+
+      {showModal && <SubscribeModal onClose={() => setShowModal(false)} />}
+
+      <style jsx global>{`
+        @keyframes slideUp {
+          from { transform: translateY(40px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-slideUp { animation: slideUp 0.22s ease; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { scrollbar-width: none; }
+      `}</style>
     </>
   )
 }
