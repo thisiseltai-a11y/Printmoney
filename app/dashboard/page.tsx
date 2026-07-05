@@ -99,26 +99,38 @@ function GameCard({ game, isMember, onUnlock }: {
           <span className="text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded border text-white/40 bg-white/5 border-white/10">
             {game.sport}
           </span>
-          <span className="text-[11px] font-medium text-white/40 font-mono tabular-nums">{game.gameTime}</span>
+          {!game.isLive && (
+            <span className="text-[11px] font-medium text-white/40 font-mono tabular-nums">{game.gameTime}</span>
+          )}
         </div>
         {game.isLive && (
-          <span className="flex items-center gap-1 text-[10px] font-bold text-orange-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
-            LIVE
+          <span className="flex items-center gap-1.5 text-[10px] font-bold text-orange-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse shrink-0" />
+            {game.gameClock ? `LIVE · ${game.gameClock}` : 'LIVE'}
           </span>
         )}
       </div>
 
-      {/* Matchup */}
+      {/* Matchup — shows score when live */}
       <div className="px-4 pb-3.5 flex items-center gap-2.5">
         <div className="flex-1">
           <div className="text-[15px] font-black tracking-tight text-white leading-tight">{game.homeTeam}</div>
-          {game.homeRecord && <div className="text-[11px] text-white/40 font-medium mt-0.5">{game.homeRecord}</div>}
+          {game.isLive && game.homeScore !== undefined
+            ? <div className="text-[22px] font-black font-mono tabular-nums text-neon leading-tight mt-0.5">{game.homeScore}</div>
+            : game.homeRecord
+              ? <div className="text-[11px] text-white/40 font-medium mt-0.5">{game.homeRecord}</div>
+              : null
+          }
         </div>
-        <span className="text-[11px] font-bold text-white/20 shrink-0">VS</span>
+        <span className="text-[11px] font-bold text-white/20 shrink-0">{game.isLive ? '—' : 'VS'}</span>
         <div className="flex-1 text-right">
           <div className="text-[15px] font-black tracking-tight text-white leading-tight">{game.awayTeam}</div>
-          {game.awayRecord && <div className="text-[11px] text-white/40 font-medium mt-0.5">{game.awayRecord}</div>}
+          {game.isLive && game.awayScore !== undefined
+            ? <div className="text-[22px] font-black font-mono tabular-nums text-neon leading-tight mt-0.5">{game.awayScore}</div>
+            : game.awayRecord
+              ? <div className="text-[11px] text-white/40 font-medium mt-0.5">{game.awayRecord}</div>
+              : null
+          }
         </div>
       </div>
 

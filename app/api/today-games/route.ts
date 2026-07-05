@@ -22,6 +22,9 @@ export interface GamePick {
   awayTeam: string
   homeRecord: string
   awayRecord: string
+  homeScore?: string
+  awayScore?: string
+  gameClock?: string
   gameTime: string
   gameDate: string
   isLive: boolean

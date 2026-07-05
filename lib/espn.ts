@@ -6,6 +6,9 @@ export interface EspnGame {
   awayTeam: string
   homeRecord: string
   awayRecord: string
+  homeScore?: string
+  awayScore?: string
+  gameClock?: string   // e.g. "74'" or "3rd Q" or "Top 7th"
   gameTime: string
   gameDate: string
   isLive: boolean
@@ -77,9 +80,31 @@ export async function fetchEspnGames(sportKey: string): Promise<EspnGame[]> {
         const away = competitors.find(c => c.homeAway === 'away') ?? {}
         const homeTeam = (home.team as Record<string, unknown>) ?? {}
         const awayTeam = (away.team as Record<string, unknown>) ?? {}
-        const statusType = ((comp.status as Record<string, unknown>)?.type as Record<string, unknown>) ?? {}
+        const statusObj = (comp.status as Record<string, unknown>) ?? {}
+        const statusType = (statusObj.type as Record<string, unknown>) ?? {}
         const statusName = (statusType.name as string) ?? ''
         const isLive = statusName.includes('IN_PROGRESS')
+        const displayClock = (statusObj.displayClock as string) ?? ''
+        const period = statusObj.period as number | undefined
+
+        // Build a human-readable clock string per sport
+        let gameClock: string | undefined
+        if (isLive && period) {
+          if (config.key === 'wc' || config.key === 'soccer') {
+            gameClock = displayClock ? `${displayClock}'` : undefined
+          } else if (config.key === 'mlb') {
+            gameClock = displayClock || undefined
+          } else if (config.key === 'nba') {
+            const qtr = ['1st', '2nd', '3rd', '4th'][period - 1] ?? `Q${period}`
+            gameClock = displayClock ? `${displayClock} · ${qtr}` : qtr
+          } else if (config.key === 'nfl') {
+            const qtr = ['1st', '2nd', '3rd', '4th'][period - 1] ?? `Q${period}`
+            gameClock = displayClock ? `${displayClock} · ${qtr}` : qtr
+          } else if (config.key === 'nhl') {
+            const per = ['1st', '2nd', '3rd'][period - 1] ?? `P${period}`
+            gameClock = displayClock ? `${displayClock} · ${per}` : per
+          }
+        }
 
         return {
           id: event.id as string,
@@ -89,6 +114,9 @@ export async function fetchEspnGames(sportKey: string): Promise<EspnGame[]> {
           awayTeam: (awayTeam.displayName as string) ?? 'Away',
           homeRecord: parseRecord(home),
           awayRecord: parseRecord(away),
+          homeScore: isLive ? (home.score as string) ?? undefined : undefined,
+          awayScore: isLive ? (away.score as string) ?? undefined : undefined,
+          gameClock,
           gameTime: formatGameTime(event.date as string),
           gameDate: event.date as string,
           isLive,
