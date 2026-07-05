@@ -11,6 +11,9 @@ export interface GameDetail {
   liveNarrative?: string
   scenarios?: { label: string; desc: string }[]
   bettingAngle?: string
+  hotTeam?: string | null
+  momentum?: string
+  h2h?: string
 }
 
 const SYSTEM = `You are GambitParlay's AI sports analyst. You receive real ESPN game data.
@@ -28,7 +31,10 @@ Return ONLY valid JSON (no markdown, no code fences) with this shape:
   "scenarios": [
     { "label": "If X happens", "desc": "one sentence outcome" }
   ],
-  "bettingAngle": "One sentence on the specific bet type and why — e.g. the moneyline vs the spread, or why over/under makes more sense"
+  "bettingAngle": "One sentence on the specific bet type and why — e.g. the moneyline vs the spread, or why over/under makes more sense",
+  "hotTeam": "The team name that is currently on a hot streak / playing better right now, or null if neither stands out",
+  "momentum": "2 sentences: which team has the edge in recent form and WHY — cite streak, last 10, or recent results",
+  "h2h": "2-3 sentences on recent head-to-head history between these teams from your knowledge — last few meetings, who tends to win, any patterns (home/away advantage, high-scoring games, etc.)"
 }
 
 Tiers: 1 = safe/high-confidence, 2 = balanced, 3 = value/contrarian.
@@ -47,6 +53,15 @@ async function analyzeGame(summary: GameSummary): Promise<Omit<GameDetail, 'summ
   }
   if (summary.venue) parts.push(`VENUE: ${summary.venue}`)
   parts.push(`RECORDS: ${summary.homeTeam} ${summary.homeRecord} | ${summary.awayTeam} ${summary.awayRecord}`)
+
+  const formParts: string[] = []
+  if (summary.homeLastTen) formParts.push(`${summary.homeTeam} Last 10: ${summary.homeLastTen}`)
+  if (summary.awayLastTen) formParts.push(`${summary.awayTeam} Last 10: ${summary.awayLastTen}`)
+  if (summary.homeStreak) formParts.push(`${summary.homeTeam} Streak: ${summary.homeStreak}`)
+  if (summary.awayStreak) formParts.push(`${summary.awayTeam} Streak: ${summary.awayStreak}`)
+  if (summary.homeHomeRecord) formParts.push(`${summary.homeTeam} at Home: ${summary.homeHomeRecord}`)
+  if (summary.awayAwayRecord) formParts.push(`${summary.awayTeam} Away: ${summary.awayAwayRecord}`)
+  if (formParts.length > 0) parts.push(`FORM: ${formParts.join(' | ')}`)
 
   if (summary.homePitcher || summary.awayPitcher) {
     parts.push(`STARTING PITCHERS:`)
@@ -101,6 +116,9 @@ async function analyzeGame(summary: GameSummary): Promise<Omit<GameDetail, 'summ
       liveNarrative: parsed.liveNarrative,
       scenarios: parsed.scenarios,
       bettingAngle: parsed.bettingAngle,
+      hotTeam: parsed.hotTeam ?? null,
+      momentum: parsed.momentum,
+      h2h: parsed.h2h,
     }
   } catch (err) {
     console.error('Claude game detail error:', err)

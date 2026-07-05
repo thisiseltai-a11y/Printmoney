@@ -24,6 +24,13 @@ export interface GameSummary {
   // Form
   homeForm: FormResult[]
   awayForm: FormResult[]
+  // Last 10 + streak
+  homeLastTen?: string
+  awayLastTen?: string
+  homeStreak?: string
+  awayStreak?: string
+  homeHomeRecord?: string
+  awayAwayRecord?: string
   // Stats
   teamStats: TeamStat[]
   // Injuries
@@ -37,6 +44,17 @@ export interface GameSummary {
 
 function safeStr(v: unknown): string {
   return typeof v === 'string' ? v : typeof v === 'number' ? String(v) : ''
+}
+
+function getRecordByType(recs: Array<Record<string, unknown>>, ...types: string[]): string | undefined {
+  for (const type of types) {
+    const r = recs.find(x =>
+      safeStr(x.type).toLowerCase() === type.toLowerCase() ||
+      safeStr(x.name).toLowerCase() === type.toLowerCase()
+    )
+    if (r) return safeStr(r.summary) || undefined
+  }
+  return undefined
 }
 
 function extractForm(team: Record<string, unknown>): FormResult[] {
@@ -240,6 +258,12 @@ export async function fetchGameSummary(espnId: string, sportKey: string): Promis
       awayPitcherStats,
       homeForm: [],
       awayForm: [],
+      homeLastTen: getRecordByType(homeRecords, 'last10', 'Last 10', 'lastTen'),
+      awayLastTen: getRecordByType(awayRecords, 'last10', 'Last 10', 'lastTen'),
+      homeStreak: getRecordByType(homeRecords, 'streak', 'Streak'),
+      awayStreak: getRecordByType(awayRecords, 'streak', 'Streak'),
+      homeHomeRecord: getRecordByType(homeRecords, 'home', 'Home'),
+      awayAwayRecord: getRecordByType(awayRecords, 'away', 'Away'),
       teamStats,
       homeInjuries,
       awayInjuries,

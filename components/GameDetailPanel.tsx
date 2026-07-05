@@ -55,6 +55,44 @@ function StatRow({ label, home, away, homeTeam, awayTeam }: {
   )
 }
 
+function FireBadge() {
+  return (
+    <span className="text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded"
+      style={{ background: 'rgba(249,115,22,0.18)', color: '#fb923c', border: '1px solid rgba(249,115,22,0.30)' }}>
+      🔥 Hot
+    </span>
+  )
+}
+
+function FormBar({ label, record, streak }: { label: string; record?: string; streak?: string }) {
+  if (!record && !streak) return null
+  const [w, l] = (record ?? '').split('-').map(Number)
+  const total = (w || 0) + (l || 0)
+  const winPct = total > 0 ? (w || 0) / total : 0
+  const streakNum = parseInt(streak?.replace(/[WLD]/i, '') ?? '0')
+  const streakType = streak?.charAt(0)?.toUpperCase()
+  const isWin = streakType === 'W'
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-[10px] font-bold text-white/30 w-16 shrink-0">{label}</span>
+      <div className="flex-1">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-[11px] font-black text-white/70 tabular-nums font-mono">{record ?? '—'}</span>
+          {streak && (
+            <span className={`text-[10px] font-black tabular-nums ${isWin ? 'text-neon' : 'text-red-400'}`}>
+              {isWin ? '▲' : '▼'} {streakType}{streakNum}
+            </span>
+          )}
+        </div>
+        <div className="h-[3px] bg-white/8 rounded-full overflow-hidden">
+          <div className="h-full rounded-full transition-all"
+            style={{ width: `${winPct * 100}%`, background: winPct >= 0.6 ? '#7CFC00' : winPct >= 0.4 ? '#f59e0b' : '#ef4444' }} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function LockedSection({ onUnlock }: { onUnlock: () => void }) {
   return (
     <div className="rounded-2xl p-5 text-center"
@@ -109,6 +147,7 @@ export default function GameDetailPanel({ game, isMember, onClose, onUnlock }: P
   const hasScore = s?.isLive && s.homeScore !== undefined
   const homeSide = { name: s?.homeTeam ?? game.homeTeam, record: s?.homeRecord ?? game.homeRecord, score: s?.homeScore }
   const awaySide = { name: s?.awayTeam ?? game.awayTeam, record: s?.awayRecord ?? game.awayRecord, score: s?.awayScore }
+  const hotTeam = detail?.hotTeam
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.88)' }}
@@ -152,6 +191,7 @@ export default function GameDetailPanel({ game, isMember, onClose, onUnlock }: P
                   <span className="text-[9px] font-bold uppercase tracking-wider shrink-0 w-7"
                     style={{ color: 'rgba(255,255,255,0.22)' }}>{i === 0 ? 'AWY' : 'HME'}</span>
                   <span className="text-[15px] font-black text-white truncate">{team.name}</span>
+                  {hotTeam && team.name === hotTeam && <span className="text-[12px] shrink-0">🔥</span>}
                 </div>
                 {hasScore
                   ? <span className={`text-[26px] font-black font-mono tabular-nums leading-none ml-3 shrink-0 ${
@@ -204,6 +244,52 @@ export default function GameDetailPanel({ game, isMember, onClose, onUnlock }: P
                     <span className="text-[10px] font-black tracking-widest uppercase text-orange-400">Live Breakdown</span>
                   </div>
                   <p className="text-[13px] leading-relaxed text-white/70">{detail.liveNarrative}</p>
+                </div>
+              )}
+
+              {/* Who's Hot + Momentum */}
+              {(detail.hotTeam || detail.momentum) && (
+                <div className="rounded-2xl p-4"
+                  style={{ background: 'rgba(249,115,22,0.05)', border: '1px solid rgba(249,115,22,0.18)' }}>
+                  <div className="flex items-center gap-2 mb-2.5">
+                    <span className="text-[10px] font-black tracking-widest uppercase text-orange-400">Who's Hot</span>
+                  </div>
+                  {detail.hotTeam && (
+                    <div className="flex items-center gap-2.5 mb-2.5">
+                      <span className="text-[15px] font-black text-white">{detail.hotTeam}</span>
+                      <FireBadge />
+                    </div>
+                  )}
+                  {detail.momentum && (
+                    <p className="text-[12px] leading-relaxed text-white/60">{detail.momentum}</p>
+                  )}
+                </div>
+              )}
+
+              {/* Recent Form */}
+              {(s?.homeLastTen || s?.awayLastTen || s?.homeStreak || s?.awayStreak) && (
+                <div className="rounded-2xl p-4"
+                  style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <div className="text-[9px] font-black tracking-widest uppercase mb-3 text-white/25">Recent Form (Last 10)</div>
+                  <div className="space-y-3">
+                    <FormBar label={s?.homeTeam ?? ''} record={s?.homeLastTen} streak={s?.homeStreak} />
+                    <FormBar label={s?.awayTeam ?? ''} record={s?.awayLastTen} streak={s?.awayStreak} />
+                  </div>
+                  {(s?.homeHomeRecord || s?.awayAwayRecord) && (
+                    <div className="mt-3 pt-3 border-t border-white/6 flex justify-between text-[10px] text-white/30">
+                      {s?.homeHomeRecord && <span>Home: <span className="text-white/55 font-mono">{s.homeHomeRecord}</span></span>}
+                      {s?.awayAwayRecord && <span>Away: <span className="text-white/55 font-mono">{s.awayAwayRecord}</span></span>}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Head to Head */}
+              {detail.h2h && (
+                <div className="rounded-2xl p-4"
+                  style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <div className="text-[9px] font-black tracking-widest uppercase mb-2.5 text-white/25">Head to Head</div>
+                  <p className="text-[12px] leading-relaxed text-white/60">{detail.h2h}</p>
                 </div>
               )}
 
