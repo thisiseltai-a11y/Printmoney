@@ -147,7 +147,16 @@ export default function GameDetailPanel({ game, isMember, onClose, onUnlock }: P
   const hasScore = s?.isLive && s.homeScore !== undefined
   const homeSide = { name: s?.homeTeam ?? game.homeTeam, record: s?.homeRecord ?? game.homeRecord, score: s?.homeScore }
   const awaySide = { name: s?.awayTeam ?? game.awayTeam, record: s?.awayRecord ?? game.awayRecord, score: s?.awayScore }
-  const hotTeam = detail?.hotTeam
+  // Prefer Claude's pick; fall back to ESPN streak data
+  const hotTeam = detail?.hotTeam ?? (() => {
+    const homeWin = s?.homeStreak?.toUpperCase().startsWith('W')
+    const awayWin = s?.awayStreak?.toUpperCase().startsWith('W')
+    const homeLen = parseInt(s?.homeStreak?.replace(/\D/g, '') ?? '0')
+    const awayLen = parseInt(s?.awayStreak?.replace(/\D/g, '') ?? '0')
+    if (homeWin && (!awayWin || homeLen >= awayLen)) return s?.homeTeam ?? null
+    if (awayWin && (!homeWin || awayLen > homeLen)) return s?.awayTeam ?? null
+    return null
+  })()
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.88)' }}
@@ -267,18 +276,28 @@ export default function GameDetailPanel({ game, isMember, onClose, onUnlock }: P
               )}
 
               {/* Recent Form */}
-              {(s?.homeLastTen || s?.awayLastTen || s?.homeStreak || s?.awayStreak) && (
+              {(s?.homeLastTen || s?.awayLastTen || s?.homeStreak || s?.awayStreak || s?.homeHomeRecord || s?.awayAwayRecord || s?.homeRecord || s?.awayRecord) && (
                 <div className="rounded-2xl p-4"
                   style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                  <div className="text-[9px] font-black tracking-widest uppercase mb-3 text-white/25">Recent Form (Last 10)</div>
-                  <div className="space-y-3">
-                    <FormBar label={s?.homeTeam ?? ''} record={s?.homeLastTen} streak={s?.homeStreak} />
-                    <FormBar label={s?.awayTeam ?? ''} record={s?.awayLastTen} streak={s?.awayStreak} />
+                  <div className="text-[9px] font-black tracking-widest uppercase mb-3 text-white/25">
+                    {s?.homeLastTen || s?.awayLastTen ? 'Recent Form (Last 10)' : 'Season Records'}
                   </div>
-                  {(s?.homeHomeRecord || s?.awayAwayRecord) && (
+                  <div className="space-y-3">
+                    <FormBar
+                      label={s?.homeTeam ?? game.homeTeam}
+                      record={s?.homeLastTen ?? s?.homeHomeRecord ?? s?.homeRecord}
+                      streak={s?.homeStreak}
+                    />
+                    <FormBar
+                      label={s?.awayTeam ?? game.awayTeam}
+                      record={s?.awayLastTen ?? s?.awayAwayRecord ?? s?.awayRecord}
+                      streak={s?.awayStreak}
+                    />
+                  </div>
+                  {(s?.homeHomeRecord || s?.awayAwayRecord) && (s?.homeLastTen || s?.awayLastTen) && (
                     <div className="mt-3 pt-3 border-t border-white/6 flex justify-between text-[10px] text-white/30">
-                      {s?.homeHomeRecord && <span>Home: <span className="text-white/55 font-mono">{s.homeHomeRecord}</span></span>}
-                      {s?.awayAwayRecord && <span>Away: <span className="text-white/55 font-mono">{s.awayAwayRecord}</span></span>}
+                      {s?.homeHomeRecord && <span>{s.homeTeam?.split(' ').pop()} at Home: <span className="text-white/55 font-mono">{s.homeHomeRecord}</span></span>}
+                      {s?.awayAwayRecord && <span>{s.awayTeam?.split(' ').pop()} Away: <span className="text-white/55 font-mono">{s.awayAwayRecord}</span></span>}
                     </div>
                   )}
                 </div>
