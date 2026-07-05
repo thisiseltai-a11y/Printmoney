@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Navbar from '@/components/Navbar'
+import GameDetailPanel from '@/components/GameDetailPanel'
 import { createClient } from '@/lib/supabase/client'
 import type { GamePick } from '@/app/api/today-games/route'
 
@@ -79,10 +80,11 @@ function ConfBar({ value, tier }: { value: number; tier: Tier }) {
   )
 }
 
-function GameCard({ game, isMember, onUnlock }: {
+function GameCard({ game, isMember, onUnlock, onClick }: {
   game: GamePick
   isMember: boolean
   onUnlock: () => void
+  onClick: () => void
 }) {
   const pickParts = game.pick?.split('—') ?? []
   const pickTeam = pickParts[0]?.trim()
@@ -100,7 +102,7 @@ function GameCard({ game, isMember, onUnlock }: {
         border: game.isLive ? '1px solid rgba(249,115,22,0.25)' : '1px solid rgba(255,255,255,0.07)',
         boxShadow: game.isLive ? '0 0 0 1px rgba(249,115,22,0.08) inset' : 'none',
       }}
-      onClick={!isMember ? onUnlock : undefined}
+      onClick={onClick}
     >
       {/* Top accent bar */}
       <div className="h-[3px]" style={{
@@ -180,7 +182,7 @@ function GameCard({ game, isMember, onUnlock }: {
             className="text-[11px] font-black text-neon px-3 py-1.5 rounded-lg shrink-0 transition-colors"
             style={{ background: 'rgba(124,252,0,0.10)', border: '1px solid rgba(124,252,0,0.22)' }}
           >
-            Unlock
+            Unlock →
           </button>
         </div>
       )}
@@ -308,6 +310,7 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('wc')
   const [isMember, setIsMember] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const [selectedGame, setSelectedGame] = useState<GamePick | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [gamesLoading, setGamesLoading] = useState(true)
   const [allGames, setAllGames] = useState<Record<string, GamePick[]>>({})
@@ -434,6 +437,7 @@ export default function DashboardPage() {
                   game={game}
                   isMember={!authLoading && isMember}
                   onUnlock={() => setShowModal(true)}
+                  onClick={() => setSelectedGame(game)}
                 />
               ))}
             </div>
@@ -462,6 +466,14 @@ export default function DashboardPage() {
       </main>
 
       {showModal && <SubscribeModal onClose={() => setShowModal(false)} />}
+
+      {selectedGame && (
+        <GameDetailPanel
+          game={selectedGame}
+          isMember={!authLoading && isMember}
+          onClose={() => setSelectedGame(null)}
+          onUnlock={() => { setSelectedGame(null); setShowModal(true) }}
+        />}
 
       <style jsx global>{`
         @keyframes slideUp {
