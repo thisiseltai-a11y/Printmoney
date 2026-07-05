@@ -147,14 +147,27 @@ export default function GameDetailPanel({ game, isMember, onClose, onUnlock }: P
   const hasScore = s?.isLive && s.homeScore !== undefined
   const homeSide = { name: s?.homeTeam ?? game.homeTeam, record: s?.homeRecord ?? game.homeRecord, score: s?.homeScore }
   const awaySide = { name: s?.awayTeam ?? game.awayTeam, record: s?.awayRecord ?? game.awayRecord, score: s?.awayScore }
-  // Prefer Claude's pick; fall back to ESPN streak data
+  // Prefer Claude's pick → ESPN streak → win% from overall record
   const hotTeam = detail?.hotTeam ?? (() => {
     const homeWin = s?.homeStreak?.toUpperCase().startsWith('W')
     const awayWin = s?.awayStreak?.toUpperCase().startsWith('W')
     const homeLen = parseInt(s?.homeStreak?.replace(/\D/g, '') ?? '0')
     const awayLen = parseInt(s?.awayStreak?.replace(/\D/g, '') ?? '0')
-    if (homeWin && (!awayWin || homeLen >= awayLen)) return s?.homeTeam ?? null
-    if (awayWin && (!homeWin || awayLen > homeLen)) return s?.awayTeam ?? null
+    if (homeWin && (!awayWin || homeLen >= awayLen)) return s?.homeTeam ?? game.homeTeam
+    if (awayWin && (!homeWin || awayLen > homeLen)) return s?.awayTeam ?? game.awayTeam
+    // Fall back to win% from overall record
+    const pct = (rec: string) => {
+      const [w, l] = rec.split('-').map(Number)
+      const t = (w || 0) + (l || 0)
+      return t > 0 ? (w || 0) / t : 0
+    }
+    const homeRec = s?.homeRecord ?? game.homeRecord
+    const awayRec = s?.awayRecord ?? game.awayRecord
+    if (!homeRec || !awayRec) return null
+    const homePct = pct(homeRec)
+    const awayPct = pct(awayRec)
+    if (homePct > awayPct + 0.05) return s?.homeTeam ?? game.homeTeam
+    if (awayPct > homePct + 0.05) return s?.awayTeam ?? game.awayTeam
     return null
   })()
 
@@ -257,15 +270,15 @@ export default function GameDetailPanel({ game, isMember, onClose, onUnlock }: P
               )}
 
               {/* Who's Hot + Momentum */}
-              {(detail.hotTeam || detail.momentum) && (
+              {(hotTeam || detail.momentum) && (
                 <div className="rounded-2xl p-4"
                   style={{ background: 'rgba(249,115,22,0.05)', border: '1px solid rgba(249,115,22,0.18)' }}>
                   <div className="flex items-center gap-2 mb-2.5">
                     <span className="text-[10px] font-black tracking-widest uppercase text-orange-400">Who's Hot</span>
                   </div>
-                  {detail.hotTeam && (
+                  {hotTeam && (
                     <div className="flex items-center gap-2.5 mb-2.5">
-                      <span className="text-[15px] font-black text-white">{detail.hotTeam}</span>
+                      <span className="text-[15px] font-black text-white">{hotTeam}</span>
                       <FireBadge />
                     </div>
                   )}
@@ -275,33 +288,31 @@ export default function GameDetailPanel({ game, isMember, onClose, onUnlock }: P
                 </div>
               )}
 
-              {/* Recent Form */}
-              {(s?.homeLastTen || s?.awayLastTen || s?.homeStreak || s?.awayStreak || s?.homeHomeRecord || s?.awayAwayRecord || s?.homeRecord || s?.awayRecord) && (
-                <div className="rounded-2xl p-4"
-                  style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                  <div className="text-[9px] font-black tracking-widest uppercase mb-3 text-white/25">
-                    {s?.homeLastTen || s?.awayLastTen ? 'Recent Form (Last 10)' : 'Season Records'}
-                  </div>
-                  <div className="space-y-3">
-                    <FormBar
-                      label={s?.homeTeam ?? game.homeTeam}
-                      record={s?.homeLastTen ?? s?.homeHomeRecord ?? s?.homeRecord}
-                      streak={s?.homeStreak}
-                    />
-                    <FormBar
-                      label={s?.awayTeam ?? game.awayTeam}
-                      record={s?.awayLastTen ?? s?.awayAwayRecord ?? s?.awayRecord}
-                      streak={s?.awayStreak}
-                    />
-                  </div>
-                  {(s?.homeHomeRecord || s?.awayAwayRecord) && (s?.homeLastTen || s?.awayLastTen) && (
-                    <div className="mt-3 pt-3 border-t border-white/6 flex justify-between text-[10px] text-white/30">
-                      {s?.homeHomeRecord && <span>{s.homeTeam?.split(' ').pop()} at Home: <span className="text-white/55 font-mono">{s.homeHomeRecord}</span></span>}
-                      {s?.awayAwayRecord && <span>{s.awayTeam?.split(' ').pop()} Away: <span className="text-white/55 font-mono">{s.awayAwayRecord}</span></span>}
-                    </div>
-                  )}
+              {/* Season Records / Recent Form — always shows, game.homeRecord is guaranteed */}
+              <div className="rounded-2xl p-4"
+                style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div className="text-[9px] font-black tracking-widest uppercase mb-3 text-white/25">
+                  {s?.homeLastTen || s?.awayLastTen ? 'Recent Form (Last 10)' : 'Season Records'}
                 </div>
-              )}
+                <div className="space-y-3">
+                  <FormBar
+                    label={s?.homeTeam ?? game.homeTeam}
+                    record={s?.homeLastTen ?? s?.homeHomeRecord ?? s?.homeRecord ?? game.homeRecord}
+                    streak={s?.homeStreak}
+                  />
+                  <FormBar
+                    label={s?.awayTeam ?? game.awayTeam}
+                    record={s?.awayLastTen ?? s?.awayAwayRecord ?? s?.awayRecord ?? game.awayRecord}
+                    streak={s?.awayStreak}
+                  />
+                </div>
+                {(s?.homeHomeRecord || s?.awayAwayRecord) && (s?.homeLastTen || s?.awayLastTen) && (
+                  <div className="mt-3 pt-3 border-t border-white/6 flex justify-between text-[10px] text-white/30">
+                    {s?.homeHomeRecord && <span>{s.homeTeam?.split(' ').pop()} at Home: <span className="text-white/55 font-mono">{s.homeHomeRecord}</span></span>}
+                    {s?.awayAwayRecord && <span>{s.awayTeam?.split(' ').pop()} Away: <span className="text-white/55 font-mono">{s.awayAwayRecord}</span></span>}
+                  </div>
+                )}
+              </div>
 
               {/* Head to Head */}
               {detail.h2h && (
