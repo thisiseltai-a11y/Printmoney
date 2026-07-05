@@ -41,7 +41,7 @@ function safeStr(v: unknown): string {
 
 function extractForm(team: Record<string, unknown>): FormResult[] {
   const records = (team?.records as Array<Record<string, unknown>>) ?? []
-  const splits = (team?.splits?.categories as Array<Record<string, unknown>>) ?? []
+  const splits = ((team?.splits as Record<string, unknown>)?.categories as Array<Record<string, unknown>>) ?? []
   // Try to get last 5 results from linescores or records
   const form: FormResult[] = []
   for (const rec of records) {
