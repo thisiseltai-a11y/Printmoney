@@ -147,6 +147,10 @@ export default function GameDetailPanel({ game, isMember, onClose, onUnlock }: P
   const hasScore = s?.isLive && s.homeScore !== undefined
   const homeSide = { name: s?.homeTeam ?? game.homeTeam, record: s?.homeRecord ?? game.homeRecord, score: s?.homeScore }
   const awaySide = { name: s?.awayTeam ?? game.awayTeam, record: s?.awayRecord ?? game.awayRecord, score: s?.awayScore }
+  // Merge Claude streaks with ESPN streak data
+  const homeStreakDisplay = detail?.homeStreak ?? s?.homeStreak
+  const awayStreakDisplay = detail?.awayStreak ?? s?.awayStreak
+
   // Prefer Claude's pick → ESPN streak → win% from overall record
   const hotTeam = detail?.hotTeam ?? (() => {
     const homeWin = s?.homeStreak?.toUpperCase().startsWith('W')
@@ -269,22 +273,71 @@ export default function GameDetailPanel({ game, isMember, onClose, onUnlock }: P
                 </div>
               )}
 
+              {/* Alerts — injuries, weather, streaks, suspensions */}
+              {detail.alerts && detail.alerts.length > 0 && (
+                <div className="space-y-2">
+                  {detail.alerts.map((alert, i) => {
+                    const cfg = {
+                      injury:     { icon: '🚑', color: 'rgba(239,68,68,0.08)',  border: 'rgba(239,68,68,0.22)',  text: '#f87171' },
+                      suspension: { icon: '🟥', color: 'rgba(239,68,68,0.08)',  border: 'rgba(239,68,68,0.22)',  text: '#f87171' },
+                      weather:    { icon: '🌧️', color: 'rgba(96,165,250,0.08)', border: 'rgba(96,165,250,0.22)', text: '#93c5fd' },
+                      streak:     { icon: '🔥', color: 'rgba(249,115,22,0.08)', border: 'rgba(249,115,22,0.22)', text: '#fb923c' },
+                      travel:     { icon: '✈️', color: 'rgba(168,85,247,0.08)', border: 'rgba(168,85,247,0.22)', text: '#c084fc' },
+                      info:       { icon: '💡', color: 'rgba(250,204,21,0.08)', border: 'rgba(250,204,21,0.22)', text: '#fde047' },
+                    }[alert.type] ?? { icon: '⚠️', color: 'rgba(249,115,22,0.08)', border: 'rgba(249,115,22,0.22)', text: '#fb923c' }
+                    return (
+                      <div key={i} className="rounded-xl px-3.5 py-3 flex items-start gap-3"
+                        style={{ background: cfg.color, border: `1px solid ${cfg.border}` }}>
+                        <span className="text-[14px] shrink-0 mt-0.5">{cfg.icon}</span>
+                        <p className="text-[12px] leading-relaxed" style={{ color: cfg.text }}>{alert.text}</p>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+
+              {/* Rankings + Streaks */}
+              {(detail.rankings || homeStreakDisplay || awayStreakDisplay) && (
+                <div className="rounded-2xl p-4"
+                  style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <div className="text-[9px] font-black tracking-widest uppercase mb-3 text-white/25">Rankings & Form</div>
+                  <div className="space-y-2.5">
+                    {[
+                      { label: 'HME', team: s?.homeTeam ?? game.homeTeam, rank: detail.rankings?.home, streak: homeStreakDisplay },
+                      { label: 'AWY', team: s?.awayTeam ?? game.awayTeam, rank: detail.rankings?.away, streak: awayStreakDisplay },
+                    ].map((row, i) => {
+                      const streakWin = row.streak?.toUpperCase().startsWith('W')
+                      const streakLen = parseInt(row.streak?.replace(/\D/g, '') ?? '0')
+                      return (
+                        <div key={i} className="flex items-center gap-3">
+                          <span className="text-[9px] font-bold uppercase tracking-wider text-white/22 w-7 shrink-0">{row.label}</span>
+                          <span className="text-[13px] font-black text-white flex-1 truncate">{row.team}</span>
+                          {row.rank && (
+                            <span className="text-[10px] font-bold text-white/40 shrink-0">{row.rank}</span>
+                          )}
+                          {row.streak && (
+                            <span className={`text-[11px] font-black font-mono shrink-0 ${
+                              streakWin ? 'text-neon' : 'text-red-400'
+                            }`}>
+                              {streakWin ? '▲' : '▼'} {row.streak}
+                            </span>
+                          )}
+                          {hotTeam === row.team && <FireBadge />}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Who's Hot + Momentum */}
-              {(hotTeam || detail.momentum) && (
+              {detail.momentum && (
                 <div className="rounded-2xl p-4"
                   style={{ background: 'rgba(249,115,22,0.05)', border: '1px solid rgba(249,115,22,0.18)' }}>
-                  <div className="flex items-center gap-2 mb-2.5">
-                    <span className="text-[10px] font-black tracking-widest uppercase text-orange-400">Who's Hot</span>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-black tracking-widest uppercase text-orange-400">Momentum</span>
                   </div>
-                  {hotTeam && (
-                    <div className="flex items-center gap-2.5 mb-2.5">
-                      <span className="text-[15px] font-black text-white">{hotTeam}</span>
-                      <FireBadge />
-                    </div>
-                  )}
-                  {detail.momentum && (
-                    <p className="text-[12px] leading-relaxed text-white/60">{detail.momentum}</p>
-                  )}
+                  <p className="text-[12px] leading-relaxed text-white/60">{detail.momentum}</p>
                 </div>
               )}
 

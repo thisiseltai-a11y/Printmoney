@@ -14,11 +14,15 @@ export interface GameDetail {
   hotTeam?: string | null
   momentum?: string
   h2h?: string
+  rankings?: { home: string; away: string }
+  alerts?: { type: 'injury' | 'weather' | 'streak' | 'suspension' | 'travel' | 'info'; text: string }[]
+  homeStreak?: string
+  awayStreak?: string
 }
 
-const SYSTEM = `You are GambitParlay's AI sports analyst. You receive real ESPN game data.
+const SYSTEM = `You are GambitParlay's AI sports analyst. You receive real ESPN game data and must return a comprehensive game briefing for bettors.
 
-Return ONLY valid JSON (no markdown, no code fences) with this shape:
+Return ONLY valid JSON (no markdown, no code fences) with this exact shape:
 {
   "pick": "Team Name — description e.g. Yankees — ML or France — Draw No Bet or Over 8.5 Runs",
   "tier": 1 | 2 | 3,
@@ -31,15 +35,33 @@ Return ONLY valid JSON (no markdown, no code fences) with this shape:
   "scenarios": [
     { "label": "If X happens", "desc": "one sentence outcome" }
   ],
-  "bettingAngle": "One sentence on the specific bet type and why — e.g. the moneyline vs the spread, or why over/under makes more sense",
-  "hotTeam": "The team name that is currently on a hot streak / playing better right now, or null if neither stands out",
-  "momentum": "2 sentences: which team has the edge in recent form and WHY — cite streak, last 10, or recent results",
-  "h2h": "2-3 sentences on recent head-to-head history between these teams from your knowledge — last few meetings, who tends to win, any patterns (home/away advantage, high-scoring games, etc.)"
+  "bettingAngle": "One sentence on the specific bet type and why",
+  "hotTeam": "Team name on a hot streak right now, or null",
+  "momentum": "2 sentences on which team has recent form edge and why — cite specific streaks or recent results",
+  "h2h": "2-3 sentences on recent head-to-head history — who wins, patterns, home/away advantage",
+  "rankings": {
+    "home": "e.g. '#4 FIFA' or '2nd AL East (3 GB)' or '1st NFC West' or 'T-8th NBA West'",
+    "away": "same format for away team"
+  },
+  "homeStreak": "e.g. 'W4' or 'L2' or 'W1' — current win/loss streak for home team",
+  "awayStreak": "e.g. 'W7' or 'L3' — current win/loss streak for away team",
+  "alerts": [
+    { "type": "injury" | "weather" | "streak" | "suspension" | "travel" | "info", "text": "one sentence — specific and actionable" }
+  ]
 }
 
-Tiers: 1 = safe/high-confidence, 2 = balanced, 3 = value/contrarian.
-Factors: 4-6 items, mix positive and negative.
-Scenarios: 2-3 items covering key game-deciding moments.`
+Rules:
+- Tiers: 1 = safe/high-confidence, 2 = balanced, 3 = value/contrarian
+- Factors: 4-6 items mixing positive and negative
+- Scenarios: 2-3 key game-deciding moments
+- Alerts: 2-5 items covering the most important things bettors must know. Include:
+  * Any key player injuries or suspensions you know about
+  * Weather concerns for outdoor games (rain, wind, cold, dome = no concern)
+  * Notable streaks (e.g. "Home team has covered the spread in 7 of last 8")
+  * Travel/rest disadvantage (back-to-back, long road trip, short rest)
+  * Any stat or trend that materially affects the bet
+- Rankings: use FIFA rankings for soccer, division standings for MLB/NFL/NHL/NBA
+- Always populate homeStreak and awayStreak from your knowledge`
 
 async function analyzeGame(summary: GameSummary): Promise<Omit<GameDetail, 'summary'>> {
   if (!process.env.ANTHROPIC_API_KEY) return {}
@@ -119,6 +141,10 @@ async function analyzeGame(summary: GameSummary): Promise<Omit<GameDetail, 'summ
       hotTeam: parsed.hotTeam ?? null,
       momentum: parsed.momentum,
       h2h: parsed.h2h,
+      rankings: parsed.rankings,
+      alerts: parsed.alerts,
+      homeStreak: parsed.homeStreak,
+      awayStreak: parsed.awayStreak,
     }
   } catch (err) {
     console.error('Claude game detail error:', err)
