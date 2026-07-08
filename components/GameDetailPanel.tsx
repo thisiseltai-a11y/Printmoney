@@ -125,23 +125,42 @@ export default function GameDetailPanel({ game, isMember, onClose, onUnlock }: P
   const [detail, setDetail] = useState<GameDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
 
   useEffect(() => {
-    const load = async () => {
-      setLoading(true)
-      setError(false)
+    let cancelled = false
+    let timer: ReturnType<typeof setTimeout> | null = null
+
+    const load = async (silent = false) => {
+      if (!silent) setLoading(true)
+      if (!silent) setError(false)
       try {
         const res = await fetch(`/api/game-detail?id=${game.id}&sport=${game.sportKey}`)
         if (!res.ok) throw new Error()
         const data = await res.json()
-        setDetail(data)
+        if (!cancelled) {
+          setDetail(data)
+          setLastRefresh(new Date())
+          // Schedule next refresh if game is live
+          if (game.isLive || data?.summary?.isLive) {
+            timer = setTimeout(() => load(true), 30_000)
+          }
+        }
       } catch {
-        setError(true)
+        if (!cancelled && !silent) setError(true)
+        if (!cancelled) setLoading(false)
+        return
       }
-      setLoading(false)
+      if (!cancelled) setLoading(false)
     }
+
     load()
-  }, [game.id, game.sportKey])
+
+    return () => {
+      cancelled = true
+      if (timer) clearTimeout(timer)
+    }
+  }, [game.id, game.sportKey, game.isLive])
 
   const s = detail?.summary
   const hasScore = s?.isLive && s.homeScore !== undefined
@@ -194,10 +213,15 @@ export default function GameDetailPanel({ game, isMember, onClose, onUnlock }: P
                 style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.08)' }}>
                 {game.sport}
               </span>
-              {game.isLive ? (
+              {game.isLive || s?.isLive ? (
                 <span className="flex items-center gap-1.5 text-[10px] font-bold text-orange-400">
                   <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
                   {s?.gameClock ?? game.gameClock ?? 'LIVE'}
+                  {lastRefresh && (
+                    <span className="text-[9px] text-orange-400/40 font-normal ml-1">
+                      · {lastRefresh.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                    </span>
+                  )}
                 </span>
               ) : (
                 <span className="text-[11px] text-white/35 font-mono">{game.gameTime}</span>
