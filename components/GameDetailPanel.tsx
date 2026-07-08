@@ -283,6 +283,14 @@ export default function GameDetailPanel({ game, isMember, onClose, onUnlock }: P
             </div>
           )}
 
+          {/* AI status debug banner — shown when Claude didn't return data */}
+          {!loading && detail && detail._claudeStatus && detail._claudeStatus !== 'OK' && (
+            <div className="rounded-xl px-3.5 py-2.5 text-[10px] font-mono text-yellow-400/60"
+              style={{ background: 'rgba(250,204,21,0.04)', border: '1px solid rgba(250,204,21,0.12)' }}>
+              AI: {detail._claudeStatus}
+            </div>
+          )}
+
           {!loading && detail && (
             <>
               {/* Live narrative */}

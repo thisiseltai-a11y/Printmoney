@@ -3,6 +3,7 @@ import { fetchGameSummary, type GameSummary } from '@/lib/espnSummary'
 
 export interface GameDetail {
   summary: GameSummary
+  _claudeStatus?: string
   pick?: string
   tier?: 1 | 2 | 3
   confidence?: number
@@ -63,8 +64,8 @@ Rules:
 - Rankings: use FIFA rankings for soccer, division standings for MLB/NFL/NHL/NBA
 - Always populate homeStreak and awayStreak from your knowledge`
 
-async function analyzeGame(summary: GameSummary): Promise<Omit<GameDetail, 'summary'>> {
-  if (!process.env.ANTHROPIC_API_KEY) return {}
+async function analyzeGame(summary: GameSummary): Promise<Omit<GameDetail, 'summary'> & { _claudeStatus?: string }> {
+  if (!process.env.ANTHROPIC_API_KEY) return { _claudeStatus: 'NO_KEY' }
 
   const parts: string[] = []
 
@@ -126,10 +127,11 @@ async function analyzeGame(summary: GameSummary): Promise<Omit<GameDetail, 'summ
 
     const text = msg.content[0].type === 'text' ? msg.content[0].text : ''
     const match = text.match(/\{[\s\S]*\}/)
-    if (!match) return {}
+    if (!match) return { _claudeStatus: 'NO_JSON' }
 
     const parsed = JSON.parse(match[0])
     return {
+      _claudeStatus: 'OK',
       pick: parsed.pick,
       tier: parsed.tier,
       confidence: parsed.confidence,
@@ -147,8 +149,9 @@ async function analyzeGame(summary: GameSummary): Promise<Omit<GameDetail, 'summ
       awayStreak: parsed.awayStreak,
     }
   } catch (err) {
-    console.error('Claude game detail error:', err)
-    return {}
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('Claude game detail error:', msg)
+    return { _claudeStatus: `ERROR: ${msg}` }
   }
 }
 
