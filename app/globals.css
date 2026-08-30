@@ -287,7 +287,7 @@ nav.scrolled {
     linear-gradient(to right, rgba(12,12,13,0.90) 36%, rgba(12,12,13,0.15) 75%, rgba(12,12,13,0.05) 100%),
     linear-gradient(to top,   rgba(12,12,13,0.65) 0%,  transparent 42%);
 }
-.hero-car-svg {
+.hero-car-wrap {
   position: absolute;
   right: -2%;
   bottom: 0;
@@ -295,14 +295,28 @@ nav.scrolled {
   max-width: 860px;
   min-width: 360px;
   pointer-events: none;
+  will-change: transform;
+}
+.hero-car-svg {
+  width: 100%;
   overflow: visible;
+  display: block;
+}
+/* Hover: brighten stroke when cursor sweeps over the car area */
+.hero-car-wrap:hover .hero-car-svg [stroke] {
+  stroke-opacity: 1;
+  transition: stroke-opacity 0.4s;
 }
 @media (max-width: 760px) {
-  .hero-car-svg {
-    width: 90%;
+  .hero-car-wrap {
+    width: 92%;
     right: -8%;
-    opacity: 0.55;
+    opacity: 0.50;
   }
+}
+/* hero content parallax layer */
+.hero-content-wrap {
+  will-change: transform;
 }
 .hero-content-wrap {
   position: relative;

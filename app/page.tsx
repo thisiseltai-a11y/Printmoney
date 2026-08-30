@@ -45,6 +45,7 @@ export default function OwnTheMarque() {
     const canvas = document.getElementById('hero-canvas') as HTMLCanvasElement | null
     let rafId: number
     let resizeObserver: ResizeObserver | null = null
+    let mouseHX = -1, mouseHY = -1
 
     if (canvas && !reduced) {
       const ctx = canvas.getContext('2d')!
@@ -57,7 +58,6 @@ export default function OwnTheMarque() {
       }
       resize()
 
-      // Bokeh spot definition
       interface Spot {
         x: number; y: number
         vx: number; vy: number
@@ -69,12 +69,11 @@ export default function OwnTheMarque() {
       }
 
       function makeSpot(w: number, h: number): Spot {
-        // warm gold / amber palette — no green
         const colors: [number,number,number][] = [
-          [201, 168, 76],   // gold
-          [220, 180, 90],   // lighter gold
-          [180, 130, 55],   // amber
-          [201, 168, 76],   // gold (weighted more)
+          [201, 168, 76],
+          [220, 180, 90],
+          [180, 130, 55],
+          [201, 168, 76],
         ]
         return {
           x: Math.random() * w,
@@ -101,7 +100,7 @@ export default function OwnTheMarque() {
         const w = canvas!.width, h = canvas!.height
         ctx.clearRect(0, 0, w, h)
 
-        // Directional warm glow — comes from where the car headlights would be
+        // Warm headlight glow
         const glow = ctx.createRadialGradient(w * 0.72, h * 0.55, 0, w * 0.72, h * 0.55, w * 0.70)
         glow.addColorStop(0, 'rgba(210,155,60,0.18)')
         glow.addColorStop(0.4, 'rgba(201,140,50,0.06)')
@@ -109,7 +108,16 @@ export default function OwnTheMarque() {
         ctx.fillStyle = glow
         ctx.fillRect(0, 0, w, h)
 
-        // Bokeh spots — always fill full canvas extent so gradient renders properly
+        // Cursor spotlight
+        if (mouseHX >= 0) {
+          const spot = ctx.createRadialGradient(mouseHX, mouseHY, 0, mouseHX, mouseHY, 240)
+          spot.addColorStop(0, 'rgba(201,168,76,0.11)')
+          spot.addColorStop(0.6, 'rgba(201,168,76,0.03)')
+          spot.addColorStop(1, 'rgba(12,12,13,0)')
+          ctx.fillStyle = spot
+          ctx.fillRect(0, 0, w, h)
+        }
+
         spots.forEach(s => {
           s.phase += s.phaseSpeed
           const alpha = s.opacity * (0.55 + 0.45 * Math.sin(s.phase))
@@ -119,10 +127,7 @@ export default function OwnTheMarque() {
           grad.addColorStop(1, `rgba(${s.color[0]},${s.color[1]},${s.color[2]},0)`)
           ctx.fillStyle = grad
           ctx.fillRect(0, 0, w, h)
-
-          // Drift + wrap
-          s.x += s.vx
-          s.y += s.vy
+          s.x += s.vx; s.y += s.vy
           if (s.x < -s.r) s.x = w + s.r
           if (s.x > w + s.r) s.x = -s.r
           if (s.y < -s.r) s.y = h + s.r
@@ -133,11 +138,68 @@ export default function OwnTheMarque() {
       }
       draw()
 
-      resizeObserver = new ResizeObserver(() => {
-        resize()
-        initSpots()
-      })
+      function onCanvasMouse(e: MouseEvent) {
+        if (!canvas) return
+        const rect = canvas.getBoundingClientRect()
+        mouseHX = (e.clientX - rect.left) * (canvas.width / rect.width)
+        mouseHY = (e.clientY - rect.top) * (canvas.height / rect.height)
+      }
+      function onCanvasLeave() { mouseHX = -1; mouseHY = -1 }
+      canvas.parentElement?.addEventListener('mousemove', onCanvasMouse, { passive: true })
+      canvas.parentElement?.addEventListener('mouseleave', onCanvasLeave)
+
+      resizeObserver = new ResizeObserver(() => { resize(); initSpots() })
       resizeObserver.observe(canvas.parentElement!)
+    }
+
+    // ── SVG car: draw-on stroke animation ────────────────
+    const carWrap = document.querySelector('.hero-car-wrap') as HTMLElement | null
+    const carSvg = document.querySelector('.hero-car-svg') as SVGElement | null
+    if (carSvg && !reduced) {
+      const stroked = carSvg.querySelectorAll('[stroke]') as NodeListOf<SVGGeometryElement>
+      stroked.forEach((el, i) => {
+        try {
+          const len = el.getTotalLength ? Math.ceil(el.getTotalLength()) + 10 : 600
+          el.style.strokeDasharray = String(len)
+          el.style.strokeDashoffset = String(len)
+          el.style.transition = `stroke-dashoffset 1.8s cubic-bezier(0.4,0,0.2,1) ${0.5 + i * 0.045}s`
+        } catch (_) { /* line elements may throw */ }
+      })
+      requestAnimationFrame(() => {
+        stroked.forEach(el => { el.style.strokeDashoffset = '0' })
+      })
+    }
+
+    // ── Mouse parallax + gentle car float ────────────────
+    const heroSection = document.getElementById('home')
+    const heroContent = document.querySelector('.hero-content-wrap') as HTMLElement | null
+    let tX = 0, tY = 0, cX = 0, cY = 0
+    let parallaxRaf = 0
+
+    function onHeroMouse(e: MouseEvent) {
+      const rect = heroSection!.getBoundingClientRect()
+      tX = (e.clientX - rect.left - rect.width  / 2) / (rect.width  / 2)
+      tY = (e.clientY - rect.top  - rect.height / 2) / (rect.height / 2)
+    }
+    function onHeroLeave() { tX = 0; tY = 0 }
+
+    function runParallax() {
+      cX += (tX - cX) * 0.05
+      cY += (tY - cY) * 0.05
+      const float = Math.sin(Date.now() / 1400) * 5   // ~8.8s gentle bob
+      if (carWrap) {
+        carWrap.style.transform = `translate(${cX * -30}px, ${cY * -14 + float}px)`
+      }
+      if (heroContent) {
+        heroContent.style.transform = `translate(${cX * 8}px, ${cY * 5}px)`
+      }
+      parallaxRaf = requestAnimationFrame(runParallax)
+    }
+
+    if (!reduced) {
+      heroSection?.addEventListener('mousemove', onHeroMouse, { passive: true })
+      heroSection?.addEventListener('mouseleave', onHeroLeave)
+      runParallax()
     }
 
     // ── Section reveals ──────────────────────────────────
@@ -161,8 +223,11 @@ export default function OwnTheMarque() {
     return () => {
       window.removeEventListener('scroll', updateNav)
       cancelAnimationFrame(rafId)
+      cancelAnimationFrame(parallaxRaf)
       resizeObserver?.disconnect()
       cleanupObserver?.()
+      heroSection?.removeEventListener('mousemove', onHeroMouse)
+      heroSection?.removeEventListener('mouseleave', onHeroLeave)
     }
   }, [])
 
@@ -219,7 +284,8 @@ export default function OwnTheMarque() {
         <div className="hero-overlay" aria-hidden="true"></div>
 
         {/* Classic GT coupe silhouette — Ferrari 250-inspired line art */}
-        <svg className="hero-car-svg" aria-hidden="true" viewBox="0 0 1100 480" xmlns="http://www.w3.org/2000/svg" fill="none">
+        <div className="hero-car-wrap" aria-hidden="true">
+        <svg className="hero-car-svg" viewBox="0 0 1100 480" xmlns="http://www.w3.org/2000/svg" fill="none">
           <defs>
             <radialGradient id="carGlow" cx="50%" cy="80%" r="55%" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stopColor="#c9a84c" stopOpacity="0.18"/>
@@ -346,6 +412,7 @@ export default function OwnTheMarque() {
             />
           ))}
         </svg>
+        </div>{/* hero-car-wrap */}
 
         <div className="hero-content-wrap">
         <div className="container">
