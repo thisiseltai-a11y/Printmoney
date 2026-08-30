@@ -1,0 +1,924 @@
+<title>Own The Marque</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap">
+
+<style>
+/* ─── TOKENS — dark-first (BRG world is primary) ──────────── */
+:root {
+  --bg:        #0e1a0c;
+  --surface:   #152011;
+  --surface-2: #1d2b19;
+  --border:    rgba(201,168,76,0.14);
+  --gold:      #c9a84c;
+  --gold-dim:  rgba(201,168,76,0.38);
+  --text:      #e8dfc8;
+  --text-2:    #a09880;
+  --text-3:    #665e50;
+  --nav-fill:  rgba(14,26,12,0.94);
+  --input-bg:  rgba(255,255,255,0.04);
+  --focus:     rgba(201,168,76,0.35);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg:        #f0ebe0;
+    --surface:   #e8e2d5;
+    --surface-2: #ddd6c6;
+    --border:    rgba(26,42,18,0.14);
+    --gold:      #8a5f10;
+    --gold-dim:  rgba(138,95,16,0.35);
+    --text:      #181f12;
+    --text-2:    #3d4a30;
+    --text-3:    #7a8a6d;
+    --nav-fill:  rgba(240,235,224,0.94);
+    --input-bg:  rgba(0,0,0,0.04);
+    --focus:     rgba(138,95,16,0.28);
+  }
+}
+:root[data-theme="light"] {
+  --bg:        #f0ebe0;
+  --surface:   #e8e2d5;
+  --surface-2: #ddd6c6;
+  --border:    rgba(26,42,18,0.14);
+  --gold:      #8a5f10;
+  --gold-dim:  rgba(138,95,16,0.35);
+  --text:      #181f12;
+  --text-2:    #3d4a30;
+  --text-3:    #7a8a6d;
+  --nav-fill:  rgba(240,235,224,0.94);
+  --input-bg:  rgba(0,0,0,0.04);
+  --focus:     rgba(138,95,16,0.28);
+}
+:root[data-theme="dark"] {
+  --bg:        #0e1a0c;
+  --surface:   #152011;
+  --surface-2: #1d2b19;
+  --border:    rgba(201,168,76,0.14);
+  --gold:      #c9a84c;
+  --gold-dim:  rgba(201,168,76,0.38);
+  --text:      #e8dfc8;
+  --text-2:    #a09880;
+  --text-3:    #665e50;
+  --nav-fill:  rgba(14,26,12,0.94);
+  --input-bg:  rgba(255,255,255,0.04);
+  --focus:     rgba(201,168,76,0.35);
+}
+
+/* ─── RESET + BASE ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal, .hero-line { transition: none !important; animation: none !important; opacity: 1 !important; transform: none !important; }
+}
+
+/* ─── TYPOGRAPHY ───────────────────────────────────────────── */
+.display {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-weight: 300;
+  line-height: 1.06;
+  text-wrap: balance;
+  color: var(--text);
+}
+.display-xl { font-size: clamp(52px, 8vw, 100px); letter-spacing: -0.02em; }
+.display-lg { font-size: clamp(34px, 5vw, 56px); letter-spacing: -0.015em; }
+.display-md { font-size: clamp(26px, 3.5vw, 40px); letter-spacing: -0.01em; font-style: normal; font-weight: 400; }
+.eyebrow {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.eyebrow::before { content: "◆ "; font-size: 7px; vertical-align: middle; margin-right: 2px; }
+h3 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+}
+p { color: var(--text-2); max-width: 60ch; }
+a { color: var(--gold); text-decoration: none; }
+a:hover { color: var(--text); }
+a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 2px; }
+
+/* ─── LAYOUT ───────────────────────────────────────────────── */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 clamp(24px, 5vw, 80px);
+}
+section { padding: clamp(80px, 12vw, 140px) 0; }
+section + section { border-top: 1px solid var(--border); }
+.rule {
+  width: 40px;
+  height: 1px;
+  background: var(--gold-dim);
+  margin: 24px 0;
+}
+.rule-center { margin: 24px auto; }
+
+/* ─── NAV ──────────────────────────────────────────────────── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 0 clamp(24px, 5vw, 80px);
+  transition: background 0.3s, border-bottom 0.3s;
+}
+nav.scrolled {
+  background: var(--nav-fill);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.nav-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.wordmark {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.wordmark-badge {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--gold-dim);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 3vw, 36px);
+  list-style: none;
+}
+.nav-links a {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-2);
+  letter-spacing: 0.01em;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-cta {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: var(--gold) !important;
+  border: 1px solid var(--gold-dim);
+  padding: 7px 16px;
+  border-radius: 100px;
+  letter-spacing: 0.04em !important;
+  transition: background 0.2s, color 0.2s !important;
+}
+.nav-cta:hover { background: var(--gold) !important; color: var(--bg) !important; }
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 4px;
+  background: none;
+  border: none;
+  color: var(--text);
+}
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background: var(--text);
+  transition: transform 0.25s, opacity 0.25s;
+}
+.hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: 64px; left: 0; right: 0; bottom: 0;
+  background: var(--bg);
+  z-index: 99;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+}
+.mobile-menu.open { display: flex; }
+.mobile-menu a {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.mobile-menu a:hover { color: var(--gold); }
+@media (max-width: 760px) {
+  .nav-links { display: none; }
+  .hamburger { display: flex; }
+}
+
+/* ─── HERO ─────────────────────────────────────────────────── */
+#home {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding-top: 120px;
+  padding-bottom: 80px;
+}
+.hero-inner { display: flex; flex-direction: column; gap: 0; }
+.hero-eyebrow { overflow: hidden; }
+.hero-headline { overflow: hidden; }
+.hero-sub { max-width: 44ch; margin-top: 28px; }
+.hero-sub p { font-size: 16px; line-height: 1.8; color: var(--text-2); }
+.hero-actions { margin-top: 40px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--gold);
+  color: var(--bg);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 14px 28px;
+  border-radius: 2px;
+  text-decoration: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.btn-primary:hover { opacity: 0.88; color: var(--bg); transform: translateY(-1px); }
+.btn-ghost {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-2);
+  letter-spacing: 0.04em;
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 4px;
+}
+.btn-ghost:hover { color: var(--text); }
+.hero-line { opacity: 0; transform: translateY(24px); transition: opacity 0.7s, transform 0.7s; }
+.hero-line.in { opacity: 1; transform: none; }
+
+/* ─── PROCESS ──────────────────────────────────────────────── */
+#process .steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  margin-top: 56px;
+}
+@media (max-width: 860px) {
+  #process .steps { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 500px) {
+  #process .steps { grid-template-columns: 1fr; }
+}
+.step {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 32px 28px 36px;
+  position: relative;
+  overflow: hidden;
+}
+.step:first-child { border-radius: 2px 0 0 2px; }
+.step:last-child { border-radius: 0 2px 2px 0; }
+@media (max-width: 860px) {
+  .step:first-child { border-radius: 2px 0 0 0; }
+  .step:nth-child(2) { border-radius: 0 2px 0 0; }
+  .step:nth-child(3) { border-radius: 0 0 0 2px; }
+  .step:last-child { border-radius: 0 0 2px 0; }
+}
+@media (max-width: 500px) {
+  .step, .step:first-child, .step:last-child,
+  .step:nth-child(2), .step:nth-child(3) { border-radius: 0; }
+}
+.step-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 72px;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--gold-dim);
+  position: absolute;
+  top: 16px; right: 20px;
+  letter-spacing: -0.04em;
+  user-select: none;
+  pointer-events: none;
+}
+.step h3 { margin-top: 40px; margin-bottom: 10px; font-size: 16px; }
+.step p { font-size: 14px; line-height: 1.7; max-width: none; }
+
+/* ─── REQUEST FORM ─────────────────────────────────────────── */
+#request { background: var(--surface); }
+.form-wrap {
+  max-width: 660px;
+  margin: 0 auto;
+}
+.form-header { text-align: center; margin-bottom: 52px; }
+.form-header p { margin: 14px auto 0; font-size: 15px; }
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 600px) {
+  .form-grid { grid-template-columns: 1fr; }
+}
+.form-grid .full { grid-column: 1 / -1; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.field input,
+.field select,
+.field textarea {
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  padding: 12px 14px;
+  border-radius: 2px;
+  width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.field input::placeholder, .field textarea::placeholder { color: var(--text-3); }
+.field select option { background: var(--bg); color: var(--text); }
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--gold-dim);
+  box-shadow: 0 0 0 3px var(--focus);
+}
+.field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23a09880' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+.field textarea { resize: vertical; min-height: 100px; }
+.form-submit { margin-top: 36px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.btn-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--gold);
+  color: var(--bg);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 15px 36px;
+  border-radius: 2px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.btn-submit:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-submit:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.form-note { font-size: 12px; color: var(--text-3); line-height: 1.5; }
+.form-success {
+  display: none;
+  text-align: center;
+  padding: 48px 0;
+}
+.form-success .success-icon {
+  width: 48px; height: 48px;
+  border: 1px solid var(--gold-dim);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 20px;
+  color: var(--gold);
+}
+.form-success h3 { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 400; font-style: italic; }
+.form-success p { margin: 12px auto 0; max-width: 40ch; }
+
+/* ─── ABOUT ────────────────────────────────────────────────── */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 8vw, 100px);
+  align-items: start;
+  margin-top: 56px;
+}
+@media (max-width: 760px) {
+  .about-grid { grid-template-columns: 1fr; }
+}
+.about-copy p { margin-bottom: 18px; }
+.about-copy p:last-child { margin-bottom: 0; }
+.about-panel {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 36px 32px;
+  border-radius: 2px;
+}
+.about-panel .eyebrow { margin-bottom: 20px; }
+.credential {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+.credential:last-of-type { border-bottom: none; padding-bottom: 0; }
+.credential-icon {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+  color: var(--gold);
+  margin-top: 2px;
+}
+.credential-text h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.credential-text p { font-size: 13px; line-height: 1.6; max-width: none; }
+
+/* ─── CONTACT ──────────────────────────────────────────────── */
+.contact-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 8vw, 100px);
+  align-items: start;
+  margin-top: 48px;
+}
+@media (max-width: 680px) {
+  .contact-inner { grid-template-columns: 1fr; }
+}
+.contact-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.contact-item {}
+.contact-item .contact-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 6px;
+}
+.contact-item a, .contact-item p {
+  font-size: 17px;
+  color: var(--text);
+  line-height: 1.5;
+  max-width: none;
+}
+.contact-item a:hover { color: var(--gold); }
+.contact-note {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 28px 32px;
+  border-radius: 2px;
+}
+.contact-note p { font-size: 15px; line-height: 1.75; max-width: 38ch; }
+.contact-note .eyebrow { margin-bottom: 12px; }
+
+/* ─── FOOTER ───────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 36px 0;
+}
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.footer-copy { font-size: 12px; color: var(--text-3); }
+.footer-links {
+  display: flex;
+  gap: 24px;
+  list-style: none;
+}
+.footer-links a { font-size: 12px; color: var(--text-3); }
+.footer-links a:hover { color: var(--text); }
+
+/* ─── SECTION REVEAL ───────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+</style>
+
+<!-- ─── NAV ──────────────────────────────────────────────────── -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="#home" class="wordmark">
+      <span class="wordmark-badge" aria-hidden="true">OTM</span>
+      Own The Marque
+    </a>
+    <ul class="nav-links">
+      <li><a href="#process">How It Works</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+      <li><a href="#request" class="nav-cta">Submit a Request</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile menu -->
+<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+  <a href="#process" class="mobile-link">How It Works</a>
+  <a href="#request" class="mobile-link">Submit a Request</a>
+  <a href="#about" class="mobile-link">About</a>
+  <a href="#contact" class="mobile-link">Contact</a>
+</div>
+
+<!-- ─── HERO ─────────────────────────────────────────────────── -->
+<section id="home">
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-eyebrow">
+        <p class="eyebrow hero-line" style="transition-delay:0.1s">Exotic &amp; Classic Car Acquisition</p>
+      </div>
+      <div class="hero-headline" style="margin-top:20px">
+        <h1 class="display display-xl hero-line" style="transition-delay:0.25s">You know<br>the car.<br>We find it.</h1>
+      </div>
+      <div class="hero-sub">
+        <p class="hero-line" style="transition-delay:0.45s">Own The Marque is a personal buyer's agent for exotic and classic cars. Tell us exactly what you want — we search dealers, auctions, private collections, and club networks, then negotiate the deal on your behalf.</p>
+        <p class="hero-line" style="transition-delay:0.55s; margin-top:10px; font-size:14px; color:var(--text-3)">One finder's fee — 5% of the sale price — payable only when we deliver the car.</p>
+      </div>
+      <div class="hero-actions hero-line" style="transition-delay:0.65s">
+        <a href="#request" class="btn-primary">Submit a Search Request →</a>
+        <a href="#process" class="btn-ghost">See how it works</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── HOW IT WORKS ──────────────────────────────────────────── -->
+<section id="process">
+  <div class="container">
+    <p class="eyebrow reveal">Process</p>
+    <div class="rule"></div>
+    <h2 class="display display-md reveal reveal-delay-1">Four steps from<br>wish list to keys</h2>
+
+    <div class="steps">
+      <div class="step reveal reveal-delay-1">
+        <span class="step-num" aria-hidden="true">01</span>
+        <h3>Tell us what you want</h3>
+        <p>Make, model, year, specification, colour — the more specific, the better. We deal exclusively in the exotic and classic space, so precision is welcome here.</p>
+      </div>
+      <div class="step reveal reveal-delay-2">
+        <span class="step-num" aria-hidden="true">02</span>
+        <h3>We search the network</h3>
+        <p>Active outreach across specialist dealers, auction houses, private sellers, marque registers, and club contacts. Sources most buyers can't reach independently.</p>
+      </div>
+      <div class="step reveal reveal-delay-3">
+        <span class="step-num" aria-hidden="true">03</span>
+        <h3>We verify and negotiate</h3>
+        <p>Provenance checks, documentation review, independent mechanical inspection, and market valuation — before we negotiate the price squarely on your behalf.</p>
+      </div>
+      <div class="step reveal reveal-delay-4">
+        <span class="step-num" aria-hidden="true">04</span>
+        <h3>You take the keys</h3>
+        <p>When you're satisfied and the deal is done, our fee is 5% of the final sale price. No find, no fee — we only get paid when you get the car.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── REQUEST FORM ──────────────────────────────────────────── -->
+<section id="request">
+  <div class="container">
+    <div class="form-wrap">
+      <div class="form-header reveal">
+        <p class="eyebrow">Start a Search</p>
+        <div class="rule rule-center"></div>
+        <h2 class="display display-md">Tell us about your car</h2>
+        <p>The more detail you give us, the faster we can start looking. All enquiries are handled in strict confidence.</p>
+      </div>
+
+      <form id="request-form" novalidate>
+        <!-- Car details -->
+        <div class="form-grid reveal reveal-delay-1">
+          <div class="field full">
+            <label for="car-model">Make &amp; Model</label>
+            <input type="text" id="car-model" name="car-model" placeholder="e.g. Ferrari 308 GTB, Jaguar E-Type Series 1" required>
+          </div>
+          <div class="field">
+            <label for="year-from">Year — From</label>
+            <input type="text" id="year-from" name="year-from" placeholder="e.g. 1968">
+          </div>
+          <div class="field">
+            <label for="year-to">Year — To</label>
+            <input type="text" id="year-to" name="year-to" placeholder="e.g. 1972">
+          </div>
+          <div class="field full">
+            <label for="spec">Specification &amp; Notes</label>
+            <textarea id="spec" name="spec" placeholder="Colour, interior, RHD or LHD, matching numbers, known history, any specific options you require..."></textarea>
+          </div>
+          <div class="field">
+            <label for="budget">Budget</label>
+            <select id="budget" name="budget">
+              <option value="">Select a range</option>
+              <option>Under $100,000</option>
+              <option>$100,000 – $250,000</option>
+              <option>$250,000 – $500,000</option>
+              <option>$500,000 – $1,000,000</option>
+              <option>Over $1,000,000</option>
+              <option>Prefer to discuss privately</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="timeline">Timeline</label>
+            <select id="timeline" name="timeline">
+              <option value="">Select timeline</option>
+              <option>This week</option>
+              <option>This month</option>
+              <option>Within 3 months</option>
+              <option>Within 6 months</option>
+              <option>Just exploring</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label for="payment">How do you plan to pay?</label>
+            <select id="payment" name="payment">
+              <option value="">Select payment method</option>
+              <option>Cash / Wire transfer</option>
+              <option>Financing already arranged</option>
+              <option>Need guidance on financing options</option>
+              <option>Haven't decided yet</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Contact details -->
+        <div class="form-grid reveal reveal-delay-2" style="margin-top:32px">
+          <div class="field">
+            <label for="name">Your Name</label>
+            <input type="text" id="name" name="name" placeholder="Full name" required>
+          </div>
+          <div class="field">
+            <label for="phone">Phone</label>
+            <input type="tel" id="phone" name="phone" placeholder="+1 or international">
+          </div>
+          <div class="field full">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" placeholder="your@email.com" required>
+          </div>
+        </div>
+
+        <div class="form-submit reveal reveal-delay-3">
+          <button type="submit" class="btn-submit">Send Enquiry →</button>
+          <p class="form-note">We respond to all enquiries within 24 hours.<br>Your details are never shared with third parties.</p>
+        </div>
+      </form>
+
+      <div class="form-success" id="form-success" aria-live="polite">
+        <div class="success-icon">◆</div>
+        <h3>Enquiry received</h3>
+        <p>We'll review the details of your search and be in touch within 24 hours to discuss next steps.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── ABOUT ─────────────────────────────────────────────────── -->
+<section id="about">
+  <div class="container">
+    <p class="eyebrow reveal">About</p>
+    <div class="rule"></div>
+    <h2 class="display display-md reveal reveal-delay-1">Why a specialist matters</h2>
+
+    <div class="about-grid">
+      <div class="about-copy">
+        <p class="reveal reveal-delay-1">I've spent the better part of two decades in the world of exotic and classic cars — at auction houses, at track days, at private viewings where the car on offer is worth more than most houses on the street. That immersion is what Own The Marque is built on.</p>
+        <p class="reveal reveal-delay-2">Most buyer's agents are generalists. I work only in the exotic and classic space, because that's where the real complexity is: matching a specific production number, a particular trim specification, the right ownership history to a buyer who knows exactly what they want. Generalists miss these details. They cost you money — or they cost you the car.</p>
+        <p class="reveal reveal-delay-3">My network spans marque specialists, independent dealers, private collectors, major auction houses, and marque clubs across the United States, the UK, and Europe. When you tell me what you're looking for, I begin with sources most buyers simply can't reach on their own.</p>
+        <p class="reveal reveal-delay-4">Clients come to me because the alternative — cold-calling dealers, scouring auction catalogues, negotiating alone in an unfamiliar market — takes months and rarely ends in the right car. I do this exclusively, and I do it well.</p>
+      </div>
+
+      <div class="about-panel reveal reveal-delay-2">
+        <p class="eyebrow">What sets us apart</p>
+        <div class="credential">
+          <div class="credential-icon">◆</div>
+          <div class="credential-text">
+            <h4>Exotic &amp; Classic only</h4>
+            <p>Not general car buying. Not fleet purchasing. One lane, executed with precision.</p>
+          </div>
+        </div>
+        <div class="credential">
+          <div class="credential-icon">◆</div>
+          <div class="credential-text">
+            <h4>Buyer's side, always</h4>
+            <p>We hold no inventory and list nothing for sale. Our loyalty is exclusively to you.</p>
+          </div>
+        </div>
+        <div class="credential">
+          <div class="credential-icon">◆</div>
+          <div class="credential-text">
+            <h4>Private network access</h4>
+            <p>Marque clubs, collector networks, specialist dealers — sources before they're public.</p>
+          </div>
+        </div>
+        <div class="credential">
+          <div class="credential-icon">◆</div>
+          <div class="credential-text">
+            <h4>No find, no fee</h4>
+            <p>A 5% finder's fee, paid only when you take the keys. Fully aligned incentives.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CONTACT ────────────────────────────────────────────────── -->
+<section id="contact">
+  <div class="container">
+    <p class="eyebrow reveal">Contact</p>
+    <div class="rule"></div>
+    <h2 class="display display-md reveal reveal-delay-1">Get in touch</h2>
+
+    <div class="contact-inner">
+      <div class="contact-detail reveal reveal-delay-1">
+        <div class="contact-item">
+          <p class="contact-label">Email</p>
+          <a href="mailto:hello@ownthemarque.com">hello@ownthemarque.com</a>
+        </div>
+        <div class="contact-item">
+          <p class="contact-label">Website</p>
+          <a href="https://ownthemarque.com">ownthemarque.com</a>
+        </div>
+        <div class="contact-item">
+          <p class="contact-label">Response time</p>
+          <p>All enquiries acknowledged within 24 hours. Calls available by appointment.</p>
+        </div>
+      </div>
+
+      <div class="contact-note reveal reveal-delay-2">
+        <p class="eyebrow">Prefer to write?</p>
+        <p>Use the search request form above to give us the detail we need to start working straight away. The more you tell us about the car you're looking for, the faster we can begin reaching out to the network.</p>
+        <br>
+        <a href="#request" class="btn-primary" style="display:inline-flex; margin-top:4px;">Submit a Request →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─────────────────────────────────────────────────── -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <p class="footer-copy">© 2025 Own The Marque · ownthemarque.com</p>
+      <ul class="footer-links">
+        <li><a href="#request">Submit a Request</a></li>
+        <li><a href="mailto:hello@ownthemarque.com">Email</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // ── Nav scroll behaviour ──────────────────────────────
+  const nav = document.getElementById('nav');
+  function updateNav() {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+  }
+  window.addEventListener('scroll', updateNav, { passive: true });
+  updateNav();
+
+  // ── Mobile menu ───────────────────────────────────────
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobile-menu');
+  hamburger.addEventListener('click', function () {
+    const open = mobileMenu.classList.toggle('open');
+    hamburger.classList.toggle('open', open);
+    hamburger.setAttribute('aria-expanded', String(open));
+    mobileMenu.setAttribute('aria-hidden', String(!open));
+    document.body.style.overflow = open ? 'hidden' : '';
+  });
+  document.querySelectorAll('.mobile-link').forEach(function (link) {
+    link.addEventListener('click', function () {
+      mobileMenu.classList.remove('open');
+      hamburger.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', 'false');
+      mobileMenu.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    });
+  });
+
+  // ── Hero entrance animation ───────────────────────────
+  var heroLines = document.querySelectorAll('.hero-line');
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    heroLines.forEach(function (el) { el.classList.add('in'); });
+  } else {
+    requestAnimationFrame(function () {
+      heroLines.forEach(function (el) { el.classList.add('in'); });
+    });
+  }
+
+  // ── Section reveal on scroll ──────────────────────────
+  var revealEls = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    revealEls.forEach(function (el) { observer.observe(el); });
+  } else {
+    revealEls.forEach(function (el) { el.classList.add('in'); });
+  }
+
+  // ── Form submission ───────────────────────────────────
+  var form = document.getElementById('request-form');
+  var success = document.getElementById('form-success');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var carModel = form.querySelector('#car-model').value.trim();
+    var email = form.querySelector('#email').value.trim();
+    var name = form.querySelector('#name').value.trim();
+    if (!carModel) {
+      form.querySelector('#car-model').focus();
+      return;
+    }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      form.querySelector('#email').focus();
+      return;
+    }
+    // Simulate submission
+    form.style.transition = 'opacity 0.3s';
+    form.style.opacity = '0';
+    setTimeout(function () {
+      form.hidden = true;
+      success.style.display = 'block';
+    }, 300);
+  });
+})();
+</script>
