@@ -69,24 +69,24 @@ export default function OwnTheMarque() {
       }
 
       function makeSpot(w: number, h: number): Spot {
-        const isGold = Math.random() > 0.35
+        const isGold = Math.random() > 0.4
         return {
           x: Math.random() * w,
           y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 0.22,
-          vy: (Math.random() - 0.5) * 0.18,
-          r: 60 + Math.random() * 140,
-          opacity: 0.04 + Math.random() * 0.10,
+          vx: (Math.random() - 0.5) * 0.28,
+          vy: (Math.random() - 0.5) * 0.22,
+          r: 80 + Math.random() * 200,
+          opacity: 0.12 + Math.random() * 0.22,
           phase: Math.random() * Math.PI * 2,
-          phaseSpeed: 0.004 + Math.random() * 0.006,
-          color: isGold ? [201, 168, 76] : [90, 160, 80],
+          phaseSpeed: 0.005 + Math.random() * 0.007,
+          color: isGold ? [201, 168, 76] : [70, 140, 65],
         }
       }
 
       let spots: Spot[] = []
       function initSpots() {
         const w = canvas!.width, h = canvas!.height
-        const count = isMobile() ? 10 : 20
+        const count = isMobile() ? 12 : 22
         spots = Array.from({ length: count }, () => makeSpot(w, h))
       }
       initSpots()
@@ -95,22 +95,24 @@ export default function OwnTheMarque() {
         const w = canvas!.width, h = canvas!.height
         ctx.clearRect(0, 0, w, h)
 
-        // Directional warm glow — upper-right ambient
-        const glow = ctx.createRadialGradient(w * 0.78, h * 0.32, 0, w * 0.78, h * 0.32, w * 0.55)
-        glow.addColorStop(0, 'rgba(201,140,50,0.07)')
+        // Directional warm glow — upper-right ambient light source
+        const glow = ctx.createRadialGradient(w * 0.75, h * 0.28, 0, w * 0.75, h * 0.28, w * 0.65)
+        glow.addColorStop(0, 'rgba(201,140,50,0.13)')
+        glow.addColorStop(0.5, 'rgba(201,140,50,0.04)')
         glow.addColorStop(1, 'rgba(14,26,12,0)')
         ctx.fillStyle = glow
         ctx.fillRect(0, 0, w, h)
 
-        // Bokeh spots
+        // Bokeh spots — always fill full canvas extent so gradient renders properly
         spots.forEach(s => {
           s.phase += s.phaseSpeed
-          const alpha = s.opacity * (0.6 + 0.4 * Math.sin(s.phase))
+          const alpha = s.opacity * (0.55 + 0.45 * Math.sin(s.phase))
           const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r)
-          grad.addColorStop(0, `rgba(${s.color[0]},${s.color[1]},${s.color[2]},${alpha})`)
+          grad.addColorStop(0, `rgba(${s.color[0]},${s.color[1]},${s.color[2]},${alpha.toFixed(3)})`)
+          grad.addColorStop(0.5, `rgba(${s.color[0]},${s.color[1]},${s.color[2]},${(alpha * 0.3).toFixed(3)})`)
           grad.addColorStop(1, `rgba(${s.color[0]},${s.color[1]},${s.color[2]},0)`)
           ctx.fillStyle = grad
-          ctx.fillRect(Math.max(0, s.x - s.r), Math.max(0, s.y - s.r), s.r * 2, s.r * 2)
+          ctx.fillRect(0, 0, w, h)
 
           // Drift + wrap
           s.x += s.vx
