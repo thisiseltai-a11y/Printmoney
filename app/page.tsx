@@ -1,304 +1,368 @@
-import Link from 'next/link'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
-import { Check, ChevronRight, Zap, Lock, TrendingUp } from 'lucide-react'
+'use client'
+import { useEffect } from 'react'
 
-function GameCardPreview({
-  home, away, time, locked, pick, conf,
-}: {
-  home: string; away: string; time: string
-  locked: boolean; pick?: string; conf?: number
-}) {
-  return (
-    <div className="bg-card border border-dim rounded-2xl overflow-hidden">
-      <div className="px-4 pt-3.5 pb-3 flex items-center gap-2">
-        <span className="text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded border text-white/40 bg-white/5 border-white/10">
-          World Cup
-        </span>
-        <span className="text-[11px] font-medium text-white/40 font-mono">{time}</span>
-      </div>
-      <div className="px-4 pb-3.5 flex items-center gap-2.5">
-        <div className="flex-1">
-          <div className="text-[15px] font-black tracking-tight text-white">{home}</div>
-        </div>
-        <span className="text-[11px] font-bold text-white/20">VS</span>
-        <div className="flex-1 text-right">
-          <div className="text-[15px] font-black tracking-tight text-white">{away}</div>
-        </div>
-      </div>
-      {locked ? (
-        <div className="mx-4 mb-3.5 rounded-xl px-4 py-3 flex items-center justify-between"
-          style={{ background: '#0c0c0c', border: '1px solid rgba(255,255,255,0.08)' }}>
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid #252525' }}>
-              <Lock className="w-3.5 h-3.5 text-white/30" />
-            </div>
-            <div>
-              <div className="text-[11px] font-bold tracking-widest uppercase text-white/30">Members Only</div>
-              <div className="text-[9px] text-white/20 mt-0.5">Pick + full analysis</div>
-            </div>
-          </div>
-          <span className="text-[10px] font-black text-neon px-2.5 py-1 rounded-lg"
-            style={{ background: 'rgba(124,252,0,0.10)', border: '1px solid rgba(124,252,0,0.20)' }}>
-            Unlock
-          </span>
-        </div>
-      ) : (
-        <div className="mx-4 mb-3.5 rounded-xl p-3"
-          style={{ background: 'rgba(124,252,0,0.08)', border: '1px solid rgba(124,252,0,0.18)' }}>
-          <div className="text-[9px] font-black tracking-widest uppercase mb-1" style={{ color: 'rgba(124,252,0,0.6)' }}>
-            Our Pick
-          </div>
-          <div className="text-[15px] font-black text-white">{pick}</div>
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded border bg-emerald-500/12 text-emerald-400 border-emerald-500/20">
-              Tier 1
-            </span>
-            <div className="flex-1">
-              <div className="flex justify-between mb-0.5">
-                <span className="text-[9px] text-white/30 font-bold uppercase tracking-widest">Confidence</span>
-                <span className="text-[10px] font-black text-neon font-mono">{conf}%</span>
-              </div>
-              <div className="h-[3px] bg-white/8 rounded-full overflow-hidden">
-                <div className="h-full bg-neon rounded-full" style={{ width: `${conf}%` }} />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
+export default function OwnTheMarque() {
+  useEffect(() => {
+    // ── Nav scroll ──────────────────────────────────────
+    const nav = document.getElementById('nav')
+    function updateNav() {
+      nav?.classList.toggle('scrolled', window.scrollY > 40)
+    }
+    window.addEventListener('scroll', updateNav, { passive: true })
+    updateNav()
 
-export default function LandingPage() {
+    // ── Mobile menu ──────────────────────────────────────
+    const hamburger = document.getElementById('hamburger')
+    const mobileMenu = document.getElementById('mobile-menu')
+    function toggleMenu() {
+      const open = mobileMenu?.classList.toggle('open') ?? false
+      hamburger?.classList.toggle('open', open)
+      hamburger?.setAttribute('aria-expanded', String(open))
+      mobileMenu?.setAttribute('aria-hidden', String(!open))
+      document.body.style.overflow = open ? 'hidden' : ''
+    }
+    hamburger?.addEventListener('click', toggleMenu)
+    document.querySelectorAll('.mobile-link').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenu?.classList.remove('open')
+        hamburger?.classList.remove('open')
+        hamburger?.setAttribute('aria-expanded', 'false')
+        mobileMenu?.setAttribute('aria-hidden', 'true')
+        document.body.style.overflow = ''
+      })
+    })
+
+    // ── Hero entrance ────────────────────────────────────
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const heroLines = document.querySelectorAll('.hero-line')
+    if (reduced) {
+      heroLines.forEach(el => el.classList.add('in'))
+    } else {
+      requestAnimationFrame(() => heroLines.forEach(el => el.classList.add('in')))
+    }
+
+    // ── Section reveals ──────────────────────────────────
+    const revealEls = document.querySelectorAll('.reveal')
+    if ('IntersectionObserver' in window && !reduced) {
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in')
+            observer.unobserve(entry.target)
+          }
+        })
+      }, { threshold: 0.12 })
+      revealEls.forEach(el => observer.observe(el))
+      return () => {
+        observer.disconnect()
+        window.removeEventListener('scroll', updateNav)
+      }
+    } else {
+      revealEls.forEach(el => el.classList.add('in'))
+    }
+
+    return () => window.removeEventListener('scroll', updateNav)
+  }, [])
+
+  function handleFormSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const form = e.currentTarget
+    const carModel = (form.querySelector('#car-model') as HTMLInputElement)?.value.trim()
+    const email = (form.querySelector('#email') as HTMLInputElement)?.value.trim()
+    if (!carModel) { (form.querySelector('#car-model') as HTMLInputElement)?.focus(); return }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      ;(form.querySelector('#email') as HTMLInputElement)?.focus(); return
+    }
+    form.style.transition = 'opacity 0.3s'
+    form.style.opacity = '0'
+    setTimeout(() => {
+      form.hidden = true
+      const success = document.getElementById('form-success')
+      if (success) success.style.display = 'block'
+    }, 300)
+  }
+
   return (
     <>
-      <Navbar />
-      <main>
+      {/* ── NAV ───────────────────────────────────────────── */}
+      <nav id="nav">
+        <div className="nav-inner">
+          <a href="#home" className="wordmark">
+            <span className="wordmark-badge" aria-hidden="true">OTM</span>
+            Own The Marque
+          </a>
+          <ul className="nav-links">
+            <li><a href="#process">How It Works</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="#request" className="nav-cta">Submit a Request</a></li>
+          </ul>
+          <button className="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </nav>
 
-        {/* ── HERO ── */}
-        <section className="relative overflow-hidden bg-dark bg-grid pt-20 pb-28 px-4">
-          <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-14 lg:gap-20 items-center">
+      {/* Mobile menu */}
+      <div className="mobile-menu" id="mobile-menu" aria-hidden="true">
+        <a href="#process" className="mobile-link">How It Works</a>
+        <a href="#request" className="mobile-link">Submit a Request</a>
+        <a href="#about" className="mobile-link">About</a>
+        <a href="#contact" className="mobile-link">Contact</a>
+      </div>
 
-            {/* Left */}
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-neon/10 border border-neon/20 text-neon text-xs font-bold tracking-widest uppercase mb-6">
-                <Zap className="w-3 h-3" />
-                Research · Analyze · Win
-              </div>
-              <h1 className="text-5xl sm:text-6xl font-black tracking-tight leading-[1.05] mb-5">
-                Every game.<br />
-                <span className="text-neon">Every pick.</span><br />
-                Fully researched.
+      {/* ── HERO ──────────────────────────────────────────── */}
+      <section id="home">
+        <div className="container">
+          <div className="hero-inner">
+            <div className="hero-eyebrow">
+              <p className="eyebrow hero-line" style={{ transitionDelay: '0.1s' }}>Exotic &amp; Classic Car Acquisition</p>
+            </div>
+            <div className="hero-headline" style={{ marginTop: '20px' }}>
+              <h1 className="display display-xl hero-line" style={{ transitionDelay: '0.25s' }}>
+                You know<br />the car.<br />We find it.
               </h1>
-              <p className="text-lg text-white/55 leading-relaxed mb-8 max-w-lg">
-                GambitParlay pulls live data from ESPN and runs it through AI analysis — giving you pick recommendations, confidence scores, injury context, and team form for every game, every day.
+            </div>
+            <div className="hero-sub">
+              <p className="hero-line" style={{ transitionDelay: '0.45s' }}>
+                Own The Marque is a personal buyer&apos;s agent for exotic and classic cars. Tell us exactly what you want — we search dealers, auctions, private collections, and club networks, then negotiate the deal on your behalf.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 mb-10">
-                <Link
-                  href="/subscribe"
-                  className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-neon text-black font-bold text-base hover:bg-neon/90 transition-all hover:shadow-neon"
-                >
-                  Get Started Free
-                  <ChevronRight className="w-4 h-4" />
-                </Link>
-                <Link
-                  href="/login"
-                  className="flex items-center justify-center px-6 py-4 rounded-xl border border-dim text-white/60 font-semibold text-base hover:border-neon/30 hover:text-white transition-colors"
-                >
-                  Sign In
-                </Link>
+              <p className="hero-line" style={{ transitionDelay: '0.55s', marginTop: '10px', fontSize: '14px', color: 'var(--text-3)' }}>
+                One finder&apos;s fee — 5% of the sale price — payable only when we deliver the car.
+              </p>
+            </div>
+            <div className="hero-actions hero-line" style={{ transitionDelay: '0.65s' }}>
+              <a href="#request" className="btn-primary">Submit a Search Request →</a>
+              <a href="#process" className="btn-ghost">See how it works</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS ──────────────────────────────────── */}
+      <section id="process">
+        <div className="container">
+          <p className="eyebrow reveal">Process</p>
+          <div className="rule"></div>
+          <h2 className="display display-md reveal reveal-delay-1">Four steps from<br />wish list to keys</h2>
+
+          <div className="steps">
+            <div className="step reveal reveal-delay-1">
+              <span className="step-num" aria-hidden="true">01</span>
+              <h3>Tell us what you want</h3>
+              <p>Make, model, year, specification, colour — the more specific, the better. We deal exclusively in the exotic and classic space, so precision is welcome here.</p>
+            </div>
+            <div className="step reveal reveal-delay-2">
+              <span className="step-num" aria-hidden="true">02</span>
+              <h3>We search the network</h3>
+              <p>Active outreach across specialist dealers, auction houses, private sellers, marque registers, and club contacts. Sources most buyers can&apos;t reach independently.</p>
+            </div>
+            <div className="step reveal reveal-delay-3">
+              <span className="step-num" aria-hidden="true">03</span>
+              <h3>We verify and negotiate</h3>
+              <p>Provenance checks, documentation review, independent mechanical inspection, and market valuation — before we negotiate the price squarely on your behalf.</p>
+            </div>
+            <div className="step reveal reveal-delay-4">
+              <span className="step-num" aria-hidden="true">04</span>
+              <h3>You take the keys</h3>
+              <p>When you&apos;re satisfied and the deal is done, our fee is 5% of the final sale price. No find, no fee — we only get paid when you get the car.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── REQUEST FORM ──────────────────────────────────── */}
+      <section id="request" style={{ background: 'var(--surface)' }}>
+        <div className="container">
+          <div className="form-wrap">
+            <div className="form-header reveal">
+              <p className="eyebrow">Start a Search</p>
+              <div className="rule rule-center"></div>
+              <h2 className="display display-md">Tell us about your car</h2>
+              <p>The more detail you give us, the faster we can start looking. All enquiries are handled in strict confidence.</p>
+            </div>
+
+            <form id="request-form" onSubmit={handleFormSubmit} noValidate>
+              <div className="form-grid reveal reveal-delay-1">
+                <div className="field full">
+                  <label htmlFor="car-model">Make &amp; Model</label>
+                  <input type="text" id="car-model" name="car-model" placeholder="e.g. Ferrari 308 GTB, Jaguar E-Type Series 1" required />
+                </div>
+                <div className="field">
+                  <label htmlFor="year-from">Year — From</label>
+                  <input type="text" id="year-from" name="year-from" placeholder="e.g. 1968" />
+                </div>
+                <div className="field">
+                  <label htmlFor="year-to">Year — To</label>
+                  <input type="text" id="year-to" name="year-to" placeholder="e.g. 1972" />
+                </div>
+                <div className="field full">
+                  <label htmlFor="spec">Specification &amp; Notes</label>
+                  <textarea id="spec" name="spec" placeholder="Colour, interior, RHD or LHD, matching numbers, known history, any specific options you require..."></textarea>
+                </div>
+                <div className="field">
+                  <label htmlFor="budget">Budget</label>
+                  <select id="budget" name="budget">
+                    <option value="">Select a range</option>
+                    <option>Under $100,000</option>
+                    <option>$100,000 – $250,000</option>
+                    <option>$250,000 – $500,000</option>
+                    <option>$500,000 – $1,000,000</option>
+                    <option>Over $1,000,000</option>
+                    <option>Prefer to discuss privately</option>
+                  </select>
+                </div>
+                <div className="field">
+                  <label htmlFor="timeline">Timeline</label>
+                  <select id="timeline" name="timeline">
+                    <option value="">Select timeline</option>
+                    <option>This week</option>
+                    <option>This month</option>
+                    <option>Within 3 months</option>
+                    <option>Within 6 months</option>
+                    <option>Just exploring</option>
+                  </select>
+                </div>
+                <div className="field full">
+                  <label htmlFor="payment">How do you plan to pay?</label>
+                  <select id="payment" name="payment">
+                    <option value="">Select payment method</option>
+                    <option>Cash / Wire transfer</option>
+                    <option>Financing already arranged</option>
+                    <option>Need guidance on financing options</option>
+                    <option>Haven&apos;t decided yet</option>
+                  </select>
+                </div>
               </div>
-              <p className="text-xs text-white/25">No credit card required · Free tier available</p>
+
+              <div className="form-grid reveal reveal-delay-2" style={{ marginTop: '32px' }}>
+                <div className="field">
+                  <label htmlFor="name">Your Name</label>
+                  <input type="text" id="name" name="name" placeholder="Full name" required />
+                </div>
+                <div className="field">
+                  <label htmlFor="phone">Phone</label>
+                  <input type="tel" id="phone" name="phone" placeholder="+1 or international" />
+                </div>
+                <div className="field full">
+                  <label htmlFor="email">Email Address</label>
+                  <input type="email" id="email" name="email" placeholder="your@email.com" required />
+                </div>
+              </div>
+
+              <div className="form-submit reveal reveal-delay-3">
+                <button type="submit" className="btn-submit">Send Enquiry →</button>
+                <p className="form-note">
+                  We respond to all enquiries within 24 hours.<br />
+                  Your details are never shared with third parties.
+                </p>
+              </div>
+            </form>
+
+            <div className="form-success" id="form-success" aria-live="polite">
+              <div className="success-icon">◆</div>
+              <h3>Enquiry received</h3>
+              <p>We&apos;ll review the details of your search and be in touch within 24 hours to discuss next steps.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── ABOUT ─────────────────────────────────────────── */}
+      <section id="about">
+        <div className="container">
+          <p className="eyebrow reveal">About</p>
+          <div className="rule"></div>
+          <h2 className="display display-md reveal reveal-delay-1">Why a specialist matters</h2>
+
+          <div className="about-grid">
+            <div className="about-copy">
+              <p className="reveal reveal-delay-1">I&apos;ve spent the better part of two decades in the world of exotic and classic cars — at auction houses, at track days, at private viewings where the car on offer is worth more than most houses on the street. That immersion is what Own The Marque is built on.</p>
+              <p className="reveal reveal-delay-2">Most buyer&apos;s agents are generalists. I work only in the exotic and classic space, because that&apos;s where the real complexity is: matching a specific production number, a particular trim specification, the right ownership history to a buyer who knows exactly what they want.</p>
+              <p className="reveal reveal-delay-3">My network spans marque specialists, independent dealers, private collectors, major auction houses, and marque clubs across the United States, the UK, and Europe. When you tell me what you&apos;re looking for, I begin with sources most buyers simply can&apos;t reach on their own.</p>
+              <p className="reveal reveal-delay-4">Clients come to me because the alternative — cold-calling dealers, scouring auction catalogues, negotiating alone in an unfamiliar market — takes months and rarely ends in the right car.</p>
             </div>
 
-            {/* Right — game card preview */}
-            <div className="flex flex-col gap-3 max-w-sm mx-auto w-full">
-              {/* Unlocked card */}
-              <GameCardPreview
-                home="🇫🇷 France"
-                away="🇵🇹 Portugal"
-                time="3:00 PM ET"
-                locked={false}
-                pick="France — Draw No Bet"
-                conf={81}
-              />
-              {/* Locked card */}
-              <GameCardPreview
-                home="🇧🇷 Brazil"
-                away="🇦🇷 Argentina"
-                time="6:00 PM ET"
-                locked={true}
-              />
-              <div className="text-center text-[11px] text-white/25">
-                Members see the full pick · Free users see the schedule
+            <div className="about-panel reveal reveal-delay-2">
+              <p className="eyebrow">What sets us apart</p>
+              <div className="credential">
+                <div className="credential-icon">◆</div>
+                <div className="credential-text">
+                  <h4>Exotic &amp; Classic only</h4>
+                  <p>Not general car buying. Not fleet purchasing. One lane, executed with precision.</p>
+                </div>
+              </div>
+              <div className="credential">
+                <div className="credential-icon">◆</div>
+                <div className="credential-text">
+                  <h4>Buyer&apos;s side, always</h4>
+                  <p>We hold no inventory and list nothing for sale. Our loyalty is exclusively to you.</p>
+                </div>
+              </div>
+              <div className="credential">
+                <div className="credential-icon">◆</div>
+                <div className="credential-text">
+                  <h4>Private network access</h4>
+                  <p>Marque clubs, collector networks, specialist dealers — sources before they&apos;re public.</p>
+                </div>
+              </div>
+              <div className="credential">
+                <div className="credential-icon">◆</div>
+                <div className="credential-text">
+                  <h4>No find, no fee</h4>
+                  <p>A 5% finder&apos;s fee, paid only when you take the keys. Fully aligned incentives.</p>
+                </div>
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ── HOW IT WORKS ── */}
-        <section className="py-24 px-4 border-t border-dim">
-          <div className="max-w-4xl mx-auto text-center">
-            <p className="text-xs font-bold text-neon tracking-widest uppercase mb-3">How It Works</p>
-            <h2 className="text-4xl font-black tracking-tight mb-14">Research done for you.</h2>
-            <div className="grid sm:grid-cols-3 gap-8">
-              {[
-                {
-                  icon: <TrendingUp className="w-5 h-5 text-neon" />,
-                  title: 'Live ESPN Data',
-                  desc: "Every day we pull today's schedule directly from ESPN — teams, records, and game times across World Cup, MLB, NFL, NBA, and NHL.",
-                },
-                {
-                  icon: <Zap className="w-5 h-5 text-neon" />,
-                  title: 'AI Analysis',
-                  desc: 'Claude AI analyzes team form, head-to-head history, injuries, home/away splits, and more — then generates a pick with a confidence score.',
-                },
-                {
-                  icon: <Lock className="w-5 h-5 text-neon" />,
-                  title: 'Members Get Everything',
-                  desc: 'Free users see the schedule. Members unlock the full pick, analysis, confidence rating, and key factors for every game.',
-                },
-              ].map((s, i) => (
-                <div key={i}>
-                  <div className="w-10 h-10 rounded-xl bg-neon/10 border border-neon/20 flex items-center justify-center mx-auto mb-4">
-                    {s.icon}
-                  </div>
-                  <h3 className="text-lg font-bold mb-2">{s.title}</h3>
-                  <p className="text-sm text-white/45 leading-relaxed">{s.desc}</p>
-                </div>
-              ))}
+      {/* ── CONTACT ───────────────────────────────────────── */}
+      <section id="contact">
+        <div className="container">
+          <p className="eyebrow reveal">Contact</p>
+          <div className="rule"></div>
+          <h2 className="display display-md reveal reveal-delay-1">Get in touch</h2>
+
+          <div className="contact-inner">
+            <div className="contact-detail reveal reveal-delay-1">
+              <div className="contact-item">
+                <p className="contact-label">Email</p>
+                <a href="mailto:hello@ownthemarque.com">hello@ownthemarque.com</a>
+              </div>
+              <div className="contact-item">
+                <p className="contact-label">Website</p>
+                <a href="https://ownthemarque.com">ownthemarque.com</a>
+              </div>
+              <div className="contact-item">
+                <p className="contact-label">Response time</p>
+                <p>All enquiries acknowledged within 24 hours. Calls available by appointment.</p>
+              </div>
+            </div>
+
+            <div className="contact-note reveal reveal-delay-2">
+              <p className="eyebrow">Prefer to write?</p>
+              <p>Use the search request form above to give us the detail we need to start working straight away. The more you tell us about the car you&apos;re looking for, the faster we can begin reaching out to the network.</p>
+              <br />
+              <a href="#request" className="btn-primary" style={{ display: 'inline-flex', marginTop: '4px' }}>Submit a Request →</a>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ── WHAT YOU GET ── */}
-        <section className="py-24 px-4 bg-card border-t border-b border-dim">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-14">
-              <p className="text-xs font-bold text-neon tracking-widest uppercase mb-3">Members Get</p>
-              <h2 className="text-4xl font-black tracking-tight">Everything you need to decide.</h2>
-            </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-              {[
-                { title: 'Pick Recommendation', desc: 'Moneyline, spread, or total — whichever the AI has most edge on.' },
-                { title: 'Confidence Score', desc: 'A percentage showing how strong the edge is for that specific game.' },
-                { title: 'Full AI Analysis', desc: '2–3 sentence breakdown: form, injuries, matchup history, home/away splits.' },
-                { title: 'Key Factors', desc: 'Positive and negative factors laid out clearly — know what\'s working for and against the pick.' },
-                { title: 'Warning Flags', desc: 'One game per day we flag as high-risk. Know what to avoid before you look at the slate.' },
-                { title: 'Bet Tracker', desc: 'Log your bets, track P&L, and see your win rate over time.' },
-              ].map((f, i) => (
-                <div key={i} className="flex items-start gap-3 p-5 rounded-2xl bg-elevated border border-dim">
-                  <div className="w-5 h-5 rounded-full bg-neon/15 border border-neon/30 flex items-center justify-center shrink-0 mt-0.5">
-                    <Check className="w-3 h-3 text-neon" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-sm mb-1">{f.title}</div>
-                    <div className="text-xs text-white/45 leading-relaxed">{f.desc}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+      {/* ── FOOTER ────────────────────────────────────────── */}
+      <footer>
+        <div className="container">
+          <div className="footer-inner">
+            <p className="footer-copy">© 2025 Own The Marque · ownthemarque.com</p>
+            <ul className="footer-links">
+              <li><a href="#request">Submit a Request</a></li>
+              <li><a href="mailto:hello@ownthemarque.com">Email</a></li>
+            </ul>
           </div>
-        </section>
-
-        {/* ── PRICING ── */}
-        <section className="py-24 px-4 border-b border-dim" id="pricing">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-14">
-              <p className="text-xs font-bold text-neon tracking-widest uppercase mb-3">Pricing</p>
-              <h2 className="text-4xl font-black tracking-tight mb-3">Simple pricing.</h2>
-              <p className="text-white/50">Start free. Upgrade when you&apos;re ready.</p>
-            </div>
-            <div className="grid sm:grid-cols-3 gap-6">
-              {[
-                {
-                  name: 'Free',
-                  price: '$0',
-                  per: 'forever',
-                  features: ["Today's game schedule", 'See teams + game times', 'Bet tracker (5 bets)'],
-                  cta: 'Get Started',
-                  href: '/subscribe',
-                  highlight: false,
-                },
-                {
-                  name: 'Premium',
-                  price: '$9.99',
-                  per: '/month',
-                  features: ['All picks — all sports', 'AI analysis + factors', 'Confidence scores', 'Warning flags', 'Unlimited bet tracker'],
-                  cta: 'Start Premium',
-                  href: '/subscribe?plan=premium',
-                  highlight: true,
-                },
-                {
-                  name: 'VIP',
-                  price: '$24.99',
-                  per: '/month',
-                  features: ['Everything in Premium', 'Props & player props', 'Priority updates', 'Direct Telegram channel', 'Priority support'],
-                  cta: 'Go VIP',
-                  href: '/subscribe?plan=vip',
-                  highlight: false,
-                },
-              ].map(p => (
-                <div key={p.name} className={`rounded-2xl p-6 border ${p.highlight ? 'bg-neon/5 border-neon/40' : 'bg-elevated border-dim'}`}>
-                  {p.highlight && (
-                    <div className="text-[10px] font-black text-neon tracking-widest uppercase mb-2">Most Popular</div>
-                  )}
-                  <h3 className="text-xl font-black mb-1">{p.name}</h3>
-                  <div className="mb-6">
-                    <span className="text-3xl font-black font-mono">{p.price}</span>
-                    <span className="text-white/40 text-sm ml-1">{p.per}</span>
-                  </div>
-                  <ul className="space-y-2.5 mb-6">
-                    {p.features.map(f => (
-                      <li key={f} className="flex items-start gap-2 text-sm text-white/70">
-                        <Check className="w-4 h-4 text-neon shrink-0 mt-0.5" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link
-                    href={p.href}
-                    className={`block text-center py-3 rounded-xl font-bold text-sm transition-all ${
-                      p.highlight
-                        ? 'bg-neon text-black hover:bg-neon/90'
-                        : 'border border-dim text-white/70 hover:border-neon/30 hover:text-white'
-                    }`}
-                  >
-                    {p.cta}
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── FINAL CTA ── */}
-        <section className="py-24 px-4 text-center">
-          <div className="max-w-xl mx-auto">
-            <div className="w-12 h-12 rounded-2xl bg-neon/10 border border-neon/20 flex items-center justify-center mx-auto mb-6">
-              <TrendingUp className="w-6 h-6 text-neon" />
-            </div>
-            <h2 className="text-4xl font-black tracking-tight mb-4">
-              Start making better decisions.
-            </h2>
-            <p className="text-white/50 mb-8 text-lg leading-relaxed">
-              Free to join. No credit card. See today&apos;s games immediately.
-            </p>
-            <Link
-              href="/subscribe"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-neon text-black font-bold text-lg hover:bg-neon/90 transition-all hover:shadow-neon"
-            >
-              Create Free Account
-              <ChevronRight className="w-5 h-5" />
-            </Link>
-            <p className="text-xs text-white/20 mt-4">For entertainment purposes only · Must be 21+ · Please gamble responsibly</p>
-          </div>
-        </section>
-
-      </main>
-      <Footer />
+        </div>
+      </footer>
     </>
   )
 }
