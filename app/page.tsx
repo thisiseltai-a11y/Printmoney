@@ -69,7 +69,13 @@ export default function OwnTheMarque() {
       }
 
       function makeSpot(w: number, h: number): Spot {
-        const isGold = Math.random() > 0.4
+        // warm gold / amber palette — no green
+        const colors: [number,number,number][] = [
+          [201, 168, 76],   // gold
+          [220, 180, 90],   // lighter gold
+          [180, 130, 55],   // amber
+          [201, 168, 76],   // gold (weighted more)
+        ]
         return {
           x: Math.random() * w,
           y: Math.random() * h,
@@ -79,7 +85,7 @@ export default function OwnTheMarque() {
           opacity: 0.12 + Math.random() * 0.22,
           phase: Math.random() * Math.PI * 2,
           phaseSpeed: 0.005 + Math.random() * 0.007,
-          color: isGold ? [201, 168, 76] : [70, 140, 65],
+          color: colors[Math.floor(Math.random() * colors.length)],
         }
       }
 
@@ -95,11 +101,11 @@ export default function OwnTheMarque() {
         const w = canvas!.width, h = canvas!.height
         ctx.clearRect(0, 0, w, h)
 
-        // Directional warm glow — upper-right ambient light source
-        const glow = ctx.createRadialGradient(w * 0.75, h * 0.28, 0, w * 0.75, h * 0.28, w * 0.65)
-        glow.addColorStop(0, 'rgba(201,140,50,0.13)')
-        glow.addColorStop(0.5, 'rgba(201,140,50,0.04)')
-        glow.addColorStop(1, 'rgba(14,26,12,0)')
+        // Directional warm glow — comes from where the car headlights would be
+        const glow = ctx.createRadialGradient(w * 0.72, h * 0.55, 0, w * 0.72, h * 0.55, w * 0.70)
+        glow.addColorStop(0, 'rgba(210,155,60,0.18)')
+        glow.addColorStop(0.4, 'rgba(201,140,50,0.06)')
+        glow.addColorStop(1, 'rgba(12,12,13,0)')
         ctx.fillStyle = glow
         ctx.fillRect(0, 0, w, h)
 
@@ -211,6 +217,136 @@ export default function OwnTheMarque() {
       <section id="home">
         <canvas id="hero-canvas" aria-hidden="true"></canvas>
         <div className="hero-overlay" aria-hidden="true"></div>
+
+        {/* Classic GT coupe silhouette — Ferrari 250-inspired line art */}
+        <svg className="hero-car-svg" aria-hidden="true" viewBox="0 0 1100 480" xmlns="http://www.w3.org/2000/svg" fill="none">
+          <defs>
+            <radialGradient id="carGlow" cx="50%" cy="80%" r="55%" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#c9a84c" stopOpacity="0.18"/>
+              <stop offset="100%" stopColor="#c9a84c" stopOpacity="0"/>
+            </radialGradient>
+            <radialGradient id="headlightBeam" cx="8%" cy="68%" r="35%" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#e8c870" stopOpacity="0.22"/>
+              <stop offset="100%" stopColor="#c9a84c" stopOpacity="0"/>
+            </radialGradient>
+            <filter id="softGlow">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          {/* Ground glow beneath car */}
+          <ellipse cx="560" cy="418" rx="440" ry="28" fill="url(#carGlow)"/>
+          {/* Headlight beam */}
+          <ellipse cx="88" cy="330" rx="200" ry="55" fill="url(#headlightBeam)" transform="rotate(-12 88 330)"/>
+
+          {/* ── Main body outline ── */}
+          <path
+            d="
+              M 82 348
+              L 76 318
+              C 72 292 76 268 94 252
+              L 124 240
+              C 178 226 295 216 438 210
+              C 504 207 553 206 572 209
+              C 582 206 594 192 603 170
+              C 612 148 616 120 614 102
+              C 630 96 668 93 714 93
+              C 758 93 800 96 822 102
+              C 840 116 854 142 856 170
+              C 858 194 852 224 848 242
+              C 844 258 844 280 848 300
+              L 850 348
+
+              L 773 350
+              C 758 388 728 410 694 410
+              C 660 410 630 388 615 350
+
+              L 458 350
+              C 443 388 413 410 379 410
+              C 345 410 315 388 300 350
+
+              Z
+            "
+            fill="rgba(201,168,76,0.05)"
+            stroke="rgba(201,168,76,0.70)"
+            strokeWidth="1.6"
+            strokeLinejoin="round"
+            filter="url(#softGlow)"
+          />
+
+          {/* ── Bonnet / hood character line ── */}
+          <path
+            d="M 118 244 C 200 232 340 220 480 213"
+            stroke="rgba(201,168,76,0.30)"
+            strokeWidth="0.8"
+            strokeLinecap="round"
+          />
+
+          {/* ── Door / side crease line ── */}
+          <path
+            d="M 440 260 C 520 255 580 252 630 254 C 660 255 690 260 710 270"
+            stroke="rgba(201,168,76,0.28)"
+            strokeWidth="0.8"
+            strokeLinecap="round"
+          />
+
+          {/* ── Windscreen inner line ── */}
+          <path
+            d="M 575 207 C 585 200 596 186 605 163 C 612 145 615 118 614 102"
+            stroke="rgba(201,168,76,0.25)"
+            strokeWidth="0.9"
+            strokeLinecap="round"
+          />
+
+          {/* ── Rear quarter / fastback line ── */}
+          <path
+            d="M 822 102 C 840 116 854 142 856 170 C 858 194 852 224 848 240"
+            stroke="rgba(201,168,76,0.25)"
+            strokeWidth="0.9"
+            strokeLinecap="round"
+          />
+
+          {/* ── Front wheel (spoked) ── */}
+          <circle cx="379" cy="380" r="62" stroke="rgba(201,168,76,0.55)" strokeWidth="1.4" filter="url(#softGlow)"/>
+          <circle cx="379" cy="380" r="44" stroke="rgba(201,168,76,0.22)" strokeWidth="0.8"/>
+          <circle cx="379" cy="380" r="14" stroke="rgba(201,168,76,0.45)" strokeWidth="1.2"/>
+          {/* spokes */}
+          {[0,60,120,180,240,300].map(deg => {
+            const rad = (deg * Math.PI) / 180
+            const x1 = 379 + 15 * Math.cos(rad), y1 = 380 + 15 * Math.sin(rad)
+            const x2 = 379 + 43 * Math.cos(rad), y2 = 380 + 43 * Math.sin(rad)
+            return <line key={deg} x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(201,168,76,0.30)" strokeWidth="0.9"/>
+          })}
+
+          {/* ── Rear wheel (spoked) ── */}
+          <circle cx="694" cy="380" r="62" stroke="rgba(201,168,76,0.55)" strokeWidth="1.4" filter="url(#softGlow)"/>
+          <circle cx="694" cy="380" r="44" stroke="rgba(201,168,76,0.22)" strokeWidth="0.8"/>
+          <circle cx="694" cy="380" r="14" stroke="rgba(201,168,76,0.45)" strokeWidth="1.2"/>
+          {[0,60,120,180,240,300].map(deg => {
+            const rad = (deg * Math.PI) / 180
+            const x1 = 694 + 15 * Math.cos(rad), y1 = 380 + 15 * Math.sin(rad)
+            const x2 = 694 + 43 * Math.cos(rad), y2 = 380 + 43 * Math.sin(rad)
+            return <line key={deg} x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(201,168,76,0.30)" strokeWidth="0.9"/>
+          })}
+
+          {/* ── Headlight circle ── */}
+          <circle cx="88" cy="290" r="22" stroke="rgba(201,168,76,0.60)" strokeWidth="1.4" filter="url(#softGlow)"/>
+          <circle cx="88" cy="290" r="14" stroke="rgba(201,168,76,0.35)" strokeWidth="0.8"/>
+
+          {/* ── Rear tail light ── */}
+          <rect x="845" y="268" width="8" height="26" rx="1" stroke="rgba(201,168,76,0.45)" strokeWidth="1" fill="rgba(201,168,76,0.06)"/>
+
+          {/* ── Front grille slats ── */}
+          {[0,1,2,3].map(i => (
+            <line key={i}
+              x1={74} y1={262 + i * 12}
+              x2={94} y2={262 + i * 12}
+              stroke="rgba(201,168,76,0.38)" strokeWidth="0.9"
+            />
+          ))}
+        </svg>
+
         <div className="hero-content-wrap">
         <div className="container">
           <div className="hero-inner">
