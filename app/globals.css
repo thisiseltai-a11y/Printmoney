@@ -247,11 +247,49 @@ nav.scrolled {
 
 /* ─── HERO ─────────────────────────────────────────────────── */
 #home {
+  /* always-dark island — override tokens locally */
+  --text:     #e8dfc8;
+  --text-2:   #a09880;
+  --text-3:   #665e50;
+  --gold:     #c9a84c;
+  --gold-dim: rgba(201,168,76,0.38);
+  --border:   rgba(201,168,76,0.14);
+
+  position: relative;
+  overflow: hidden;
+  background: #0e1a0c;
   min-height: 100vh;
   display: flex;
   align-items: center;
   padding-top: 120px;
   padding-bottom: 80px;
+}
+#hero-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  animation: heroZoom 28s ease-in-out infinite alternate;
+}
+@keyframes heroZoom {
+  from { transform: scale(1.0); }
+  to   { transform: scale(1.12); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #hero-canvas { animation: none; }
+}
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to right, rgba(14,26,12,0.88) 40%, rgba(14,26,12,0.20) 100%),
+    linear-gradient(to top,   rgba(14,26,12,0.72) 0%,  transparent 50%);
+}
+.hero-content-wrap {
+  position: relative;
+  z-index: 2;
 }
 .hero-inner { display: flex; flex-direction: column; gap: 0; }
 .hero-eyebrow { overflow: hidden; }
