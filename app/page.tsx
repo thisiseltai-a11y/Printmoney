@@ -259,10 +259,10 @@ export default function OwnTheMarque() {
             Own The Marque
           </a>
           <ul className="nav-links">
-            <li><a href="#process">How It Works</a></li>
+            <li><a href="#packages">Packages</a></li>
             <li><a href="#about">About</a></li>
             <li><a href="#contact">Contact</a></li>
-            <li><a href="#request" className="nav-cta">Submit a Request</a></li>
+            <li><a href="#quote" className="nav-cta">Get a Free Quote</a></li>
           </ul>
           <button className="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
             <span></span><span></span><span></span>
@@ -272,8 +272,8 @@ export default function OwnTheMarque() {
 
       {/* Mobile menu */}
       <div className="mobile-menu" id="mobile-menu" aria-hidden="true">
-        <a href="#process" className="mobile-link">How It Works</a>
-        <a href="#request" className="mobile-link">Submit a Request</a>
+        <a href="#packages" className="mobile-link">Packages</a>
+        <a href="#quote" className="mobile-link">Get a Free Quote</a>
         <a href="#about" className="mobile-link">About</a>
         <a href="#contact" className="mobile-link">Contact</a>
       </div>
@@ -418,122 +418,163 @@ export default function OwnTheMarque() {
         <div className="container">
           <div className="hero-inner">
             <div className="hero-eyebrow">
-              <p className="eyebrow hero-line" style={{ transitionDelay: '0.1s' }}>Exotic &amp; Classic Car Acquisition</p>
+              <p className="eyebrow hero-line" style={{ transitionDelay: '0.1s' }}>Exotic &amp; Classic Car Listing Service</p>
             </div>
             <div className="hero-headline" style={{ marginTop: '20px' }}>
               <h1 className="display display-xl hero-line" style={{ transitionDelay: '0.25s' }}>
-                You know<br />the car.<br />We find it.
+                Sell it<br />yourself.<br />Just not alone.
               </h1>
             </div>
             <div className="hero-sub">
               <p className="hero-line" style={{ transitionDelay: '0.45s' }}>
-                Own The Marque is a specialist search service for exotic and classic cars. Tell us exactly what you want. We search dealers, auctions, private collections, and club networks until we find it, then connect you directly with the seller.
+                Own The Marque prepares exotic and classic cars for private sale. Professional photography, expert copy, and a listing that commands the price your car deserves. You stay in control and close the deal on your terms.
               </p>
               <p className="hero-line" style={{ transitionDelay: '0.55s', marginTop: '10px', fontSize: '14px', color: 'var(--text-3)' }}>
-                One finder&apos;s fee: 5% of the sale price, payable only when we deliver the car.
+                Packages from $249. No commission. No consignment. You keep every dollar of the sale.
               </p>
             </div>
             <div className="hero-actions hero-line" style={{ transitionDelay: '0.65s' }}>
-              <a href="#request" className="btn-primary">Submit a Search Request →</a>
-              <a href="#process" className="btn-ghost">See how it works</a>
+              <a href="#quote" className="btn-primary">Get Your Free Listing Quote →</a>
+              <a href="#packages" className="btn-ghost">See our packages</a>
             </div>
           </div>
         </div>
         </div>
       </section>
 
-      {/* ── HOW IT WORKS ──────────────────────────────────── */}
-      <section id="process">
+      {/* ── PACKAGES ──────────────────────────────────────── */}
+      <section id="packages">
         <div className="container">
-          <p className="eyebrow reveal">Process</p>
+          <p className="eyebrow reveal">Packages</p>
           <div className="rule"></div>
-          <h2 className="display display-md reveal reveal-delay-1">Four steps from<br />wish list to keys</h2>
+          <h2 className="display display-md reveal reveal-delay-1">Everything your listing needs<br />to earn its price</h2>
+          <p className="section-sub reveal reveal-delay-2">Flat fees. No commission. You negotiate and close the deal yourself — we make sure the listing is worthy of the car.</p>
 
-          <div className="steps">
-            <div className="step reveal reveal-delay-1">
-              <span className="step-num" aria-hidden="true">01</span>
-              <h3>Tell us what you want</h3>
-              <p>Make, model, year, specification, colour. The more specific, the better. We deal exclusively in the exotic and classic space, so precision is welcome here.</p>
+          <div className="tiers">
+
+            <div className="tier reveal reveal-delay-1">
+              <div className="tier-header">
+                <span className="tier-name">Essential</span>
+                <span className="tier-price">$249</span>
+              </div>
+              <p className="tier-desc">Everything you need to list with confidence on any platform.</p>
+              <ul className="tier-features">
+                <li>Professional photography — 20+ edited shots</li>
+                <li>Expert written listing description</li>
+                <li>Spec sheet formatted for private sale</li>
+                <li>Delivery within 5 business days</li>
+              </ul>
+              <a href="#quote" className="tier-cta">Get Started</a>
             </div>
-            <div className="step reveal reveal-delay-2">
-              <span className="step-num" aria-hidden="true">02</span>
-              <h3>We search the network</h3>
-              <p>Active outreach across specialist dealers, auction houses, private sellers, marque registers, and club contacts. Sources most buyers can&apos;t reach independently.</p>
+
+            <div className="tier tier-featured reveal reveal-delay-2">
+              <div className="tier-badge">Most Popular</div>
+              <div className="tier-header">
+                <span className="tier-name">Standard</span>
+                <span className="tier-price">$349</span>
+              </div>
+              <p className="tier-desc">Adds the documentation and video that serious buyers expect.</p>
+              <ul className="tier-features">
+                <li>Everything in Essential</li>
+                <li>Vehicle history report (Carfax or equivalent)</li>
+                <li>Walkthrough video — narrated, 3 to 5 minutes</li>
+                <li>Delivery within 5 business days</li>
+              </ul>
+              <a href="#quote" className="tier-cta">Get Started</a>
             </div>
-            <div className="step reveal reveal-delay-3">
-              <span className="step-num" aria-hidden="true">03</span>
-              <h3>We verify and connect</h3>
-              <p>Provenance checks, documentation review, coordinating a trusted third party inspection, and market valuation, so you go into the deal fully informed.</p>
+
+            <div className="tier reveal reveal-delay-3">
+              <div className="tier-header">
+                <span className="tier-name">Premium</span>
+                <span className="tier-price">$499</span>
+              </div>
+              <p className="tier-desc">Full service. We post it everywhere it needs to be seen.</p>
+              <ul className="tier-features">
+                <li>Everything in Standard</li>
+                <li>Detailing coordination prior to shoot</li>
+                <li>Multi-platform listing: Bring a Trailer, AutoTrader, Facebook Marketplace, marque-specific groups</li>
+                <li>Listing management and buyer enquiry triage for 30 days</li>
+              </ul>
+              <a href="#quote" className="tier-cta">Get Started</a>
             </div>
-            <div className="step reveal reveal-delay-4">
-              <span className="step-num" aria-hidden="true">04</span>
-              <h3>You take the keys</h3>
-              <p>When you&apos;re satisfied and the deal is done, our fee is 5% of the final sale price. No find, no fee. We only get paid when you get the car.</p>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ── STATS ─────────────────────────────────────────── */}
+      <section id="stats" style={{ background: 'var(--surface)' }}>
+        <div className="container">
+          <p className="eyebrow reveal" style={{ textAlign: 'center' }}>Why it works</p>
+          <div className="rule rule-center"></div>
+          <div className="stats-grid">
+            <div className="stat reveal reveal-delay-1">
+              <span className="stat-num">32%</span>
+              <p className="stat-label">faster average sale time for listings with professional photography versus phone photos</p>
+            </div>
+            <div className="stat reveal reveal-delay-2">
+              <span className="stat-num">3×</span>
+              <p className="stat-label">more buyer enquiries generated by listings with real photography and a written description</p>
+            </div>
+            <div className="stat reveal reveal-delay-3">
+              <span className="stat-num">8 in 10</span>
+              <p className="stat-label">classic car owners prefer private sale over dealer trade-in to stay in control of the transaction</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── REQUEST FORM ──────────────────────────────────── */}
-      <section id="request" style={{ background: 'var(--surface)' }}>
+      {/* ── QUOTE FORM ────────────────────────────────────── */}
+      <section id="quote">
         <div className="container">
           <div className="form-wrap">
             <div className="form-header reveal">
-              <p className="eyebrow">Start a Search</p>
+              <p className="eyebrow">Free Quote</p>
               <div className="rule rule-center"></div>
               <h2 className="display display-md">Tell us about your car</h2>
-              <p>The more detail you give us, the faster we can start looking. All enquiries are handled in strict confidence.</p>
+              <p>We&apos;ll come back to you within one business day with a quote and a clear picture of what the listing will include. No commitment required.</p>
             </div>
 
             <form id="request-form" onSubmit={handleFormSubmit} noValidate>
               <div className="form-grid reveal reveal-delay-1">
                 <div className="field full">
-                  <label htmlFor="car-model">Make &amp; Model</label>
-                  <input type="text" id="car-model" name="car-model" placeholder="e.g. Ferrari 308 GTB, Jaguar E-Type Series 1" required />
-                </div>
-                <div className="field">
-                  <label htmlFor="year-from">Year From</label>
-                  <input type="text" id="year-from" name="year-from" placeholder="e.g. 1968" />
-                </div>
-                <div className="field">
-                  <label htmlFor="year-to">Year To</label>
-                  <input type="text" id="year-to" name="year-to" placeholder="e.g. 1972" />
+                  <label htmlFor="car-model">Make, Model &amp; Year</label>
+                  <input type="text" id="car-model" name="car-model" placeholder="e.g. 1972 Ferrari 365 GTB/4 Daytona, 1961 Jaguar E-Type Series 1" required />
                 </div>
                 <div className="field full">
-                  <label htmlFor="spec">Specification &amp; Notes</label>
-                  <textarea id="spec" name="spec" placeholder="Colour, interior, RHD or LHD, matching numbers, known history, any specific options you require..."></textarea>
+                  <label htmlFor="spec">Condition &amp; Notable Details</label>
+                  <textarea id="spec" name="spec" placeholder="Current condition, any recent service or restoration work, known history, matching numbers, documentation you have..."></textarea>
                 </div>
                 <div className="field">
-                  <label htmlFor="budget">Budget</label>
-                  <select id="budget" name="budget">
+                  <label htmlFor="asking">Asking Price Range</label>
+                  <select id="asking" name="asking">
                     <option value="">Select a range</option>
-                    <option>Under $100,000</option>
-                    <option>$100,000 – $250,000</option>
-                    <option>$250,000 – $500,000</option>
-                    <option>$500,000 – $1,000,000</option>
+                    <option>Under $50,000</option>
+                    <option>$50,000 to $100,000</option>
+                    <option>$100,000 to $250,000</option>
+                    <option>$250,000 to $500,000</option>
+                    <option>$500,000 to $1,000,000</option>
                     <option>Over $1,000,000</option>
-                    <option>Prefer to discuss privately</option>
+                    <option>Prefer to discuss</option>
                   </select>
                 </div>
                 <div className="field">
-                  <label htmlFor="timeline">Timeline</label>
+                  <label htmlFor="timeline">When do you want to list?</label>
                   <select id="timeline" name="timeline">
                     <option value="">Select timeline</option>
-                    <option>This week</option>
-                    <option>This month</option>
+                    <option>As soon as possible</option>
+                    <option>Within the next month</option>
                     <option>Within 3 months</option>
-                    <option>Within 6 months</option>
-                    <option>Just exploring</option>
+                    <option>Just exploring options</option>
                   </select>
                 </div>
                 <div className="field full">
-                  <label htmlFor="payment">How do you plan to pay?</label>
-                  <select id="payment" name="payment">
-                    <option value="">Select payment method</option>
-                    <option>Cash / Wire transfer</option>
-                    <option>Financing already arranged</option>
-                    <option>Need guidance on financing options</option>
-                    <option>Haven&apos;t decided yet</option>
+                  <label htmlFor="package">Package interest</label>
+                  <select id="package" name="package">
+                    <option value="">Not sure yet — happy to advise</option>
+                    <option>Essential ($249) — photography + description</option>
+                    <option>Standard ($349) — adds history report + video</option>
+                    <option>Premium ($499) — full service + multi-platform posting</option>
                   </select>
                 </div>
               </div>
@@ -545,7 +586,7 @@ export default function OwnTheMarque() {
                 </div>
                 <div className="field">
                   <label htmlFor="phone">Phone</label>
-                  <input type="tel" id="phone" name="phone" placeholder="+1 or international" />
+                  <input type="tel" id="phone" name="phone" placeholder="+1" />
                 </div>
                 <div className="field full">
                   <label htmlFor="email">Email Address</label>
@@ -554,9 +595,9 @@ export default function OwnTheMarque() {
               </div>
 
               <div className="form-submit reveal reveal-delay-3">
-                <button type="submit" className="btn-submit">Send Enquiry →</button>
+                <button type="submit" className="btn-submit">Request a Free Quote →</button>
                 <p className="form-note">
-                  We respond to all enquiries within one business day.<br />
+                  We respond within one business day.<br />
                   Your details are never shared with third parties.
                 </p>
               </div>
@@ -564,8 +605,8 @@ export default function OwnTheMarque() {
 
             <div className="form-success" id="form-success" aria-live="polite">
               <div className="success-icon">◆</div>
-              <h3>Enquiry received</h3>
-              <p>We&apos;ll review the details of your search and be in touch within one business day to discuss next steps.</p>
+              <h3>Quote request received</h3>
+              <p>We&apos;ll review your car&apos;s details and be in touch within one business day with a tailored quote and next steps.</p>
             </div>
           </div>
         </div>
@@ -576,14 +617,14 @@ export default function OwnTheMarque() {
         <div className="container">
           <p className="eyebrow reveal">About</p>
           <div className="rule"></div>
-          <h2 className="display display-md reveal reveal-delay-1">Why a specialist matters</h2>
+          <h2 className="display display-md reveal reveal-delay-1">Why presentation<br />changes the price</h2>
 
           <div className="about-grid">
             <div className="about-copy">
-              <p className="reveal reveal-delay-1">Own The Marque was founded because I know exactly what makes a specific car worth owning: the right production year, the correct trim specification, documented provenance, matching numbers. I got tired of watching buyers overpay for the wrong example or miss the right one entirely. That knowledge is what this service is built on.</p>
-              <p className="reveal reveal-delay-2">Exotic and classic cars are a different category from standard car buying. A 1967 Jaguar E-Type with a Heritage certificate and matching drivetrain is a fundamentally different object from the same car without that history. Knowing which details actually matter, and which sellers are genuinely representing them, takes deep immersion in this world, and that&apos;s where I live.</p>
-              <p className="reveal reveal-delay-3">We work exclusively in the exotic and classic segment, not general car buying. That focus means every search gets specialist attention: we already speak the language of the car you&apos;re looking for, its production quirks, its known problem areas, what the market pays for the right example versus a compromised one. We&apos;re currently building our network across South Florida, working with independent dealers, auction contacts, and collector clubs including AACA chapters and marque specific clubs, with plans to expand nationally as the business grows.</p>
-              <p className="reveal reveal-delay-4">The no find, no fee model keeps the incentives honest. We don&apos;t charge a retainer or consultation fee. We earn 5% of the sale price when we deliver the car you want. That means we&apos;re motivated to find the right car, not just any car.</p>
+              <p className="reveal reveal-delay-1">Own The Marque was built around a simple observation: exotic and classic cars routinely sell for less than they should, not because the car isn&apos;t right, but because the listing isn&apos;t. Phone photos, vague descriptions, and a generic post on a general marketplace communicate the wrong thing to the right buyer.</p>
+              <p className="reveal reveal-delay-2">We work exclusively with exotic and classic cars. A 1972 Ferrari Daytona is not the same category of sale as a used sedan, and it shouldn&apos;t be treated like one. The photography, the copy, and the platform choice all need to speak to the collector who knows what that car is worth — because that&apos;s the buyer who will pay full price for it.</p>
+              <p className="reveal reveal-delay-3">You stay in control throughout. You set the asking price, you handle the enquiries, you negotiate, and you close. We handle everything that makes the car look and read like it deserves its price, then step back. No consignment, no commission, no one else&apos;s hand in your pocket at closing.</p>
+              <p className="reveal reveal-delay-4">We&apos;re based in South Florida and currently serve sellers across the region, with plans to expand nationally. Our focus is exclusively the exotic and classic segment — not general used cars, not fleet vehicles. One lane, done properly.</p>
             </div>
 
             <div className="about-panel reveal reveal-delay-2">
@@ -592,28 +633,28 @@ export default function OwnTheMarque() {
                 <div className="credential-icon">◆</div>
                 <div className="credential-text">
                   <h4>Exotic &amp; Classic only</h4>
-                  <p>Not general car buying. Not fleet purchasing. One lane, executed with precision.</p>
+                  <p>We don&apos;t photograph used sedans. Every listing we produce is for a car that warrants specialist presentation.</p>
                 </div>
               </div>
               <div className="credential">
                 <div className="credential-icon">◆</div>
                 <div className="credential-text">
-                  <h4>Buyer&apos;s side, always</h4>
-                  <p>We hold no inventory and list nothing for sale. Our loyalty is exclusively to you.</p>
+                  <h4>You keep the sale</h4>
+                  <p>No consignment, no commission. You negotiate directly with buyers and keep every dollar of the final price.</p>
                 </div>
               </div>
               <div className="credential">
                 <div className="credential-icon">◆</div>
                 <div className="credential-text">
-                  <h4>South Florida network, growing</h4>
-                  <p>Dealers, auctions, AACA chapters, and marque clubs across South Florida, expanding nationally with our client base.</p>
+                  <h4>Flat fee, full transparency</h4>
+                  <p>You know exactly what you&apos;re paying before we start. No surprises, no percentage of the sale.</p>
                 </div>
               </div>
               <div className="credential">
                 <div className="credential-icon">◆</div>
                 <div className="credential-text">
-                  <h4>No find, no fee</h4>
-                  <p>A 5% finder&apos;s fee, paid only when you take the keys. Fully aligned incentives.</p>
+                  <h4>Right platforms, right audience</h4>
+                  <p>Bring a Trailer, marque-specific groups, AutoTrader. We post where serious exotic and classic buyers actually look.</p>
                 </div>
               </div>
             </div>
@@ -645,10 +686,10 @@ export default function OwnTheMarque() {
             </div>
 
             <div className="contact-note reveal reveal-delay-2">
-              <p className="eyebrow">Prefer to write?</p>
-              <p>Use the search request form above to give us the detail we need to start working straight away. The more you tell us about the car you&apos;re looking for, the faster we can begin reaching out to the network.</p>
+              <p className="eyebrow">Ready to get started?</p>
+              <p>Use the form above to tell us about your car and we&apos;ll come back with a quote within one business day. No obligation, no commitment — just a clear picture of what the listing will include and what it will cost.</p>
               <br />
-              <a href="#request" className="btn-primary" style={{ display: 'inline-flex', marginTop: '4px' }}>Submit a Request →</a>
+              <a href="#quote" className="btn-primary" style={{ display: 'inline-flex', marginTop: '4px' }}>Get a Free Quote →</a>
             </div>
           </div>
         </div>
@@ -660,7 +701,7 @@ export default function OwnTheMarque() {
           <div className="footer-inner">
             <p className="footer-copy">© 2026 Own The Marque · ownthemarque.com</p>
             <ul className="footer-links">
-              <li><a href="#request">Submit a Request</a></li>
+              <li><a href="#quote">Get a Free Quote</a></li>
               <li><a href="mailto:hello@ownthemarque.com">Email</a></li>
               <li><a href="/privacy">Privacy Policy</a></li>
               <li><a href="/terms">Terms of Service</a></li>

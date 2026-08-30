@@ -19,11 +19,11 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: 'Own The Marque',
-  description: 'Personal buyer\'s agent for exotic and classic cars. We source the exact car you want, verify provenance, and negotiate on your behalf. One finder\'s fee, paid only when we deliver.',
-  keywords: 'exotic car buyer agent, classic car finder, private car buyer, collector car acquisition, ownthemarque',
+  description: 'Professional listing-prep for exotic and classic car sellers. Photography, expert copy, and multi-platform posting so your car sells privately, faster, and for more. Packages from $249.',
+  keywords: 'classic car listing service, exotic car photography, private car sale, classic car listing prep, collector car photography, ownthemarque',
   openGraph: {
-    title: 'Own The Marque — We Find the Car You Want',
-    description: 'Personal buyer\'s agent for exotic and classic cars.',
+    title: 'Own The Marque — Sell Your Classic, Your Way',
+    description: 'Professional listing-prep for exotic and classic car sellers. Packages from $249.',
     type: 'website',
     url: 'https://ownthemarque.com',
   },
