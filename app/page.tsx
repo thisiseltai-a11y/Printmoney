@@ -427,10 +427,10 @@ export default function OwnTheMarque() {
             </div>
             <div className="hero-sub">
               <p className="hero-line" style={{ transitionDelay: '0.45s' }}>
-                Own The Marque is a specialist search service for exotic and classic cars. Tell us exactly what you want — we search dealers, auctions, private collections, and club networks until we find it, then connect you directly with the seller.
+                Own The Marque is a specialist search service for exotic and classic cars. Tell us exactly what you want. We search dealers, auctions, private collections, and club networks until we find it, then connect you directly with the seller.
               </p>
               <p className="hero-line" style={{ transitionDelay: '0.55s', marginTop: '10px', fontSize: '14px', color: 'var(--text-3)' }}>
-                One finder&apos;s fee — 5% of the sale price — payable only when we deliver the car.
+                One finder&apos;s fee: 5% of the sale price, payable only when we deliver the car.
               </p>
             </div>
             <div className="hero-actions hero-line" style={{ transitionDelay: '0.65s' }}>
@@ -453,7 +453,7 @@ export default function OwnTheMarque() {
             <div className="step reveal reveal-delay-1">
               <span className="step-num" aria-hidden="true">01</span>
               <h3>Tell us what you want</h3>
-              <p>Make, model, year, specification, colour — the more specific, the better. We deal exclusively in the exotic and classic space, so precision is welcome here.</p>
+              <p>Make, model, year, specification, colour. The more specific, the better. We deal exclusively in the exotic and classic space, so precision is welcome here.</p>
             </div>
             <div className="step reveal reveal-delay-2">
               <span className="step-num" aria-hidden="true">02</span>
@@ -463,12 +463,12 @@ export default function OwnTheMarque() {
             <div className="step reveal reveal-delay-3">
               <span className="step-num" aria-hidden="true">03</span>
               <h3>We verify and connect</h3>
-              <p>Provenance checks, documentation review, coordinating a trusted third-party inspection, and market valuation — so you go into the deal fully informed.</p>
+              <p>Provenance checks, documentation review, coordinating a trusted third party inspection, and market valuation, so you go into the deal fully informed.</p>
             </div>
             <div className="step reveal reveal-delay-4">
               <span className="step-num" aria-hidden="true">04</span>
               <h3>You take the keys</h3>
-              <p>When you&apos;re satisfied and the deal is done, our fee is 5% of the final sale price. No find, no fee — we only get paid when you get the car.</p>
+              <p>When you&apos;re satisfied and the deal is done, our fee is 5% of the final sale price. No find, no fee. We only get paid when you get the car.</p>
             </div>
           </div>
         </div>
@@ -492,11 +492,11 @@ export default function OwnTheMarque() {
                   <input type="text" id="car-model" name="car-model" placeholder="e.g. Ferrari 308 GTB, Jaguar E-Type Series 1" required />
                 </div>
                 <div className="field">
-                  <label htmlFor="year-from">Year — From</label>
+                  <label htmlFor="year-from">Year From</label>
                   <input type="text" id="year-from" name="year-from" placeholder="e.g. 1968" />
                 </div>
                 <div className="field">
-                  <label htmlFor="year-to">Year — To</label>
+                  <label htmlFor="year-to">Year To</label>
                   <input type="text" id="year-to" name="year-to" placeholder="e.g. 1972" />
                 </div>
                 <div className="field full">
@@ -580,10 +580,10 @@ export default function OwnTheMarque() {
 
           <div className="about-grid">
             <div className="about-copy">
-              <p className="reveal reveal-delay-1">Own The Marque was founded because I know exactly what makes a specific car worth owning — the right production year, the correct trim specification, documented provenance, matching numbers — and I got tired of watching buyers overpay for the wrong example or miss the right one entirely. That knowledge is what this service is built on.</p>
-              <p className="reveal reveal-delay-2">Exotic and classic cars are a different category from standard car buying. A 1967 Jaguar E-Type with a Heritage certificate and matching drivetrain is a fundamentally different object from the same car without that history. Knowing which details actually matter — and which sellers are genuinely representing them — takes deep immersion in this world, and that&apos;s where I live.</p>
-              <p className="reveal reveal-delay-3">We work exclusively in the exotic and classic segment, not general car buying. That focus means every search gets specialist attention: we already speak the language of the car you&apos;re looking for — its production quirks, its known problem areas, what the market pays for the right example versus a compromised one. We&apos;re currently building our network across South Florida, working with independent dealers, auction contacts, and collector clubs including AACA chapters and marque-specific clubs, with plans to expand nationally as the business grows.</p>
-              <p className="reveal reveal-delay-4">The no find, no fee model keeps the incentives honest. We don&apos;t charge a retainer or consultation fee — we earn 5% of the sale price when we deliver the car you want. That means we&apos;re motivated to find the right car, not just any car.</p>
+              <p className="reveal reveal-delay-1">Own The Marque was founded because I know exactly what makes a specific car worth owning: the right production year, the correct trim specification, documented provenance, matching numbers. I got tired of watching buyers overpay for the wrong example or miss the right one entirely. That knowledge is what this service is built on.</p>
+              <p className="reveal reveal-delay-2">Exotic and classic cars are a different category from standard car buying. A 1967 Jaguar E-Type with a Heritage certificate and matching drivetrain is a fundamentally different object from the same car without that history. Knowing which details actually matter, and which sellers are genuinely representing them, takes deep immersion in this world, and that&apos;s where I live.</p>
+              <p className="reveal reveal-delay-3">We work exclusively in the exotic and classic segment, not general car buying. That focus means every search gets specialist attention: we already speak the language of the car you&apos;re looking for, its production quirks, its known problem areas, what the market pays for the right example versus a compromised one. We&apos;re currently building our network across South Florida, working with independent dealers, auction contacts, and collector clubs including AACA chapters and marque specific clubs, with plans to expand nationally as the business grows.</p>
+              <p className="reveal reveal-delay-4">The no find, no fee model keeps the incentives honest. We don&apos;t charge a retainer or consultation fee. We earn 5% of the sale price when we deliver the car you want. That means we&apos;re motivated to find the right car, not just any car.</p>
             </div>
 
             <div className="about-panel reveal reveal-delay-2">
@@ -606,7 +606,7 @@ export default function OwnTheMarque() {
                 <div className="credential-icon">◆</div>
                 <div className="credential-text">
                   <h4>South Florida network, growing</h4>
-                  <p>Dealers, auctions, AACA chapters, and marque clubs across South Florida — expanding nationally with our client base.</p>
+                  <p>Dealers, auctions, AACA chapters, and marque clubs across South Florida, expanding nationally with our client base.</p>
                 </div>
               </div>
               <div className="credential">

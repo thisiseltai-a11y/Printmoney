@@ -61,7 +61,7 @@ export default function PrivacyPolicy() {
 
           <section className="legal-section">
             <h2>How we protect your information</h2>
-            <p>Enquiries submitted through this site are handled directly by us — there is no third-party CRM or marketing platform storing your data. We treat every enquiry with the same discretion we apply to the search itself.</p>
+            <p>Enquiries submitted through this site are handled directly by us. There is no third party CRM or marketing platform storing your data. We treat every enquiry with the same discretion we apply to the search itself.</p>
           </section>
 
           <section className="legal-section">

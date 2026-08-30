@@ -48,7 +48,7 @@ export default function TermsOfService() {
 
           <section className="legal-section">
             <h2>Inspections and due diligence</h2>
-            <p>Where we coordinate a third-party inspection, the inspection is conducted by an independent specialist. We are not responsible for the findings, conclusions, or accuracy of any third-party inspection report. You are responsible for conducting your own due diligence — including any independent inspection, title search, and legal review — before purchasing any vehicle.</p>
+            <p>Where we coordinate a third party inspection, the inspection is conducted by an independent specialist. We are not responsible for the findings, conclusions, or accuracy of any third party inspection report. You are responsible for conducting your own due diligence, including any independent inspection, title search, and legal review, before purchasing any vehicle.</p>
             <p>Purchasing a vehicle is your decision. We provide information and introductions; we do not advise on whether a specific purchase is the right financial or personal decision for you.</p>
           </section>
 
@@ -65,7 +65,7 @@ export default function TermsOfService() {
 
           <section className="legal-section">
             <h2>Confidentiality</h2>
-            <p>We treat all search enquiries with strict confidentiality. In turn, we ask that any seller introductions we make — including seller identity and vehicle details prior to your purchase — are treated as confidential and not shared with third parties.</p>
+            <p>We treat all search enquiries with strict confidentiality. In turn, we ask that any seller introductions we make, including seller identity and vehicle details prior to your purchase, are treated as confidential and not shared with third parties.</p>
           </section>
 
           <section className="legal-section">
