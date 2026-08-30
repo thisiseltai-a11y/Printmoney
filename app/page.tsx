@@ -160,7 +160,7 @@ export default function OwnTheMarque() {
             <div className="step reveal reveal-delay-3">
               <span className="step-num" aria-hidden="true">03</span>
               <h3>We verify and negotiate</h3>
-              <p>Provenance checks, documentation review, independent mechanical inspection, and market valuation — before we negotiate the price squarely on your behalf.</p>
+              <p>Provenance checks, documentation review, coordinating a trusted third-party inspection, and market valuation — before we negotiate the price squarely on your behalf.</p>
             </div>
             <div className="step reveal reveal-delay-4">
               <span className="step-num" aria-hidden="true">04</span>
@@ -277,10 +277,10 @@ export default function OwnTheMarque() {
 
           <div className="about-grid">
             <div className="about-copy">
-              <p className="reveal reveal-delay-1">I&apos;ve spent the better part of two decades in the world of exotic and classic cars — at auction houses, at track days, at private viewings where the car on offer is worth more than most houses on the street. That immersion is what Own The Marque is built on.</p>
-              <p className="reveal reveal-delay-2">Most buyer&apos;s agents are generalists. I work only in the exotic and classic space, because that&apos;s where the real complexity is: matching a specific production number, a particular trim specification, the right ownership history to a buyer who knows exactly what they want.</p>
-              <p className="reveal reveal-delay-3">My network spans marque specialists, independent dealers, private collectors, major auction houses, and marque clubs across the United States, the UK, and Europe. When you tell me what you&apos;re looking for, I begin with sources most buyers simply can&apos;t reach on their own.</p>
-              <p className="reveal reveal-delay-4">Clients come to me because the alternative — cold-calling dealers, scouring auction catalogues, negotiating alone in an unfamiliar market — takes months and rarely ends in the right car.</p>
+              <p className="reveal reveal-delay-1">Own The Marque was founded because I know exactly what makes a specific car worth owning — the right production year, the correct trim specification, documented provenance, matching numbers — and I got tired of watching buyers overpay for the wrong example or miss the right one entirely. That knowledge is what this service is built on.</p>
+              <p className="reveal reveal-delay-2">Exotic and classic cars are a different category from standard car buying. A 1967 Jaguar E-Type with a Heritage certificate and matching drivetrain is a fundamentally different object from the same car without that history. Knowing which details actually matter — and which sellers are genuinely representing them — takes deep immersion in this world, and that&apos;s where I live.</p>
+              <p className="reveal reveal-delay-3">We work exclusively in the exotic and classic segment, not general car buying. That focus means every search gets specialist attention: we already speak the language of the car you&apos;re looking for — its production quirks, its known problem areas, what the market pays for the right example versus a compromised one. We&apos;re currently building our network across South Florida, working with independent dealers, auction contacts, and collector clubs including AACA chapters and marque-specific clubs, with plans to expand nationally as the business grows.</p>
+              <p className="reveal reveal-delay-4">The no find, no fee model keeps the incentives honest. We don&apos;t charge a retainer or consultation fee — we earn 5% of the sale price when we deliver the car you want. That means we&apos;re motivated to find the right car, not just any car.</p>
             </div>
 
             <div className="about-panel reveal reveal-delay-2">
@@ -302,8 +302,8 @@ export default function OwnTheMarque() {
               <div className="credential">
                 <div className="credential-icon">◆</div>
                 <div className="credential-text">
-                  <h4>Private network access</h4>
-                  <p>Marque clubs, collector networks, specialist dealers — sources before they&apos;re public.</p>
+                  <h4>South Florida network, growing</h4>
+                  <p>Dealers, auctions, AACA chapters, and marque clubs across South Florida — expanding nationally with our client base.</p>
                 </div>
               </div>
               <div className="credential">
