@@ -125,7 +125,7 @@ export default function OwnTheMarque() {
             </div>
             <div className="hero-sub">
               <p className="hero-line" style={{ transitionDelay: '0.45s' }}>
-                Own The Marque is a personal buyer&apos;s agent for exotic and classic cars. Tell us exactly what you want — we search dealers, auctions, private collections, and club networks, then negotiate the deal on your behalf.
+                Own The Marque is a specialist search service for exotic and classic cars. Tell us exactly what you want — we search dealers, auctions, private collections, and club networks until we find it, then connect you directly with the seller.
               </p>
               <p className="hero-line" style={{ transitionDelay: '0.55s', marginTop: '10px', fontSize: '14px', color: 'var(--text-3)' }}>
                 One finder&apos;s fee — 5% of the sale price — payable only when we deliver the car.
@@ -159,8 +159,8 @@ export default function OwnTheMarque() {
             </div>
             <div className="step reveal reveal-delay-3">
               <span className="step-num" aria-hidden="true">03</span>
-              <h3>We verify and negotiate</h3>
-              <p>Provenance checks, documentation review, coordinating a trusted third-party inspection, and market valuation — before we negotiate the price squarely on your behalf.</p>
+              <h3>We verify and connect</h3>
+              <p>Provenance checks, documentation review, coordinating a trusted third-party inspection, and market valuation — so you go into the deal fully informed.</p>
             </div>
             <div className="step reveal reveal-delay-4">
               <span className="step-num" aria-hidden="true">04</span>
@@ -253,7 +253,7 @@ export default function OwnTheMarque() {
               <div className="form-submit reveal reveal-delay-3">
                 <button type="submit" className="btn-submit">Send Enquiry →</button>
                 <p className="form-note">
-                  We respond to all enquiries within 24 hours.<br />
+                  We respond to all enquiries within one business day.<br />
                   Your details are never shared with third parties.
                 </p>
               </div>
@@ -262,7 +262,7 @@ export default function OwnTheMarque() {
             <div className="form-success" id="form-success" aria-live="polite">
               <div className="success-icon">◆</div>
               <h3>Enquiry received</h3>
-              <p>We&apos;ll review the details of your search and be in touch within 24 hours to discuss next steps.</p>
+              <p>We&apos;ll review the details of your search and be in touch within one business day to discuss next steps.</p>
             </div>
           </div>
         </div>
@@ -337,7 +337,7 @@ export default function OwnTheMarque() {
               </div>
               <div className="contact-item">
                 <p className="contact-label">Response time</p>
-                <p>All enquiries acknowledged within 24 hours. Calls available by appointment.</p>
+                <p>All enquiries acknowledged within one business day. Calls available by appointment.</p>
               </div>
             </div>
 
@@ -355,10 +355,12 @@ export default function OwnTheMarque() {
       <footer>
         <div className="container">
           <div className="footer-inner">
-            <p className="footer-copy">© 2025 Own The Marque · ownthemarque.com</p>
+            <p className="footer-copy">© 2026 Own The Marque · ownthemarque.com</p>
             <ul className="footer-links">
               <li><a href="#request">Submit a Request</a></li>
               <li><a href="mailto:hello@ownthemarque.com">Email</a></li>
+              <li><a href="/privacy">Privacy Policy</a></li>
+              <li><a href="/terms">Terms of Service</a></li>
             </ul>
           </div>
         </div>
