@@ -40,7 +40,7 @@ export default function VinInput({ autoFocus = false }: { autoFocus?: boolean })
           type="submit"
           className="flex h-14 shrink-0 items-center justify-center gap-2 rounded-sm bg-amber px-7 font-semibold text-bg transition hover:opacity-90 active:scale-[0.98]"
         >
-          Decode Free
+          Check Now — Free
           <ArrowRight className="h-4 w-4" />
         </button>
       </div>
