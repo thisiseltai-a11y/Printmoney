@@ -9,11 +9,23 @@
 // ValuationResult shape below, so a provider swap (e.g. MarketCheck) is a
 // same-file change.
 
+export interface Comparable {
+  price: number
+  mileage?: number
+  distanceMiles?: number
+  soldDaysAgo?: number
+}
+
 export interface ValuationResult {
   low: number
   estimate: number
   high: number
   source: 'vinaudit' | 'demo'
+  // Anonymized "similar cars sold nearby" examples. Left undefined unless
+  // the live provider response is confirmed to include comp/listing data —
+  // do NOT wire this to a second paid call. The UI shows a "coming soon"
+  // placeholder whenever this is empty/undefined (see ComparablesCard).
+  comparables?: Comparable[]
 }
 
 export async function getValuation(params: {
@@ -38,6 +50,13 @@ export async function getValuation(params: {
       const data = await res.json()
       const prices = data?.prices
       if (prices?.average) {
+        // TODO(comparables): once VinAudit's real response shape is
+        // confirmed, if it includes a comparable-listings array (e.g.
+        // `data.listings`), map the first 2-3 into `comparables` here —
+        // anonymized (no VIN/seller info), just price/mileage/distance/age.
+        // Do not call a second endpoint or a different provider for this;
+        // leave comparables undefined (→ "coming soon" in the UI) until it's
+        // confirmed to already be in this same response.
         return {
           low: Math.round(Number(prices.below ?? prices.average * 0.9)),
           estimate: Math.round(Number(prices.average)),

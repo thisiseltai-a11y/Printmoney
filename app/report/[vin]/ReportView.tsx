@@ -7,6 +7,7 @@ import ArcGauge from '@/components/ArcGauge'
 import ValueBand from '@/components/ValueBand'
 import LockedReportCard from '@/components/LockedReportCard'
 import HistoryReportCard from '@/components/HistoryReportCard'
+import ComparablesCard from '@/components/ComparablesCard'
 import type { DecodedVehicle } from '@/lib/nhtsa'
 import type { ValuationResult } from '@/lib/valuation'
 import type { HistoryReport } from '@/lib/vehicleHistory'
@@ -205,6 +206,8 @@ export default function ReportView({ vin }: { vin: string }) {
         )}
         {valuationError && <p className="mt-3 font-mono text-xs text-amber">{valuationError}</p>}
       </div>
+
+      {valuation && <ComparablesCard comparables={valuation.comparables} />}
 
       {retrieving && !unlockedReport && (
         <div className="flex items-center gap-3 rounded-card border border-line bg-panel p-6 text-muted">

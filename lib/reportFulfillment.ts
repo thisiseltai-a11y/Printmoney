@@ -7,6 +7,9 @@ export async function fulfillReport(vin: string, email: string, stripeSessionId?
   const existing = await getReport(vin, email)
   if (existing) return existing
 
+  // Only ever called from here — after Stripe confirms payment_status ===
+  // 'paid' (see /api/checkout/verify and /api/stripe/webhook). The paid
+  // history API is never pre-fetched or called speculatively.
   const report = await getHistoryReport(vin)
   await saveReport({ vin, email, stripeSessionId, report })
   await logLookup(vin, 'paid')
