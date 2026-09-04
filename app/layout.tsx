@@ -1,38 +1,41 @@
 import type { Metadata } from 'next'
-import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
+import { Space_Grotesk, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 
-const cormorant = Cormorant_Garamond({
+const grotesk = Space_Grotesk({
   subsets: ['latin'],
-  weight: ['300', '400', '600'],
-  style: ['normal', 'italic'],
-  variable: '--font-cormorant',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-grotesk',
   display: 'swap',
 })
 
-const dmSans = DM_Sans({
+const jbMono = JetBrains_Mono({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
-  variable: '--font-dm-sans',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-jbmono',
   display: 'swap',
 })
 
 export const metadata: Metadata = {
-  title: 'Own The Marque',
-  description: 'Professional listing-prep for exotic and classic car sellers. Photography, expert copy, and multi-platform posting so your car sells privately, faster, and for more. Packages from $249.',
-  keywords: 'classic car listing service, exotic car photography, private car sale, classic car listing prep, collector car photography, ownthemarque',
+  title: 'WorthCars — Instant VIN Decode & Vehicle Value',
+  description:
+    'Enter any VIN and get an instant free decode plus estimated market value. Unlock the full history report — accidents, title, ownership — for one flat fee.',
+  keywords:
+    'VIN lookup, vehicle history report, car value estimate, VIN decoder, used car value, accident history, title check',
   openGraph: {
-    title: 'Own The Marque — Sell Your Classic, Your Way',
-    description: 'Professional listing-prep for exotic and classic car sellers. Packages from $249.',
+    title: 'WorthCars — Instant VIN Decode & Vehicle Value',
+    description:
+      'Free instant VIN decode + market value estimate. Unlock the full history report when you need it.',
     type: 'website',
-    url: 'https://ownthemarque.com',
+    url: 'https://worthcars.com',
   },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://worthcars.com'),
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${dmSans.variable}`}>
-      <body>{children}</body>
+    <html lang="en" className={`${grotesk.variable} ${jbMono.variable}`}>
+      <body className="bg-bg text-ink font-grotesk antialiased">{children}</body>
     </html>
   )
 }
