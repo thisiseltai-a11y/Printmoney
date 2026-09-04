@@ -1,13 +1,7 @@
 {
   "functions": {
-    "app/api/generate/route.ts": {
-      "maxDuration": 60
-    },
-    "app/api/checkout/route.ts": {
-      "maxDuration": 30
-    },
-    "app/api/verify-payment/route.ts": {
-      "maxDuration": 30
-    }
+    "app/api/checkout/route.ts": { "maxDuration": 30 },
+    "app/api/checkout/verify/route.ts": { "maxDuration": 30 },
+    "app/api/stripe/webhook/route.ts": { "maxDuration": 30 }
   }
 }

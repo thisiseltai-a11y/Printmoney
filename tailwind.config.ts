@@ -1,6 +1,7 @@
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
+  darkMode: 'class',
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -9,20 +10,26 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        neon:    '#7CFC00',
-        dark:    '#0a0a0a',
-        card:    '#111111',
-        elevated:'#171717',
-        dim:     '#222222',
-        muted:   '#555555',
+        bg: '#12151A',
+        panel: '#1B1F26',
+        raised: '#22262E',
+        line: '#2C313A',
+        ink: '#EDEFF2',
+        muted: '#8B909A',
+        amber: '#FF8A3D',
+        teal: '#3ED9C0',
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
-        mono: ['var(--font-mono)', 'monospace'],
+        grotesk: ['var(--font-grotesk)', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-jbmono)', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+      },
+      borderRadius: {
+        sm: '6px',
+        card: '10px',
       },
       boxShadow: {
-        neon: '0 0 20px rgba(124,252,0,0.25)',
-        'neon-sm': '0 0 10px rgba(124,252,0,0.15)',
+        amber: '0 0 24px rgba(255,138,61,0.25)',
+        teal: '0 0 24px rgba(62,217,192,0.20)',
       },
     },
   },

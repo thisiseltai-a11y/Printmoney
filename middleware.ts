@@ -1,40 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
 
-const PROTECTED = ['/dashboard', '/picks', '/tracker']
-
-export async function middleware(req: NextRequest) {
+// Simple password gate for /admin — there are no user accounts anywhere else
+// in this app, so this is deliberately lightweight: a single shared password
+// (ADMIN_PASSWORD) checked against an httpOnly cookie set by /api/admin/login.
+export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
-  const isProtected = PROTECTED.some(p => pathname.startsWith(p))
-  if (!isProtected) return NextResponse.next()
-
-  let res = NextResponse.next({ request: req })
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() { return req.cookies.getAll() },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value))
-          res = NextResponse.next({ request: req })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            res.cookies.set(name, value, options)
-          )
-        },
-      },
-    }
-  )
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.redirect(new URL('/login', req.url))
+  if (!pathname.startsWith('/admin') || pathname === '/admin/login') {
+    return NextResponse.next()
   }
 
-  return res
+  const cookie = req.cookies.get('admin_pw')?.value
+  if (!process.env.ADMIN_PASSWORD || cookie !== process.env.ADMIN_PASSWORD) {
+    return NextResponse.redirect(new URL('/admin/login', req.url))
+  }
+
+  return NextResponse.next()
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/picks/:path*', '/tracker/:path*'],
+  matcher: ['/admin/:path*'],
 }
