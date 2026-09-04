@@ -6,14 +6,19 @@ function dbConfigured(): boolean {
   return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY)
 }
 
-export async function logLookup(vin: string, type: 'free' | 'paid', estimatedValue?: number) {
+export async function logLookup(
+  vin: string,
+  type: 'free' | 'paid',
+  opts: { estimatedValue?: number; ip?: string | null } = {}
+) {
   if (!dbConfigured()) return
   try {
     const supabase = getSupabase()
     await supabase.from('lookups').insert({
       vin,
       type,
-      estimated_value: estimatedValue ?? null,
+      estimated_value: opts.estimatedValue ?? null,
+      ip: opts.ip ?? null,
     })
   } catch (err) {
     console.error('logLookup failed:', err)
@@ -55,7 +60,7 @@ export async function getReport(vin: string, email: string): Promise<HistoryRepo
 // Called once a mileage-based valuation completes for a VIN that was just
 // decoded, so the ticker's value-trend math has a number to work with
 // without inserting a second "lookup" row for the same visit.
-export async function attachValuationToLookup(vin: string, estimatedValue: number) {
+export async function attachValuationToLookup(vin: string, estimatedValue: number, ip?: string | null) {
   if (!dbConfigured()) return
   try {
     const supabase = getSupabase()
@@ -73,7 +78,9 @@ export async function attachValuationToLookup(vin: string, estimatedValue: numbe
     if (data && data.length) {
       await supabase.from('lookups').update({ estimated_value: estimatedValue }).eq('id', data[0].id)
     } else {
-      await supabase.from('lookups').insert({ vin, type: 'free', estimated_value: estimatedValue })
+      // No matching decode row (e.g. direct API call to /api/valuation) —
+      // record it as its own lookup, with the IP, so rate limiting still sees it.
+      await supabase.from('lookups').insert({ vin, type: 'free', estimated_value: estimatedValue, ip: ip ?? null })
     }
   } catch (err) {
     console.error('attachValuationToLookup failed:', err)
