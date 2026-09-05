@@ -8,7 +8,7 @@ export default function GaugeCluster() {
   return (
     <div className="rounded-card border border-line bg-panel p-6 shadow-2xl shadow-black/40">
       <div className="mb-5 flex items-center justify-between">
-        <span className="font-mono text-xs uppercase tracking-wider text-muted">Sample decode</span>
+        <span className="font-mono text-xs uppercase tracking-wider text-muted">Sample lookup</span>
         <span className="rounded-full bg-teal/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-teal">
           Live
         </span>

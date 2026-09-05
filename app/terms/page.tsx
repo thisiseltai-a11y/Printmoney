@@ -18,7 +18,7 @@ export default function TermsPage() {
 
         <div className="mt-8 space-y-6 leading-relaxed">
           <Section title="The service">
-            WorthCars provides a free VIN decode and estimated market value for any vehicle, plus an optional paid
+            WorthCars provides a free VIN lookup and estimated market value for any vehicle, plus an optional paid
             full history report ({REPORT_PRICE_DISPLAY}, one-time, non-recurring) covering accident history, title
             status, ownership, and service records where available.
           </Section>

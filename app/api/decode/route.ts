@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       decoded = await decodeVin(vin)
       if (decoded.errorCode && decoded.errorCode !== '0') {
         return NextResponse.json(
-          { error: decoded.errorText || 'Could not decode this VIN.' },
+          { error: decoded.errorText || 'Could not find details for this VIN.' },
           { status: 422 }
         )
       }
@@ -42,6 +42,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ vin, decoded })
   } catch (err) {
     console.error('Decode error:', err)
-    return NextResponse.json({ error: 'Decode failed. Please try again.' }, { status: 500 })
+    return NextResponse.json({ error: 'Lookup failed. Please try again.' }, { status: 500 })
   }
 }

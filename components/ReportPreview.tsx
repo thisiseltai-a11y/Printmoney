@@ -23,7 +23,7 @@ export default function ReportPreview() {
           <div>
             <h2 className="font-grotesk text-3xl font-semibold tracking-tight text-ink">What&apos;s in the report</h2>
             <p className="mt-2 max-w-xl text-muted">
-              The decode and value estimate are always free. The full history report adds what a used-car buyer
+              The vehicle lookup and value estimate are always free. The full history report adds what a used-car buyer
               actually needs to know.
             </p>
           </div>

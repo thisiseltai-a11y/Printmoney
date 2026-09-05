@@ -16,7 +16,7 @@ export default async function AdminPage() {
 
         <div className="grid gap-4 sm:grid-cols-4">
           <Stat label="Total Lookups" value={stats.totalLookups.toLocaleString()} />
-          <Stat label="Free Decodes" value={stats.totalFree.toLocaleString()} />
+          <Stat label="Free Lookups" value={stats.totalFree.toLocaleString()} />
           <Stat label="Reports Sold" value={stats.totalPaid.toLocaleString()} color="text-teal" />
           <Stat
             label="Revenue"

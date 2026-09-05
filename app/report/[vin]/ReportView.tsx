@@ -39,7 +39,7 @@ export default function ReportView({ vin }: { vin: string }) {
     })
       .then(async (r) => {
         const data = await r.json()
-        if (!r.ok) throw new Error(data.error || 'Decode failed.')
+        if (!r.ok) throw new Error(data.error || 'Lookup failed.')
         setDecoded(data.decoded)
       })
       .catch((e) => setDecodeError(e.message))
@@ -136,7 +136,7 @@ export default function ReportView({ vin }: { vin: string }) {
     return (
       <div className="flex items-center gap-3 rounded-card border border-line bg-panel p-8 text-muted">
         <Loader2 className="h-5 w-5 animate-spin text-amber" />
-        <span className="readout text-sm">Decoding {vin}…</span>
+        <span className="readout text-sm">Looking up {vin}…</span>
       </div>
     )
   }
@@ -146,7 +146,7 @@ export default function ReportView({ vin }: { vin: string }) {
       <div className="flex items-start gap-3 rounded-card border border-amber/40 bg-panel p-8">
         <AlertCircle className="h-5 w-5 shrink-0 text-amber" />
         <div>
-          <p className="text-ink">{decodeError || 'Could not decode this VIN.'}</p>
+          <p className="text-ink">{decodeError || 'Could not find details for this VIN.'}</p>
           <p className="mt-1 text-sm text-muted">Double-check the VIN and try again.</p>
         </div>
       </div>

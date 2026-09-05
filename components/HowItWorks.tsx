@@ -11,7 +11,7 @@ const STEPS = [
     icon: Gauge,
     step: '02',
     title: 'Get the free readout',
-    body: 'Year, make, model, trim, engine, and a market value estimate — decoded in seconds, no signup.',
+    body: 'Year, make, model, trim, engine, and a market value estimate — all in seconds, no signup.',
   },
   {
     icon: FileLock2,

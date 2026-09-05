@@ -45,7 +45,7 @@ export default function VinInput({ autoFocus = false }: { autoFocus?: boolean })
         </button>
       </div>
       <div className="mt-2 flex justify-between px-1 font-mono text-xs">
-        <span className={error ? 'text-amber' : 'text-muted'}>{error || 'No signup required · free decode + value estimate'}</span>
+        <span className={error ? 'text-amber' : 'text-muted'}>{error || 'No signup required · free lookup + value estimate'}</span>
         <span className="text-muted">{vin.length}/17</span>
       </div>
     </form>

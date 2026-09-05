@@ -17,7 +17,7 @@ export default function PrivacyPolicy() {
 
         <div className="mt-8 space-y-6 leading-relaxed">
           <Section title="What we collect">
-            Free VIN decodes and value estimates require no personal information — we log only the VIN, whether the
+            Free VIN lookups and value estimates require no personal information — we log only the VIN, whether the
             lookup was free or paid, and a timestamp, to power the live activity stats and our own analytics.
             When you unlock a paid history report, we collect your email address so we can associate the report
             with your purchase and let you retrieve it again without paying twice.
@@ -27,7 +27,7 @@ export default function PrivacyPolicy() {
             directly and shares with us only the confirmation needed to unlock your report.
           </Section>
           <Section title="Third-party data providers">
-            Vehicle decode data comes from the NHTSA vPIC API (a public federal service). Market value estimates
+            Vehicle detail data comes from the NHTSA vPIC API (a public federal service). Market value estimates
             and full history reports are sourced from a licensed vehicle data provider. We do not scrape or resell
             Carfax data.
           </Section>
