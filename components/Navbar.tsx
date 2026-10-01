@@ -24,7 +24,7 @@ export default async function Navbar() {
             <>
               <Link
                 href="/sell/new"
-                className="rounded-sm border border-amber/40 px-4 py-2 font-medium text-amber transition hover:bg-amber hover:text-bg"
+                className="rounded-sm border border-amber/40 px-4 py-2 font-medium text-amber transition hover:bg-amber hover:text-white"
               >
                 List a car
               </Link>
@@ -41,7 +41,7 @@ export default async function Navbar() {
               </Link>
               <Link
                 href="/signup"
-                className="rounded-sm border border-amber/40 px-4 py-2 font-medium text-amber transition hover:bg-amber hover:text-bg"
+                className="rounded-sm border border-amber/40 px-4 py-2 font-medium text-amber transition hover:bg-amber hover:text-white"
               >
                 Sign up
               </Link>

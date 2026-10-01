@@ -56,13 +56,13 @@ export default function NotificationsBell() {
       <button onClick={handleOpen} className="relative rounded-sm p-2 text-muted transition hover:text-ink" aria-label="Notifications">
         <Bell className="h-5 w-5" />
         {unread > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber text-[10px] font-semibold text-bg">
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber text-[10px] font-semibold text-white">
             {unread > 9 ? '9+' : unread}
           </span>
         )}
       </button>
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-80 rounded-card border border-line bg-panel shadow-2xl shadow-black/40">
+        <div className="absolute right-0 z-50 mt-2 w-80 rounded-card border border-line bg-panel shadow-xl shadow-black/10">
           <div className="border-b border-line px-4 py-3 font-grotesk text-sm font-semibold text-ink">Notifications</div>
           <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 ? (

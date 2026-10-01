@@ -136,7 +136,7 @@ export default function NewListingForm() {
             type="button"
             onClick={handleAutoFill}
             disabled={decoding}
-            className="flex h-12 shrink-0 items-center gap-2 rounded-sm border border-teal/40 px-4 text-sm text-teal transition hover:bg-teal hover:text-bg disabled:opacity-60"
+            className="flex h-12 shrink-0 items-center gap-2 rounded-sm border border-teal/40 px-4 text-sm text-teal transition hover:bg-teal hover:text-white disabled:opacity-60"
           >
             {decoding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
             Auto-fill
@@ -237,7 +237,7 @@ export default function NewListingForm() {
       <button
         type="submit"
         disabled={submitting}
-        className="flex h-12 w-full items-center justify-center gap-2 rounded-sm bg-amber font-semibold text-bg transition hover:opacity-90 active:scale-[0.99] disabled:opacity-60"
+        className="flex h-12 w-full items-center justify-center gap-2 rounded-sm bg-amber font-semibold text-white transition hover:opacity-90 active:scale-[0.99] disabled:opacity-60"
       >
         {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Post listing'}
       </button>

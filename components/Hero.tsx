@@ -23,7 +23,7 @@ export default function Hero() {
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <Link
               href="/sell/new"
-              className="flex items-center gap-2 rounded-sm bg-amber px-7 py-4 font-semibold text-bg transition hover:opacity-90 active:scale-[0.98]"
+              className="flex items-center gap-2 rounded-sm bg-amber px-7 py-4 font-semibold text-white transition hover:opacity-90 active:scale-[0.98]"
             >
               List your car
               <ArrowRight className="h-4 w-4" />

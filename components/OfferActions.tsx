@@ -68,14 +68,14 @@ export default function OfferActions({
           <button
             onClick={() => act('accept')}
             disabled={loading}
-            className="rounded-sm bg-teal px-3 py-1.5 text-xs font-semibold text-bg transition hover:opacity-90 disabled:opacity-60"
+            className="rounded-sm bg-teal px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
           >
             Accept
           </button>
           <button
             onClick={() => setShowCounter((v) => !v)}
             disabled={loading}
-            className="rounded-sm border border-amber/40 px-3 py-1.5 text-xs text-amber transition hover:bg-amber hover:text-bg disabled:opacity-60"
+            className="rounded-sm border border-amber/40 px-3 py-1.5 text-xs text-amber transition hover:bg-amber hover:text-white disabled:opacity-60"
           >
             Counter
           </button>
@@ -103,7 +103,7 @@ export default function OfferActions({
           <button
             onClick={() => act('counter', counterAmount)}
             disabled={loading || !counterAmount}
-            className="rounded-sm bg-amber px-3 py-1.5 text-xs font-semibold text-bg disabled:opacity-60"
+            className="rounded-sm bg-amber px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
           >
             Send
           </button>

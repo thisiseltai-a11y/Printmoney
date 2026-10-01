@@ -4,7 +4,7 @@ import { Car, CheckCircle2, ArrowRight } from 'lucide-react'
 // product reads at a glance instead of needing the copy to carry it alone.
 export default function OfferMockup() {
   return (
-    <div className="card-lift relative w-full max-w-sm rounded-card border border-line bg-panel p-6 shadow-2xl shadow-black/40">
+    <div className="card-lift relative w-full max-w-sm rounded-card border border-line bg-panel p-6 shadow-xl shadow-black/10">
       <div className="mb-5 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-raised">

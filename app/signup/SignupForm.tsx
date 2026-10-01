@@ -85,7 +85,7 @@ export default function SignupForm() {
       <button
         type="submit"
         disabled={loading}
-        className="mt-5 h-12 w-full rounded-sm bg-amber font-semibold text-bg transition hover:opacity-90 disabled:opacity-60"
+        className="mt-5 h-12 w-full rounded-sm bg-amber font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
       >
         {loading ? 'Signing up…' : 'Sign up'}
       </button>

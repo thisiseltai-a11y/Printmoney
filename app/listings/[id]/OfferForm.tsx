@@ -58,7 +58,7 @@ export default function OfferForm({ listingId, minimumOffer }: { listingId: numb
         <button
           type="submit"
           disabled={loading}
-          className="flex h-12 shrink-0 items-center justify-center gap-2 rounded-sm bg-amber px-6 font-semibold text-bg transition hover:opacity-90 disabled:opacity-60"
+          className="flex h-12 shrink-0 items-center justify-center gap-2 rounded-sm bg-amber px-6 font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
         >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Make offer'}
         </button>
