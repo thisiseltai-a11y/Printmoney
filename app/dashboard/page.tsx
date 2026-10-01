@@ -50,14 +50,24 @@ export default async function DashboardPage() {
                 const offers = offersByListing.get(listing.id) ?? []
                 const title = [listing.year, listing.make, listing.model].filter(Boolean).join(' ')
                 return (
-                  <div key={listing.id} className="rounded-card border border-line bg-panel p-5">
+                  <div key={listing.id} className="card-lift rounded-card border border-line bg-panel p-5">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <Link href={`/listings/${listing.id}`} className="font-grotesk font-semibold text-ink hover:underline">
                         {title || 'Vehicle'}
                       </Link>
                       <div className="flex items-center gap-3">
                         <span className="font-mono text-sm text-amber">{centsToDisplay(listing.asking_price)}</span>
-                        <span className="font-mono text-xs uppercase text-muted">{listing.status}</span>
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-1 font-mono text-xs uppercase ${
+                            listing.status === 'active'
+                              ? 'bg-teal/10 text-teal'
+                              : listing.status === 'sold'
+                                ? 'bg-amber/10 text-amber'
+                                : 'bg-raised text-muted'
+                          }`}
+                        >
+                          {listing.status}
+                        </span>
                         {listing.status === 'active' && <CancelListingButton listingId={listing.id} />}
                       </div>
                     </div>
@@ -96,7 +106,7 @@ export default async function DashboardPage() {
               {buyerOffers.map((offer) => {
                 const title = [offer.listing.year, offer.listing.make, offer.listing.model].filter(Boolean).join(' ')
                 return (
-                  <div key={offer.id} className="rounded-card border border-line bg-panel p-5">
+                  <div key={offer.id} className="card-lift rounded-card border border-line bg-panel p-5">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         <Link href={`/listings/${offer.listing_id}`} className="font-grotesk font-semibold text-ink hover:underline">

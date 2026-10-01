@@ -6,12 +6,21 @@ import { Loader2 } from 'lucide-react'
 import type { OfferStatus } from '@/lib/db'
 
 const BADGES: Record<OfferStatus, { label: string; className: string }> = {
-  pending_seller: { label: 'Awaiting seller', className: 'text-amber' },
-  pending_buyer: { label: 'Awaiting buyer', className: 'text-amber' },
-  accepted: { label: 'Accepted', className: 'text-teal' },
-  declined: { label: 'Declined', className: 'text-muted' },
-  withdrawn: { label: 'Withdrawn', className: 'text-muted' },
-  auto_declined: { label: 'Auto-declined', className: 'text-muted' },
+  pending_seller: { label: 'Awaiting seller', className: 'bg-amber/10 text-amber' },
+  pending_buyer: { label: 'Awaiting buyer', className: 'bg-amber/10 text-amber' },
+  accepted: { label: 'Accepted', className: 'bg-teal/10 text-teal' },
+  declined: { label: 'Declined', className: 'bg-raised text-muted' },
+  withdrawn: { label: 'Withdrawn', className: 'bg-raised text-muted' },
+  auto_declined: { label: 'Auto-declined', className: 'bg-raised text-muted' },
+}
+
+function Badge({ status }: { status: OfferStatus }) {
+  const b = BADGES[status]
+  return (
+    <span className={`inline-flex items-center rounded-full px-2.5 py-1 font-mono text-xs ${b.className}`}>
+      {b.label}
+    </span>
+  )
 }
 
 export default function OfferActions({
@@ -101,20 +110,22 @@ export default function OfferActions({
         </div>
       )}
 
-      {isWaiting && role === 'buyer' && (
-        <button
-          onClick={() => act('withdraw')}
-          disabled={loading}
-          className="rounded-sm border border-line px-3 py-1.5 text-xs text-muted transition hover:text-ink disabled:opacity-60"
-        >
-          {loading ? 'Withdrawing…' : 'Withdraw offer'}
-        </button>
+      {isWaiting && (
+        <div className="flex items-center gap-2">
+          <Badge status={status} />
+          {role === 'buyer' && (
+            <button
+              onClick={() => act('withdraw')}
+              disabled={loading}
+              className="rounded-sm border border-line px-3 py-1.5 text-xs text-muted transition hover:text-ink disabled:opacity-60"
+            >
+              {loading ? 'Withdrawing…' : 'Withdraw offer'}
+            </button>
+          )}
+        </div>
       )}
 
-      {!isMyTurn && !isWaiting && (
-        <span className={`font-mono text-xs ${BADGES[status].className}`}>{BADGES[status].label}</span>
-      )}
-      {isWaiting && <p className="mt-1 font-mono text-xs text-muted">{BADGES[status].label}</p>}
+      {!isMyTurn && !isWaiting && <Badge status={status} />}
 
       {error && <p className="mt-1 font-mono text-xs text-amber">{error}</p>}
     </div>

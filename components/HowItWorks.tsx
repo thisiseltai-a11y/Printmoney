@@ -28,9 +28,11 @@ export default function HowItWorks() {
         <h2 className="font-grotesk text-3xl font-semibold tracking-tight text-ink">How it works</h2>
         <div className="mt-10 grid gap-6 sm:grid-cols-3">
           {STEPS.map((s) => (
-            <div key={s.step} className="rounded-card border border-line bg-panel p-6">
-              <div className="mb-4 flex items-center justify-between">
-                <s.icon className="h-6 w-6 text-amber" />
+            <div key={s.step} className="card-lift rounded-card border border-line bg-panel p-6">
+              <div className="mb-5 flex items-center justify-between">
+                <div className="flex h-11 w-11 items-center justify-center rounded-sm bg-amber/10">
+                  <s.icon className="h-5 w-5 text-amber" />
+                </div>
                 <span className="font-mono text-xs text-muted">{s.step}</span>
               </div>
               <h3 className="font-grotesk text-lg font-semibold text-ink">{s.title}</h3>

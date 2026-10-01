@@ -23,8 +23,10 @@ export default async function HomePage() {
             Database isn&apos;t configured yet — set the Supabase env vars to start listing and browsing cars.
           </p>
         ) : listings.length === 0 ? (
-          <div className="mt-10 flex flex-col items-center gap-3 rounded-card border border-dashed border-line bg-panel/60 p-12 text-center">
-            <CarFront className="h-8 w-8 text-muted" />
+          <div className="mt-10 flex flex-col items-center gap-4 rounded-card border border-dashed border-line bg-panel/60 p-14 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-amber/10">
+              <CarFront className="h-7 w-7 text-amber" />
+            </div>
             <p className="text-muted">No listings yet — be the first to list a car.</p>
           </div>
         ) : (

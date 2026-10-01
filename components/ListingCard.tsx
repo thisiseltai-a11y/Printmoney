@@ -10,7 +10,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
   return (
     <Link
       href={`/listings/${listing.id}`}
-      className="group overflow-hidden rounded-card border border-line bg-panel transition hover:border-amber/40"
+      className="card-lift group overflow-hidden rounded-card border border-line bg-panel transition-colors hover:border-amber/40"
     >
       <div className="flex aspect-[4/3] items-center justify-center overflow-hidden bg-raised">
         {photo ? (

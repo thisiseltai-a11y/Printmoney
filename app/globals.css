@@ -6,6 +6,48 @@
   .field-input {
     @apply h-12 w-full rounded-sm border border-line bg-raised px-4 py-3 text-sm text-ink outline-none transition focus:border-amber;
   }
+  .card-lift {
+    @apply transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-card-hover;
+  }
+}
+
+/* ─── ambient background glow ───────────────────────────────────────── */
+.ambient-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.ambient-glow::before,
+.ambient-glow::after {
+  content: '';
+  position: absolute;
+  width: 560px;
+  height: 560px;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.16;
+}
+.ambient-glow::before {
+  top: -220px;
+  left: 50%;
+  transform: translateX(-70%);
+  background: #FF8A3D;
+}
+.ambient-glow::after {
+  top: -140px;
+  left: 50%;
+  transform: translateX(10%);
+  background: #3ED9C0;
+  opacity: 0.12;
+}
+@media (max-width: 760px) {
+  .ambient-glow::before,
+  .ambient-glow::after {
+    width: 360px;
+    height: 360px;
+  }
 }
 
 html {

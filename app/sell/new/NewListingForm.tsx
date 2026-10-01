@@ -120,7 +120,7 @@ export default function NewListingForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="rounded-card border border-line bg-panel p-6">
+      <FormSection step="01" title="Vehicle details">
         <label className="mb-1.5 block font-mono text-xs uppercase tracking-wider text-muted">
           VIN (optional — auto-fills the fields below)
         </label>
@@ -143,43 +143,46 @@ export default function NewListingForm() {
           </button>
         </div>
         {decodeMsg && <p className="mt-2 font-mono text-xs text-muted">{decodeMsg}</p>}
-      </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Field label="Year">
-          <input value={year} onChange={(e) => setYear(e.target.value)} className="field-input" />
-        </Field>
-        <Field label="Make" className="col-span-2 sm:col-span-1">
-          <input value={make} onChange={(e) => setMake(e.target.value)} required className="field-input" />
-        </Field>
-        <Field label="Model" className="col-span-2 sm:col-span-1">
-          <input value={model} onChange={(e) => setModel(e.target.value)} required className="field-input" />
-        </Field>
-        <Field label="Trim">
-          <input value={trim} onChange={(e) => setTrim(e.target.value)} className="field-input" />
-        </Field>
-      </div>
+        <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <Field label="Year">
+            <input value={year} onChange={(e) => setYear(e.target.value)} className="field-input" />
+          </Field>
+          <Field label="Make" className="col-span-2 sm:col-span-1">
+            <input value={make} onChange={(e) => setMake(e.target.value)} required className="field-input" />
+          </Field>
+          <Field label="Model" className="col-span-2 sm:col-span-1">
+            <input value={model} onChange={(e) => setModel(e.target.value)} required className="field-input" />
+          </Field>
+          <Field label="Trim">
+            <input value={trim} onChange={(e) => setTrim(e.target.value)} className="field-input" />
+          </Field>
+        </div>
 
-      <Field label="Mileage">
-        <input
-          value={mileage}
-          onChange={(e) => setMileage(e.target.value.replace(/[^0-9]/g, ''))}
-          className="field-input"
-        />
-      </Field>
+        <div className="mt-4">
+          <Field label="Mileage">
+            <input
+              value={mileage}
+              onChange={(e) => setMileage(e.target.value.replace(/[^0-9]/g, ''))}
+              className="field-input"
+            />
+          </Field>
+        </div>
 
-      <Field label="Description">
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={5}
-          placeholder="Condition, history, recent service, why you're selling…"
-          className="field-input resize-y"
-        />
-      </Field>
+        <div className="mt-4">
+          <Field label="Description">
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={5}
+              placeholder="Condition, history, recent service, why you're selling…"
+              className="field-input resize-y"
+            />
+          </Field>
+        </div>
+      </FormSection>
 
-      <div>
-        <label className="mb-1.5 block font-mono text-xs uppercase tracking-wider text-muted">Photos</label>
+      <FormSection step="02" title="Photos">
         <div className="flex flex-wrap gap-3">
           {photos.map((p) => (
             <div key={p} className="relative h-20 w-24 overflow-hidden rounded-sm border border-line">
@@ -194,49 +197,63 @@ export default function NewListingForm() {
               </button>
             </div>
           ))}
-          <label className="flex h-20 w-24 cursor-pointer items-center justify-center rounded-sm border border-dashed border-line text-xs text-muted hover:border-amber/40">
+          <label className="flex h-20 w-24 cursor-pointer items-center justify-center rounded-sm border border-dashed border-line text-xs text-muted transition hover:border-amber/40 hover:text-ink">
             {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Add photo'}
             <input type="file" accept="image/*" multiple hidden onChange={handlePhotoUpload} disabled={uploading} />
           </label>
         </div>
-      </div>
+      </FormSection>
 
-      <div className="grid grid-cols-2 gap-4">
-        <Field label="Asking price ($)">
-          <input
-            type="number"
-            required
-            min={1}
-            value={askingPrice}
-            onChange={(e) => setAskingPrice(e.target.value)}
-            className="field-input"
-          />
-        </Field>
-        <Field label="Minimum offer you'll consider ($)">
-          <input
-            type="number"
-            required
-            min={1}
-            value={minimumOffer}
-            onChange={(e) => setMinimumOffer(e.target.value)}
-            className="field-input"
-          />
-        </Field>
-      </div>
-      <p className="-mt-3 font-mono text-xs text-muted">
-        Buyers see this minimum on the listing — offers below it are rejected automatically.
-      </p>
+      <FormSection step="03" title="Pricing">
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Asking price ($)">
+            <input
+              type="number"
+              required
+              min={1}
+              value={askingPrice}
+              onChange={(e) => setAskingPrice(e.target.value)}
+              className="field-input"
+            />
+          </Field>
+          <Field label="Minimum offer you'll consider ($)">
+            <input
+              type="number"
+              required
+              min={1}
+              value={minimumOffer}
+              onChange={(e) => setMinimumOffer(e.target.value)}
+              className="field-input"
+            />
+          </Field>
+        </div>
+        <p className="mt-3 font-mono text-xs text-muted">
+          Buyers see this minimum on the listing — offers below it are rejected automatically.
+        </p>
+      </FormSection>
 
       {error && <p className="font-mono text-xs text-amber">{error}</p>}
 
       <button
         type="submit"
         disabled={submitting}
-        className="flex h-12 w-full items-center justify-center gap-2 rounded-sm bg-amber font-semibold text-bg transition hover:opacity-90 disabled:opacity-60"
+        className="flex h-12 w-full items-center justify-center gap-2 rounded-sm bg-amber font-semibold text-bg transition hover:opacity-90 active:scale-[0.99] disabled:opacity-60"
       >
         {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Post listing'}
       </button>
     </form>
+  )
+}
+
+function FormSection({ step, title, children }: { step: string; title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-card border border-line bg-panel p-6">
+      <div className="mb-5 flex items-center justify-between">
+        <h2 className="font-grotesk text-base font-semibold text-ink">{title}</h2>
+        <span className="font-mono text-xs text-muted">{step}</span>
+      </div>
+      {children}
+    </div>
   )
 }
 
