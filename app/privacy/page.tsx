@@ -16,28 +16,23 @@ export default function PrivacyPolicy() {
         <p className="mt-2 font-mono text-xs text-muted">Last updated {new Date().toLocaleDateString()}</p>
 
         <div className="mt-8 space-y-6 leading-relaxed">
-          <Section title="What we collect">
-            Free VIN lookups and value estimates require no personal information — we log only the VIN, whether the
-            lookup was free or paid, and a timestamp, to power the live activity stats and our own analytics.
-            When you unlock a paid history report, we collect your email address so we can associate the report
-            with your purchase and let you retrieve it again without paying twice.
+          <Section title="Accounts">
+            Making or receiving offers requires an account (email and password). We store your email, display name,
+            listings, offers, and the messages/notifications tied to your activity on the platform.
           </Section>
-          <Section title="Payments">
-            Payments are processed by Stripe. We never see or store your card details — Stripe handles that
-            directly and shares with us only the confirmation needed to unlock your report.
+          <Section title="Listings and offers">
+            Listing details and photos you post are visible to anyone browsing the site. Offer amounts and
+            negotiation history are visible only to the buyer and seller involved.
           </Section>
-          <Section title="Third-party data providers">
-            Vehicle detail data comes from the NHTSA vPIC API (a public federal service). Market value estimates
-            and full history reports are sourced from a licensed vehicle data provider. We do not scrape or resell
-            Carfax data.
+          <Section title="VIN decoding">
+            If you enter a VIN while creating a listing, the vehicle attributes (year/make/model/trim/engine) come
+            from the NHTSA vPIC API, a public federal service. We don&apos;t share your VIN with anyone else.
           </Section>
           <Section title="Data retention">
-            Lookup logs and purchased reports are retained to support the service (report retrieval, fraud
-            prevention, and aggregate stats). Contact us to request deletion of your email and associated reports.
+            Account, listing, and offer data is retained to operate the service. Contact us to request deletion of
+            your account and associated data.
           </Section>
-          <Section title="Contact">
-            Questions about this policy? Reach us at privacy@worthcars.com.
-          </Section>
+          <Section title="Contact">Questions about this policy? Reach us at privacy@worthcars.com.</Section>
         </div>
       </main>
       <Footer />

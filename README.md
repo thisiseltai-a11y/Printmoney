@@ -1,64 +1,64 @@
 # WorthCars
 
-Instant free VIN decode + estimated market value, with a paid one-time full
-history report (accidents, title, ownership) as an upsell.
+A marketplace where sellers list a car with an asking price and a minimum
+they'll actually consider, buyers submit offers, and both sides negotiate
+from their dashboard — with a notification the moment the other side
+responds.
 
 ## Stack
 
 - **Next.js 14** (App Router) + **Tailwind CSS**, deployed to Vercel
-- **Supabase** (Postgres) for lookup logging, the live ticker stats, and
-  storing purchased reports
-- **Stripe** for the one-time report unlock payment
-- **NHTSA vPIC API** (free, no key) for VIN decode
-- **VinAudit** (recommended) for market valuation + licensed vehicle history
+- **Supabase** for everything: Auth (email/password), Postgres (listings,
+  offers, notifications), and Storage (listing photos). No other paid
+  service is required.
+- **NHTSA vPIC API** (free, no key) powers the optional "auto-fill from VIN"
+  helper on the create-listing form.
+
+## How the offer flow works
+
+- A listing has an `asking_price` and a `minimum_offer`. The minimum is
+  shown to buyers directly on the listing — an offer below it is rejected
+  automatically, before the seller ever sees it.
+- A valid offer starts in `pending_seller`. The seller can **accept**,
+  **counter**, or **decline**.
+- A counter flips the offer to `pending_buyer` — the buyer gets an in-app
+  notification and can accept, counter back, or the offer stays open until
+  they do (they can also withdraw it at any point while it's open).
+- Accepting marks the listing `sold` and auto-declines any other open
+  offers on it (each of those buyers gets notified).
+- The full back-and-forth is logged in `offer_events` so the UI can show
+  the negotiation history, not just the current state.
+
+See `lib/offers.ts` for the state machine and `lib/db.ts` for the raw data
+access.
 
 ## Setup
 
 1. `npm install`
-2. Copy `.env.example` to `.env.local` and fill in the values below.
-3. Create the Supabase tables: run `supabase/schema.sql` against your project
-   (SQL editor or `psql`).
-4. `npm run dev`
+2. Copy `.env.example` to `.env.local` and fill in your Supabase project's
+   URL + keys.
+3. Run `supabase/schema.sql` against your Supabase project (SQL editor) —
+   it creates the tables, enables RLS, sets up the `profiles`-on-signup
+   trigger, and creates the public `listing-photos` storage bucket.
+4. In the Supabase dashboard, under Authentication → Email, confirm whether
+   you want email confirmation required for signup (`app/signup/page.tsx`
+   handles both cases — if confirmation is on, it shows a "check your
+   email" screen instead of logging the user straight in).
+5. `npm run dev`
 
-### Environment variables
+## Notifications
 
-| Variable | Required for | Notes |
-|---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` | ticker stats, report storage | Without these, lookups aren't logged and the ticker shows seed numbers only. |
-| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` / `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | paid report checkout | Point the Stripe webhook at `/api/stripe/webhook` for the `checkout.session.completed` event. |
-| `VINAUDIT_MARKET_VALUE_KEY` | real valuation numbers | Without it, `/api/valuation` returns a clearly-labeled deterministic demo estimate. |
-| `VINAUDIT_HISTORY_KEY` | real history reports | **Required in production** — without it, `getHistoryReport` throws rather than fabricate accident/title data for a paying customer. In `NODE_ENV !== 'production'` it falls back to seeded demo data instead. |
-| `ADMIN_PASSWORD` | `/admin` dashboard | Single shared password, checked against an httpOnly cookie. No user accounts anywhere in this app. |
-| `NEXT_PUBLIC_BASE_URL` | Stripe redirect URLs, metadata | Your deployed domain. |
-
-## Data provider notes
-
-- **Valuation**: `lib/valuation.ts` calls VinAudit's Market Value API. The
-  exact request/response shape there is based on VinAudit's documented
-  pattern (`key` + `vin` + `mileage` + `format=json`, returning `prices.average`
-  etc.) — confirm it against VinAudit's live API console once a key is
-  issued; that function is the only place to change if the wire format
-  differs. MarketCheck's Price API is a solid alternative if you want
-  listing-comp-based valuations instead — same adapter shape.
-- **History**: `lib/vehicleHistory.ts` calls VinAudit's Vehicle History API,
-  an NMVTIS-approved data source. **Carfax data cannot be scraped or resold**
-  — VinAudit (or another NMVTIS-approved provider like VINData) is the
-  properly licensed option. Same caveat as above: confirm the live response
-  shape before going to production.
-- Both are gated so the app runs fully in "demo mode" without any keys —
-  useful for local development — but `vehicleHistory.ts` refuses to fabricate
-  a paid report in production if no key is configured.
+In-app only for now (bell icon in the nav, polls every 30s). Email/SMS
+notifications would need a provider like Resend or Twilio — that's a new
+ongoing cost, so it's intentionally not wired up; ask before adding it.
 
 ## Architecture notes
 
-- No user accounts anywhere — the free decode/valuation flow needs nothing,
-  and the paid flow only collects an email at checkout so a report can be
-  retrieved again without re-paying (`vin` + `email` uniquely key a report).
-- `/api/checkout/verify` (called from the success redirect) and
-  `/api/stripe/webhook` both call the same idempotent
-  `lib/reportFulfillment.ts` helper, so the report gets generated once
-  whichever fires first, and the webhook is the reliability backstop if the
-  customer closes the tab before the client-side verify call completes.
-- The homepage ticker (`lib/db.ts#getTickerStats`) blends real counts with
-  seed floors so the strip never looks dead before there's real traffic —
-  once real traffic clears the floor, real numbers take over automatically.
+- No separate "buyer" vs "seller" account type — any signed-in user can
+  list a car and make offers on others' listings from the same account.
+- All offer/listing state changes happen server-side (API routes using the
+  Supabase service-role key) after checking the caller is the buyer or
+  seller involved — RLS policies on the tables are a read-time backstop,
+  not the only authorization check.
+- Prices are stored in cents everywhere (`lib/money.ts` has the only two
+  conversion points) to avoid floating-point rounding on money.

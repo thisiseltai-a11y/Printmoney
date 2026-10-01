@@ -1,211 +1,246 @@
 import { getSupabase } from './supabase'
-import { REPORT_PRICE_CENTS } from './constants'
-import type { HistoryReport } from './vehicleHistory'
 
-function dbConfigured(): boolean {
+export function dbConfigured(): boolean {
   return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY)
 }
 
-export async function logLookup(
-  vin: string,
-  type: 'free' | 'paid',
-  opts: { estimatedValue?: number; ip?: string | null } = {}
-) {
-  if (!dbConfigured()) return
-  try {
-    const supabase = getSupabase()
-    await supabase.from('lookups').insert({
-      vin,
-      type,
-      estimated_value: opts.estimatedValue ?? null,
-      ip: opts.ip ?? null,
-    })
-  } catch (err) {
-    console.error('logLookup failed:', err)
+function requireDb() {
+  if (!dbConfigured()) {
+    throw new Error('Supabase is not configured — set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.')
   }
 }
 
-export async function saveReport(input: {
-  vin: string
-  email: string
-  stripeSessionId?: string
-  report: HistoryReport
-}) {
-  if (!dbConfigured()) return
-  const supabase = getSupabase()
-  await supabase.from('reports').upsert(
-    {
-      vin: input.vin,
-      email: input.email,
-      stripe_session_id: input.stripeSessionId,
-      amount_cents: REPORT_PRICE_CENTS,
-      report_json: input.report,
-    },
-    { onConflict: 'vin,email' }
-  )
+// ─── Listings ──────────────────────────────────────────────────────────
+
+export interface Listing {
+  id: number
+  seller_id: string
+  year: number | null
+  make: string
+  model: string
+  trim: string | null
+  mileage: number | null
+  vin: string | null
+  description: string | null
+  photos: string[]
+  asking_price: number
+  minimum_offer: number
+  status: 'active' | 'sold' | 'cancelled'
+  created_at: string
 }
 
-export async function getReport(vin: string, email: string): Promise<HistoryReport | null> {
+export type NewListing = Omit<Listing, 'id' | 'created_at' | 'status'>
+
+export async function createListing(input: NewListing): Promise<Listing> {
+  requireDb()
+  const supabase = getSupabase()
+  const { data, error } = await supabase.from('listings').insert(input).select().single()
+  if (error) throw error
+  return data as Listing
+}
+
+// Soft-fails (returns null) rather than throwing — this is read directly by
+// the listing detail page, and "not configured" should render as a normal
+// not-found page rather than crash the request.
+export async function getListing(id: number): Promise<Listing | null> {
   if (!dbConfigured()) return null
   const supabase = getSupabase()
-  const { data } = await supabase
-    .from('reports')
-    .select('report_json')
-    .eq('vin', vin)
-    .eq('email', email)
-    .maybeSingle()
-  return (data?.report_json as HistoryReport) ?? null
+  const { data } = await supabase.from('listings').select().eq('id', id).maybeSingle()
+  return (data as Listing) ?? null
 }
 
-// Called once a mileage-based valuation completes for a VIN that was just
-// decoded, so the ticker's value-trend math has a number to work with
-// without inserting a second "lookup" row for the same visit.
-export async function attachValuationToLookup(vin: string, estimatedValue: number, ip?: string | null) {
+export async function listActiveListings(): Promise<Listing[]> {
+  if (!dbConfigured()) return []
+  const supabase = getSupabase()
+  const { data } = await supabase
+    .from('listings')
+    .select()
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+  return (data as Listing[]) ?? []
+}
+
+export async function listListingsBySeller(sellerId: string): Promise<Listing[]> {
+  if (!dbConfigured()) return []
+  const supabase = getSupabase()
+  const { data } = await supabase
+    .from('listings')
+    .select()
+    .eq('seller_id', sellerId)
+    .order('created_at', { ascending: false })
+  return (data as Listing[]) ?? []
+}
+
+export async function updateListingStatus(id: number, status: Listing['status']) {
+  requireDb()
+  const supabase = getSupabase()
+  await supabase.from('listings').update({ status }).eq('id', id)
+}
+
+// ─── Offers ────────────────────────────────────────────────────────────
+
+export type OfferStatus =
+  | 'pending_seller'
+  | 'pending_buyer'
+  | 'accepted'
+  | 'declined'
+  | 'withdrawn'
+  | 'auto_declined'
+
+export interface Offer {
+  id: number
+  listing_id: number
+  buyer_id: string
+  amount: number
+  status: OfferStatus
+  created_at: string
+  updated_at: string
+}
+
+export async function createOffer(input: {
+  listing_id: number
+  buyer_id: string
+  amount: number
+  status: OfferStatus
+}): Promise<Offer> {
+  requireDb()
+  const supabase = getSupabase()
+  const { data, error } = await supabase.from('offers').insert(input).select().single()
+  if (error) throw error
+  return data as Offer
+}
+
+export async function getOffer(id: number): Promise<Offer | null> {
+  requireDb()
+  const supabase = getSupabase()
+  const { data } = await supabase.from('offers').select().eq('id', id).maybeSingle()
+  return (data as Offer) ?? null
+}
+
+export async function updateOffer(id: number, patch: Partial<Pick<Offer, 'amount' | 'status'>>) {
+  requireDb()
+  const supabase = getSupabase()
+  await supabase
+    .from('offers')
+    .update({ ...patch, updated_at: new Date().toISOString() })
+    .eq('id', id)
+}
+
+export async function listOffersForListing(listingId: number): Promise<Offer[]> {
+  if (!dbConfigured()) return []
+  const supabase = getSupabase()
+  const { data } = await supabase
+    .from('offers')
+    .select()
+    .eq('listing_id', listingId)
+    .order('created_at', { ascending: false })
+  return (data as Offer[]) ?? []
+}
+
+export async function listPendingOffersForListing(listingId: number): Promise<Offer[]> {
+  if (!dbConfigured()) return []
+  const supabase = getSupabase()
+  const { data } = await supabase
+    .from('offers')
+    .select()
+    .eq('listing_id', listingId)
+    .in('status', ['pending_seller', 'pending_buyer'])
+  return (data as Offer[]) ?? []
+}
+
+export async function listOffersForBuyer(buyerId: string): Promise<(Offer & { listing: Listing })[]> {
+  if (!dbConfigured()) return []
+  const supabase = getSupabase()
+  const { data } = await supabase
+    .from('offers')
+    .select('*, listing:listings!inner(*)')
+    .eq('buyer_id', buyerId)
+    .order('updated_at', { ascending: false })
+  return (data as any) ?? []
+}
+
+// listings the current user is selling, joined with their offers — used by
+// the seller side of the dashboard
+export async function listOffersForSeller(sellerId: string): Promise<(Offer & { listing: Listing })[]> {
+  if (!dbConfigured()) return []
+  const supabase = getSupabase()
+  const { data } = await supabase
+    .from('offers')
+    .select('*, listing:listings!inner(*)')
+    .eq('listing.seller_id', sellerId)
+    .order('updated_at', { ascending: false })
+  return (data as any) ?? []
+}
+
+export type OfferAction = 'offer' | 'counter' | 'accept' | 'decline' | 'withdraw' | 'auto_decline'
+
+export async function insertOfferEvent(input: {
+  offer_id: number
+  actor_id: string
+  action: OfferAction
+  amount?: number | null
+}) {
+  requireDb()
+  const supabase = getSupabase()
+  await supabase.from('offer_events').insert(input)
+}
+
+export async function listOfferEvents(offerId: number) {
+  if (!dbConfigured()) return []
+  const supabase = getSupabase()
+  const { data } = await supabase
+    .from('offer_events')
+    .select()
+    .eq('offer_id', offerId)
+    .order('created_at', { ascending: true })
+  return data ?? []
+}
+
+// ─── Notifications ─────────────────────────────────────────────────────
+
+export async function createNotification(input: {
+  user_id: string
+  type: string
+  title: string
+  body?: string
+  link?: string
+}) {
   if (!dbConfigured()) return
   try {
     const supabase = getSupabase()
-    const tenMinAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString()
-    const { data } = await supabase
-      .from('lookups')
-      .select('id')
-      .eq('vin', vin)
-      .eq('type', 'free')
-      .is('estimated_value', null)
-      .gte('created_at', tenMinAgo)
-      .order('created_at', { ascending: false })
-      .limit(1)
-
-    if (data && data.length) {
-      await supabase.from('lookups').update({ estimated_value: estimatedValue }).eq('id', data[0].id)
-    } else {
-      // No matching decode row (e.g. direct API call to /api/valuation) —
-      // record it as its own lookup, with the IP, so rate limiting still sees it.
-      await supabase.from('lookups').insert({ vin, type: 'free', estimated_value: estimatedValue, ip: ip ?? null })
-    }
+    await supabase.from('notifications').insert(input)
   } catch (err) {
-    console.error('attachValuationToLookup failed:', err)
+    console.error('createNotification failed:', err)
   }
 }
 
-export interface TickerStats {
-  lookupsLastHour: number
-  reportsUnlockedToday: number
-  valueTrend: 'up' | 'down'
-  valueTrendPct: number
-  live: boolean
-}
-
-// Seed numbers keep the strip feeling alive before there's real traffic.
-// Once real counts clear these floors, the real numbers take over on their own.
-const SEED_LOOKUPS_PER_HOUR = 40
-const SEED_REPORTS_PER_DAY = 12
-const SEED_TREND_PCT = 2.4
-
-export async function getTickerStats(): Promise<TickerStats> {
-  if (!dbConfigured()) {
-    return {
-      lookupsLastHour: SEED_LOOKUPS_PER_HOUR,
-      reportsUnlockedToday: SEED_REPORTS_PER_DAY,
-      valueTrend: 'up',
-      valueTrendPct: SEED_TREND_PCT,
-      live: false,
-    }
-  }
-
-  try {
-    const supabase = getSupabase()
-    const now = Date.now()
-    const hourAgo = new Date(now - 60 * 60 * 1000).toISOString()
-    const dayStart = new Date(new Date().setHours(0, 0, 0, 0)).toISOString()
-    const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString()
-    const twoWeeksAgo = new Date(now - 14 * 24 * 60 * 60 * 1000).toISOString()
-
-    const [{ count: lastHourCount }, { count: unlockedTodayCount }, thisWeekVals, lastWeekVals] =
-      await Promise.all([
-        supabase.from('lookups').select('id', { count: 'exact', head: true }).gte('created_at', hourAgo),
-        supabase
-          .from('lookups')
-          .select('id', { count: 'exact', head: true })
-          .eq('type', 'paid')
-          .gte('created_at', dayStart),
-        supabase
-          .from('lookups')
-          .select('estimated_value')
-          .not('estimated_value', 'is', null)
-          .gte('created_at', weekAgo),
-        supabase
-          .from('lookups')
-          .select('estimated_value')
-          .not('estimated_value', 'is', null)
-          .gte('created_at', twoWeeksAgo)
-          .lt('created_at', weekAgo),
-      ])
-
-    const avg = (rows: { estimated_value: number | null }[] | null) => {
-      const vals = (rows ?? []).map((r) => r.estimated_value).filter((v): v is number => v != null)
-      if (!vals.length) return null
-      return vals.reduce((a, b) => a + b, 0) / vals.length
-    }
-
-    const thisWeekAvg = avg(thisWeekVals.data)
-    const lastWeekAvg = avg(lastWeekVals.data)
-
-    let valueTrend: 'up' | 'down' = 'up'
-    let valueTrendPct = SEED_TREND_PCT
-    if (thisWeekAvg != null && lastWeekAvg != null && lastWeekAvg > 0) {
-      const pct = ((thisWeekAvg - lastWeekAvg) / lastWeekAvg) * 100
-      valueTrend = pct >= 0 ? 'up' : 'down'
-      valueTrendPct = Math.round(Math.abs(pct) * 10) / 10
-    }
-
-    return {
-      lookupsLastHour: Math.max(lastHourCount ?? 0, SEED_LOOKUPS_PER_HOUR),
-      reportsUnlockedToday: Math.max(unlockedTodayCount ?? 0, SEED_REPORTS_PER_DAY),
-      valueTrend,
-      valueTrendPct,
-      live: (lastHourCount ?? 0) > 0,
-    }
-  } catch (err) {
-    console.error('getTickerStats failed:', err)
-    return {
-      lookupsLastHour: SEED_LOOKUPS_PER_HOUR,
-      reportsUnlockedToday: SEED_REPORTS_PER_DAY,
-      valueTrend: 'up',
-      valueTrendPct: SEED_TREND_PCT,
-      live: false,
-    }
-  }
-}
-
-export interface AdminStats {
-  totalLookups: number
-  totalFree: number
-  totalPaid: number
-  totalRevenueCents: number
-  recent: { vin: string; type: string; created_at: string }[]
-}
-
-export async function getAdminStats(): Promise<AdminStats> {
-  if (!dbConfigured()) {
-    return { totalLookups: 0, totalFree: 0, totalPaid: 0, totalRevenueCents: 0, recent: [] }
-  }
+export async function listNotifications(userId: string, limit = 20) {
+  if (!dbConfigured()) return []
   const supabase = getSupabase()
-  const [{ count: totalLookups }, { count: totalFree }, { count: totalPaid }, { data: reports }, { data: recent }] =
-    await Promise.all([
-      supabase.from('lookups').select('id', { count: 'exact', head: true }),
-      supabase.from('lookups').select('id', { count: 'exact', head: true }).eq('type', 'free'),
-      supabase.from('lookups').select('id', { count: 'exact', head: true }).eq('type', 'paid'),
-      supabase.from('reports').select('amount_cents'),
-      supabase.from('lookups').select('vin, type, created_at').order('created_at', { ascending: false }).limit(25),
-    ])
+  const { data } = await supabase
+    .from('notifications')
+    .select()
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  return data ?? []
+}
 
-  const totalRevenueCents = (reports ?? []).reduce((sum, r) => sum + (r.amount_cents ?? 0), 0)
+export async function countUnreadNotifications(userId: string): Promise<number> {
+  if (!dbConfigured()) return 0
+  const supabase = getSupabase()
+  const { count } = await supabase
+    .from('notifications')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('read', false)
+  return count ?? 0
+}
 
-  return {
-    totalLookups: totalLookups ?? 0,
-    totalFree: totalFree ?? 0,
-    totalPaid: totalPaid ?? 0,
-    totalRevenueCents,
-    recent: recent ?? [],
-  }
+export async function markNotificationsRead(userId: string, ids?: number[]) {
+  if (!dbConfigured()) return
+  const supabase = getSupabase()
+  let query = supabase.from('notifications').update({ read: true }).eq('user_id', userId)
+  if (ids && ids.length) query = query.in('id', ids)
+  await query
 }

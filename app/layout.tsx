@@ -17,15 +17,13 @@ const jbMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'WorthCars — Instant VIN Lookup & Vehicle Value',
+  title: 'WorthCars — List your car, get real offers',
   description:
-    'Enter any VIN and get instant free vehicle details plus an estimated market value. Unlock the full history report — accidents, title, ownership — for one flat fee.',
-  keywords:
-    'VIN lookup, vehicle history report, car value estimate, VIN decoder, used car value, accident history, title check',
+    'List your car with a minimum you\'ll actually consider, so every offer is worth your time. Buyers negotiate from their dashboard and get notified the moment you respond.',
+  keywords: 'sell my car, car marketplace, car offers, make an offer on a car, FSBO, sell car online',
   openGraph: {
-    title: 'WorthCars — Instant VIN Lookup & Vehicle Value',
-    description:
-      'Free instant VIN lookup + market value estimate. Unlock the full history report when you need it.',
+    title: 'WorthCars — List your car, get real offers',
+    description: 'Set your minimum, skip the lowballs, negotiate straight from your dashboard.',
     type: 'website',
     url: 'https://worthcars.com',
   },

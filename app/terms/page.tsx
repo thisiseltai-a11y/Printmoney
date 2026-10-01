@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import { REPORT_PRICE_DISPLAY } from '@/lib/constants'
 
 export const metadata: Metadata = {
   title: 'Terms of Service — WorthCars',
@@ -18,26 +17,24 @@ export default function TermsPage() {
 
         <div className="mt-8 space-y-6 leading-relaxed">
           <Section title="The service">
-            WorthCars provides a free VIN lookup and estimated market value for any vehicle, plus an optional paid
-            full history report ({REPORT_PRICE_DISPLAY}, one-time, non-recurring) covering accident history, title
-            status, ownership, and service records where available.
+            WorthCars lets sellers list a vehicle with an asking price and a minimum offer, and lets signed-in
+            buyers submit offers, negotiate, and get notified when the seller responds. WorthCars is not a party to
+            any resulting sale — it&apos;s between the buyer and seller to agree final terms, inspect the vehicle,
+            and complete the transaction (title transfer, payment, etc.) themselves.
           </Section>
-          <Section title="No warranty on estimates">
-            Value estimates are statistical approximations based on comparable market data and are not an
-            appraisal. Actual sale prices vary with condition, location, and market timing. History reports
-            reflect only what has been reported to our data provider and may not capture every incident.
+          <Section title="No warranty on listings">
+            Sellers are solely responsible for the accuracy of their listing. WorthCars doesn&apos;t inspect
+            vehicles or verify listing details.
           </Section>
-          <Section title="Payments">
-            Full history reports are billed once via Stripe at the price shown at checkout. There are no
-            subscriptions. Reports are non-refundable once generated, except where required by law.
+          <Section title="Offers are not binding contracts">
+            An accepted offer on WorthCars indicates mutual interest at a price — it is not itself a binding sale
+            contract. Buyers and sellers are responsible for completing the sale through their own legal process.
           </Section>
           <Section title="Acceptable use">
-            Don&apos;t use WorthCars to scrape, resell, or bulk-harvest vehicle data, or to circumvent the payment
-            required for the full history report.
+            Don&apos;t submit offers you don&apos;t intend to honor, post listings for vehicles you don&apos;t have
+            the right to sell, or try to circumvent a seller&apos;s stated minimum offer.
           </Section>
-          <Section title="Contact">
-            Questions? Reach us at support@worthcars.com.
-          </Section>
+          <Section title="Contact">Questions? Reach us at support@worthcars.com.</Section>
         </div>
       </main>
       <Footer />

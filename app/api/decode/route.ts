@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateVin } from '@/lib/vin'
 import { decodeVin, type DecodedVehicle } from '@/lib/nhtsa'
-import { logLookup } from '@/lib/db'
 import { getCachedDecode, setCachedDecode } from '@/lib/cache'
-import { getClientIp, isRateLimited } from '@/lib/rateLimit'
 
+// Used by the "auto-fill from VIN" helper on the create-listing form.
 export async function POST(req: NextRequest) {
   try {
     const { vin: raw } = await req.json()
@@ -15,14 +14,6 @@ export async function POST(req: NextRequest) {
     const { valid, vin, reason } = validateVin(raw)
     if (!valid) {
       return NextResponse.json({ error: reason }, { status: 400 })
-    }
-
-    const ip = getClientIp(req)
-    if (await isRateLimited(ip)) {
-      return NextResponse.json(
-        { error: 'Too many lookups from this connection. Try again in a bit.' },
-        { status: 429 }
-      )
     }
 
     let decoded = await getCachedDecode<DecodedVehicle>(vin)
@@ -36,8 +27,6 @@ export async function POST(req: NextRequest) {
       }
       await setCachedDecode(vin, decoded)
     }
-
-    await logLookup(vin, 'free', { ip })
 
     return NextResponse.json({ vin, decoded })
   } catch (err) {

@@ -1,23 +1,23 @@
-import { ScanLine, Gauge, FileLock2 } from 'lucide-react'
+import { Car, HandCoins, MessageSquareText } from 'lucide-react'
 
 const STEPS = [
   {
-    icon: ScanLine,
+    icon: Car,
     step: '01',
-    title: 'Enter the VIN',
-    body: 'Type or paste any 17-character VIN. We validate it instantly, right in the box.',
+    title: 'List your car',
+    body: "Enter the details, photos, and your asking price — plus a minimum you'll actually consider. Buyers see that floor, so nobody wastes your time with a lowball.",
   },
   {
-    icon: Gauge,
+    icon: HandCoins,
     step: '02',
-    title: 'Get the free readout',
-    body: 'Year, make, model, trim, engine, and a market value estimate — all in seconds, no signup.',
+    title: 'Buyers make offers',
+    body: 'Signed-in buyers submit an offer at or above your minimum. Anything below it is rejected automatically, before it ever reaches you.',
   },
   {
-    icon: FileLock2,
+    icon: MessageSquareText,
     step: '03',
-    title: 'Unlock the full report',
-    body: 'Want accidents, title status, and ownership history? Unlock it for a flat one-time fee.',
+    title: 'Accept, counter, or decline',
+    body: "Respond right from your dashboard. If you counter, the buyer gets notified instantly and can accept, counter back, or walk away.",
   },
 ]
 

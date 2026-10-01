@@ -12,9 +12,6 @@ export default function Footer() {
           <Link href="/privacy" className="transition hover:text-ink">
             Privacy
           </Link>
-          <Link href="/admin" className="transition hover:text-ink">
-            Admin
-          </Link>
         </div>
       </div>
     </footer>

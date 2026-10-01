@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "app/api/checkout/route.ts": { "maxDuration": 30 },
-    "app/api/checkout/verify/route.ts": { "maxDuration": 30 },
-    "app/api/stripe/webhook/route.ts": { "maxDuration": 30 }
-  }
-}
