@@ -3,13 +3,13 @@ import { Car } from 'lucide-react'
 import type { Listing } from '@/lib/db'
 import { centsToDisplay } from '@/lib/money'
 
-export default function ListingCard({ listing }: { listing: Listing }) {
+export default function ListingCard({ listing, href }: { listing: Listing; href?: string }) {
   const title = [listing.year, listing.make, listing.model].filter(Boolean).join(' ')
   const photo = listing.photos?.[0]
 
   return (
     <Link
-      href={`/listings/${listing.id}`}
+      href={href ?? `/listings/${listing.id}`}
       className="card-lift group overflow-hidden rounded-card border border-line bg-panel transition-colors hover:border-amber/40"
     >
       <div className="flex aspect-[4/3] items-center justify-center overflow-hidden bg-raised">
