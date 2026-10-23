@@ -86,6 +86,63 @@ export async function updateListingStatus(id: number, status: Listing['status'])
   await supabase.from('listings').update({ status }).eq('id', id)
 }
 
+// Same make, active, not the listing itself — a simple stand-in for a real
+// "similar vehicles" recommendation until there's enough inventory to do
+// anything fancier with it.
+export async function listSimilarListings(listing: Listing, limit = 4): Promise<Listing[]> {
+  if (!dbConfigured()) return []
+  const supabase = getSupabase()
+  const { data } = await supabase
+    .from('listings')
+    .select()
+    .eq('status', 'active')
+    .eq('make', listing.make)
+    .neq('id', listing.id)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  return (data as Listing[]) ?? []
+}
+
+// ─── Saved listings ─────────────────────────────────────────────────────
+
+export async function isListingSaved(userId: string, listingId: number): Promise<boolean> {
+  if (!dbConfigured()) return false
+  const supabase = getSupabase()
+  const { data } = await supabase
+    .from('saved_listings')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('listing_id', listingId)
+    .maybeSingle()
+  return !!data
+}
+
+export async function saveListing(userId: string, listingId: number) {
+  requireDb()
+  const supabase = getSupabase()
+  const { error } = await supabase
+    .from('saved_listings')
+    .upsert({ user_id: userId, listing_id: listingId }, { onConflict: 'user_id,listing_id', ignoreDuplicates: true })
+  if (error) throw error
+}
+
+export async function unsaveListing(userId: string, listingId: number) {
+  requireDb()
+  const supabase = getSupabase()
+  await supabase.from('saved_listings').delete().eq('user_id', userId).eq('listing_id', listingId)
+}
+
+export async function listSavedListings(userId: string): Promise<Listing[]> {
+  if (!dbConfigured()) return []
+  const supabase = getSupabase()
+  const { data } = await supabase
+    .from('saved_listings')
+    .select('created_at, listing:listings!inner(*)')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+  return ((data as any) ?? []).map((row: any) => row.listing) as Listing[]
+}
+
 // ─── Offers ────────────────────────────────────────────────────────────
 
 export type OfferStatus =

@@ -95,6 +95,23 @@ drop policy if exists "sellers manage own listings" on listings;
 create policy "sellers manage own listings" on listings
   for all using (seller_id = auth.uid()) with check (seller_id = auth.uid());
 
+-- ─── Saved listings ─────────────────────────────────────────────────────
+-- A buyer's favorites list. No status/soft-delete — unsaving just deletes
+-- the row.
+
+create table if not exists saved_listings (
+  id bigint generated always as identity primary key,
+  user_id uuid not null references auth.users (id) on delete cascade,
+  listing_id bigint not null references listings (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  unique (user_id, listing_id)
+);
+create index if not exists saved_listings_user_idx on saved_listings (user_id, created_at desc);
+alter table saved_listings enable row level security;
+drop policy if exists "users manage own saved listings" on saved_listings;
+create policy "users manage own saved listings" on saved_listings
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+
 -- ─── Offers ────────────────────────────────────────────────────────────
 -- `amount` is whatever's currently on the table; `status` tracks whose turn
 -- it is. All state transitions happen server-side (service-role key) after

@@ -5,10 +5,13 @@ import Footer from '@/components/Footer'
 import OfferForm from './OfferForm'
 import PhotoGallery from './PhotoGallery'
 import SpecsPanel from '@/components/SpecsPanel'
-import { getListing } from '@/lib/db'
-import { getExampleListing } from '@/lib/exampleListings'
+import SaveButton from '@/components/SaveButton'
+import SimilarListings from '@/components/SimilarListings'
+import { getListing, listSimilarListings, isListingSaved } from '@/lib/db'
+import { getExampleListing, EXAMPLE_LISTINGS } from '@/lib/exampleListings'
 import { getSessionUser } from '@/lib/supabase/server'
 import { centsToDisplay } from '@/lib/money'
+import { ShieldCheck } from 'lucide-react'
 import styles from './listing.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -23,6 +26,11 @@ export default async function ListingPage({ params }: { params: { id: string } }
     getSessionUser(),
   ])
   if (!listing) notFound()
+
+  const [similarListings, saved] = await Promise.all([
+    isExample ? EXAMPLE_LISTINGS.filter((l) => l.id !== id).slice(0, 4) : listSimilarListings(listing),
+    user && !isExample ? isListingSaved(user.id, listing.id) : Promise.resolve(false),
+  ])
 
   const title = [listing.year, listing.make, listing.model].filter(Boolean).join(' ')
   const isOwner = user?.id === listing.seller_id
@@ -52,14 +60,25 @@ export default async function ListingPage({ params }: { params: { id: string } }
                   Example listing
                 </span>
               )}
-              <h1 className="font-grotesk text-2xl font-semibold text-ink">{title || 'Vehicle'}</h1>
-              {listing.trim && <p className="text-sm text-muted">{listing.trim}</p>}
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h1 className="font-grotesk text-2xl font-semibold text-ink">{title || 'Vehicle'}</h1>
+                  {listing.trim && <p className="text-sm text-muted">{listing.trim}</p>}
+                </div>
+                {!isOwner && (
+                  <SaveButton listingId={listing.id} initialSaved={saved} loggedIn={!!user} preview={isExample} />
+                )}
+              </div>
             </div>
 
             <div className={`${styles.price} rounded-card border border-line bg-panel p-6`}>
               <div className="font-mono text-xs uppercase tracking-wider text-muted">Asking price</div>
               <div className="mt-1 font-mono text-3xl font-semibold text-amber">
                 {centsToDisplay(listing.asking_price)}
+              </div>
+              <div className="mt-2 flex items-center gap-1.5 text-xs text-muted">
+                <ShieldCheck className="h-3.5 w-3.5 text-teal" />
+                No hidden fees — the price you see is the price.
               </div>
               {isOwner && (
                 <div className="mt-2 font-mono text-xs text-teal">
@@ -114,6 +133,8 @@ export default async function ListingPage({ params }: { params: { id: string } }
             )}
           </div>
         </div>
+
+        <SimilarListings listings={similarListings} />
       </main>
       <Footer />
     </div>

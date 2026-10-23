@@ -3,8 +3,9 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import OfferActions from '@/components/OfferActions'
 import CancelListingButton from '@/components/CancelListingButton'
+import ListingCard from '@/components/ListingCard'
 import { getSessionUser } from '@/lib/supabase/server'
-import { listListingsBySeller, listOffersForSeller, listOffersForBuyer } from '@/lib/db'
+import { listListingsBySeller, listOffersForSeller, listOffersForBuyer, listSavedListings } from '@/lib/db'
 import { centsToDisplay } from '@/lib/money'
 import { redirect } from 'next/navigation'
 
@@ -14,10 +15,11 @@ export default async function DashboardPage() {
   const user = await getSessionUser()
   if (!user) redirect('/login?next=/dashboard')
 
-  const [listings, sellerOffers, buyerOffers] = await Promise.all([
+  const [listings, sellerOffers, buyerOffers, savedListings] = await Promise.all([
     listListingsBySeller(user.id),
     listOffersForSeller(user.id),
     listOffersForBuyer(user.id),
+    listSavedListings(user.id),
   ])
 
   const offersByListing = new Map<number, typeof sellerOffers>()
@@ -119,6 +121,21 @@ export default async function DashboardPage() {
                   </div>
                 )
               })}
+            </div>
+          )}
+        </section>
+
+        <section className="mt-12">
+          <h2 className="mb-4 font-grotesk text-lg font-semibold text-ink">Saved</h2>
+          {savedListings.length === 0 ? (
+            <p className="rounded-card border border-dashed border-line bg-panel/60 p-6 text-sm text-muted">
+              Cars you save will show up here.
+            </p>
+          ) : (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {savedListings.map((listing) => (
+                <ListingCard key={listing.id} listing={listing} />
+              ))}
             </div>
           )}
         </section>
