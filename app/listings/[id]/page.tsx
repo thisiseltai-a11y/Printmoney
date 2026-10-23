@@ -3,12 +3,12 @@ import { notFound } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import OfferForm from './OfferForm'
+import PhotoGallery from './PhotoGallery'
 import SpecsPanel from '@/components/SpecsPanel'
 import { getListing } from '@/lib/db'
 import { getExampleListing } from '@/lib/exampleListings'
 import { getSessionUser } from '@/lib/supabase/server'
 import { centsToDisplay } from '@/lib/money'
-import { Car } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,24 +32,7 @@ export default async function ListingPage({ params }: { params: { id: string } }
       <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-12">
         <div className="grid gap-8 lg:grid-cols-5">
           <div className="lg:col-span-3">
-            <div className="overflow-hidden rounded-card border border-line bg-panel">
-              <div className="flex aspect-[4/3] items-center justify-center bg-raised">
-                {listing.photos?.[0] ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={listing.photos[0]} alt={title} className="h-full w-full object-cover" />
-                ) : (
-                  <Car className="h-14 w-14 text-muted" />
-                )}
-              </div>
-              {listing.photos && listing.photos.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto p-3">
-                  {listing.photos.slice(1).map((p, i) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img key={i} src={p} alt="" className="h-16 w-20 shrink-0 rounded-sm object-cover" />
-                  ))}
-                </div>
-              )}
-            </div>
+            <PhotoGallery photos={listing.photos ?? []} title={title || 'Vehicle'} />
           </div>
 
           <div className="lg:col-span-2">
