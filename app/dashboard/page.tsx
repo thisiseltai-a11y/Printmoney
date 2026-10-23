@@ -5,12 +5,18 @@ import OfferActions from '@/components/OfferActions'
 import CancelListingButton from '@/components/CancelListingButton'
 import ListingCard from '@/components/ListingCard'
 import { getSessionUser } from '@/lib/supabase/server'
-import { listListingsBySeller, listOffersForSeller, listOffersForBuyer, listSavedListings } from '@/lib/db'
+import {
+  listListingsBySeller,
+  listOffersForSeller,
+  listOffersForBuyer,
+  listSavedListings,
+  listMessageThreadsForUser,
+} from '@/lib/db'
 import { expireOverdueOffers } from '@/lib/offers'
 import { centsToDisplay } from '@/lib/money'
 import { formatTimeRemaining } from '@/lib/time'
 import { redirect } from 'next/navigation'
-import { Car, Handshake, Heart, Hourglass } from 'lucide-react'
+import { Car, Handshake, Heart, Hourglass, MessageCircle } from 'lucide-react'
 
 const LISTING_STATUS_LABELS: Record<string, string> = {
   active: 'active',
@@ -25,11 +31,12 @@ export default async function DashboardPage() {
   const user = await getSessionUser()
   if (!user) redirect('/login?next=/dashboard')
 
-  const [rawSellerOffers, rawBuyerOffers, listings, savedListings] = await Promise.all([
+  const [rawSellerOffers, rawBuyerOffers, listings, savedListings, messageThreads] = await Promise.all([
     listOffersForSeller(user.id),
     listOffersForBuyer(user.id),
     listListingsBySeller(user.id),
     listSavedListings(user.id),
+    listMessageThreadsForUser(user.id),
   ])
   // No background job — sweep for any offer whose 48-hour response window
   // passed since the last page load, so the dashboard never shows a stale
@@ -73,6 +80,49 @@ export default async function DashboardPage() {
           <StatTile icon={Hourglass} value={listings.filter((l) => l.status === 'pending_sale').length} label="Pending sale" />
           <StatTile icon={Heart} value={savedListings.length} label="Saved cars" />
         </div>
+
+        <section className="mb-12">
+          <div className="mb-4 flex items-center gap-2">
+            <MessageCircle className="h-4 w-4 text-muted" />
+            <h2 className="font-grotesk text-lg font-semibold text-ink">Messages</h2>
+          </div>
+          {messageThreads.length === 0 ? (
+            <EmptyState icon={MessageCircle} message="Conversations about your listings or offers will show up here." />
+          ) : (
+            <div className="space-y-3">
+              {messageThreads.map((thread) => {
+                const title = [thread.listing.year, thread.listing.make, thread.listing.model]
+                  .filter(Boolean)
+                  .join(' ')
+                const photo = thread.listing.photos?.[0]
+                const isMine = thread.last_message.sender_id === user.id
+                return (
+                  <Link
+                    key={`${thread.listing_id}:${thread.buyer_id}`}
+                    href={`/messages/${thread.listing_id}/${thread.buyer_id}`}
+                    className="card-lift flex items-center gap-3 rounded-card border border-line bg-panel p-4 hover:border-amber/40"
+                  >
+                    <div className="flex h-11 w-14 shrink-0 items-center justify-center overflow-hidden rounded-sm bg-raised">
+                      {photo ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={photo} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        <Car className="h-5 w-5 text-muted" />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-grotesk text-sm font-semibold text-ink">{title || 'Vehicle'}</div>
+                      <div className="truncate text-xs text-muted">
+                        {isMine && 'You: '}
+                        {thread.last_message.body}
+                      </div>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          )}
+        </section>
 
         <section className="mb-12">
           <div className="mb-4 flex items-center justify-between">

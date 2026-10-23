@@ -381,3 +381,102 @@ export async function markNotificationsRead(userId: string, ids?: number[]) {
   if (ids && ids.length) query = query.in('id', ids)
   await query
 }
+
+// ─── Messages ────────────────────────────────────────────────────────────
+// A thread is identified by (listing_id, buyer_id) — the seller is always
+// that listing's seller_id, so there's exactly one thread per buyer per
+// listing, no matter which side is currently talking.
+
+export interface Message {
+  id: number
+  listing_id: number
+  buyer_id: string
+  sender_id: string
+  body: string
+  created_at: string
+}
+
+export interface MessageThread {
+  listing_id: number
+  buyer_id: string
+  listing: Listing
+  last_message: Message
+}
+
+export async function createMessage(input: {
+  listing_id: number
+  buyer_id: string
+  sender_id: string
+  body: string
+}): Promise<Message> {
+  requireDb()
+  const supabase = getSupabase()
+  const { data, error } = await supabase.from('messages').insert(input).select().single()
+  if (error) throw error
+  return data as Message
+}
+
+export async function listMessagesForThread(listingId: number, buyerId: string): Promise<Message[]> {
+  if (!dbConfigured()) return []
+  const supabase = getSupabase()
+  const { data } = await supabase
+    .from('messages')
+    .select()
+    .eq('listing_id', listingId)
+    .eq('buyer_id', buyerId)
+    .order('created_at', { ascending: true })
+  return (data as Message[]) ?? []
+}
+
+// New messages since `afterId` — used by the thread page's poll, so it
+// only ever fetches what it doesn't already have.
+export async function listNewMessages(listingId: number, buyerId: string, afterId: number): Promise<Message[]> {
+  if (!dbConfigured()) return []
+  const supabase = getSupabase()
+  const { data } = await supabase
+    .from('messages')
+    .select()
+    .eq('listing_id', listingId)
+    .eq('buyer_id', buyerId)
+    .gt('id', afterId)
+    .order('created_at', { ascending: true })
+  return (data as Message[]) ?? []
+}
+
+// A seller can only reply into a thread, never cold-start one — this
+// checks the buyer has already either messaged first or made an offer.
+export async function hasMessageRelationship(listingId: number, buyerId: string): Promise<boolean> {
+  if (!dbConfigured()) return false
+  const supabase = getSupabase()
+  const [{ count: msgCount }, { count: offerCount }] = await Promise.all([
+    supabase.from('messages').select('id', { count: 'exact', head: true }).eq('listing_id', listingId).eq('buyer_id', buyerId),
+    supabase.from('offers').select('id', { count: 'exact', head: true }).eq('listing_id', listingId).eq('buyer_id', buyerId),
+  ])
+  return (msgCount ?? 0) > 0 || (offerCount ?? 0) > 0
+}
+
+// Every thread a user is party to, as either the buyer or the seller of
+// the listing, deduped down to each thread's latest message and sorted by
+// most recent activity — used by the dashboard's Messages section.
+export async function listMessageThreadsForUser(userId: string): Promise<MessageThread[]> {
+  if (!dbConfigured()) return []
+  const supabase = getSupabase()
+  const [asBuyer, asSeller] = await Promise.all([
+    supabase.from('messages').select('*, listing:listings!inner(*)').eq('buyer_id', userId),
+    supabase.from('messages').select('*, listing:listings!inner(*)').eq('listing.seller_id', userId),
+  ])
+  const all = [...((asBuyer.data as any) ?? []), ...((asSeller.data as any) ?? [])] as (Message & {
+    listing: Listing
+  })[]
+
+  const latest = new Map<string, Message & { listing: Listing }>()
+  for (const m of all) {
+    const key = `${m.listing_id}:${m.buyer_id}`
+    const existing = latest.get(key)
+    if (!existing || m.created_at > existing.created_at) latest.set(key, m)
+  }
+
+  return Array.from(latest.values())
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .map((m) => ({ listing_id: m.listing_id, buyer_id: m.buyer_id, listing: m.listing, last_message: m }))
+}

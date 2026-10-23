@@ -11,7 +11,7 @@ import { getListing, listSimilarListings, isListingSaved } from '@/lib/db'
 import { getExampleListing, EXAMPLE_LISTINGS } from '@/lib/exampleListings'
 import { getSessionUser } from '@/lib/supabase/server'
 import { centsToDisplay } from '@/lib/money'
-import { ShieldCheck } from 'lucide-react'
+import { ShieldCheck, MessageCircle } from 'lucide-react'
 import styles from './listing.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -118,6 +118,13 @@ export default async function ListingPage({ params }: { params: { id: string } }
                     </p>
                   )}
                   <OfferForm listingId={listing.id} askingPrice={listing.asking_price} />
+                  <Link
+                    href={`/messages/${listing.id}/${user.id}`}
+                    className="mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-sm border border-line text-sm font-medium text-ink transition hover:border-amber/40"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    Message seller
+                  </Link>
                 </>
               ) : (
                 <p className="mt-5 text-sm text-muted">

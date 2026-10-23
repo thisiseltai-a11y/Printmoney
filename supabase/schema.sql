@@ -212,8 +212,8 @@ create policy "buyer or seller can view offer events" on offer_events
   );
 
 -- ─── Notifications ─────────────────────────────────────────────────────
--- In-app only for now (no email/SMS provider wired up — that would be a
--- new ongoing cost, flag before adding it).
+-- In-app, and also mirrored as email when RESEND_API_KEY is set — see
+-- lib/email.ts and createNotification() in lib/db.ts. No SMS.
 
 create table if not exists notifications (
   id bigint generated always as identity primary key,
@@ -233,6 +233,34 @@ create policy "users see own notifications" on notifications
 drop policy if exists "users can mark own notifications read" on notifications;
 create policy "users can mark own notifications read" on notifications
   for update using (user_id = auth.uid());
+
+-- ─── Messages ───────────────────────────────────────────────────────────
+-- A buyer<->seller thread, scoped to one listing — buyer_id identifies the
+-- thread (the seller is always that listing's seller_id); sender_id is
+-- whoever actually wrote a given message, since either side can post into
+-- the same thread. Plain text only, no read receipts, no attachments —
+-- the client polls for new messages the same way NotificationsBell does.
+-- A buyer can start a thread any time; a seller can only reply into one
+-- that already has a message or an offer from that buyer (see
+-- hasMessageRelationship() in lib/db.ts) — sellers can't cold-message
+-- strangers who've shown no interest in the listing.
+
+create table if not exists messages (
+  id bigint generated always as identity primary key,
+  listing_id bigint not null references listings (id) on delete cascade,
+  buyer_id uuid not null references auth.users (id) on delete cascade,
+  sender_id uuid not null references auth.users (id) on delete cascade,
+  body text not null check (char_length(body) between 1 and 2000),
+  created_at timestamptz not null default now()
+);
+create index if not exists messages_thread_idx on messages (listing_id, buyer_id, created_at);
+alter table messages enable row level security;
+drop policy if exists "buyer or seller can view their message thread" on messages;
+create policy "buyer or seller can view their message thread" on messages
+  for select using (
+    buyer_id = auth.uid()
+    or exists (select 1 from listings l where l.id = listing_id and l.seller_id = auth.uid())
+  );
 
 -- ─── VIN decode cache ──────────────────────────────────────────────────
 -- Kept from the previous build — still used by the "auto-fill from VIN"
