@@ -57,7 +57,12 @@ create table if not exists listings (
   photos text[] not null default '{}',
   asking_price integer not null,
   minimum_offer integer not null,
-  status text not null default 'active' check (status in ('active', 'sold', 'cancelled')),
+  -- pending_sale: an offer was accepted but hasn't closed. Other buyers can
+  -- still submit offers while it's pending_sale (lib/offers.ts holds those
+  -- back as hidden "backup" offers — see the offers table below); if the
+  -- accepted deal falls through, the listing reopens as active and the
+  -- backups become visible to the seller.
+  status text not null default 'active' check (status in ('active', 'sold', 'cancelled', 'pending_sale')),
   -- Spec panel fields. engine/transmission/drive_type/fuel_type/body_type
   -- auto-fill from the free NHTSA VIN decode when a VIN is given; colors and
   -- mpg are seller-entered (no free data source for those). All optional.
@@ -88,9 +93,15 @@ alter table listings add column if not exists interior_color text;
 alter table listings add column if not exists city_mpg integer;
 alter table listings add column if not exists highway_mpg integer;
 
+-- Safe to re-run against a listings table created before 'pending_sale'
+-- existed.
+alter table listings drop constraint if exists listings_status_check;
+alter table listings add constraint listings_status_check
+  check (status in ('active', 'sold', 'cancelled', 'pending_sale'));
+
 drop policy if exists "active listings are public" on listings;
 create policy "active listings are public" on listings
-  for select using (status = 'active' or seller_id = auth.uid());
+  for select using (status in ('active', 'pending_sale') or seller_id = auth.uid());
 drop policy if exists "sellers manage own listings" on listings;
 create policy "sellers manage own listings" on listings
   for all using (seller_id = auth.uid()) with check (seller_id = auth.uid());
@@ -122,6 +133,12 @@ create policy "users manage own saved listings" on saved_listings
 -- moves to a new side (new offer, or a counter). There's no background job
 -- — lib/offers.ts checks it lazily whenever an offer is read or acted on,
 -- and flips it to 'expired' at that point rather than on a timer.
+--
+-- `backup`: a new offer submitted while the listing is pending_sale. It's
+-- a normal offer in every way except lib/db.ts's listOffersForSeller()
+-- excludes it, so the seller never sees it (and never gets notified) until
+-- the accepted deal falls through, at which point it's promoted to
+-- pending_seller (and given a fresh expires_at) like any other new offer.
 
 create table if not exists offers (
   id bigint generated always as identity primary key,
@@ -129,7 +146,10 @@ create table if not exists offers (
   buyer_id uuid not null references auth.users (id) on delete cascade,
   amount integer not null,
   status text not null default 'pending_seller'
-    check (status in ('pending_seller', 'pending_buyer', 'accepted', 'declined', 'withdrawn', 'auto_declined', 'expired')),
+    check (status in (
+      'pending_seller', 'pending_buyer', 'accepted', 'declined', 'withdrawn',
+      'auto_declined', 'expired', 'backup', 'fell_through'
+    )),
   expires_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -139,11 +159,14 @@ create index if not exists offers_buyer_idx on offers (buyer_id);
 alter table offers enable row level security;
 
 -- Safe to re-run against an offers table created before expires_at and the
--- 'expired' status existed.
+-- 'expired'/'backup'/'fell_through' statuses existed.
 alter table offers add column if not exists expires_at timestamptz;
 alter table offers drop constraint if exists offers_status_check;
 alter table offers add constraint offers_status_check
-  check (status in ('pending_seller', 'pending_buyer', 'accepted', 'declined', 'withdrawn', 'auto_declined', 'expired'));
+  check (status in (
+    'pending_seller', 'pending_buyer', 'accepted', 'declined', 'withdrawn',
+    'auto_declined', 'expired', 'backup', 'fell_through'
+  ));
 
 drop policy if exists "buyer or seller can view their offers" on offers;
 create policy "buyer or seller can view their offers" on offers
@@ -153,18 +176,23 @@ create policy "buyer or seller can view their offers" on offers
   );
 
 -- Full negotiation history for an offer thread (offer / counter / accept /
--- decline / withdraw / expire), so the UI can show the back-and-forth.
+-- decline / withdraw / expire / fall_through / reactivate), so the UI can
+-- show the back-and-forth.
 create table if not exists offer_events (
   id bigint generated always as identity primary key,
   offer_id bigint not null references offers (id) on delete cascade,
   actor_id uuid not null references auth.users (id),
-  action text not null check (action in ('offer', 'counter', 'accept', 'decline', 'withdraw', 'auto_decline', 'expire')),
+  action text not null check (action in (
+    'offer', 'counter', 'accept', 'decline', 'withdraw', 'auto_decline', 'expire', 'fall_through', 'reactivate'
+  )),
   amount integer,
   created_at timestamptz not null default now()
 );
 alter table offer_events drop constraint if exists offer_events_action_check;
 alter table offer_events add constraint offer_events_action_check
-  check (action in ('offer', 'counter', 'accept', 'decline', 'withdraw', 'auto_decline', 'expire'));
+  check (action in (
+    'offer', 'counter', 'accept', 'decline', 'withdraw', 'auto_decline', 'expire', 'fall_through', 'reactivate'
+  ));
 create index if not exists offer_events_offer_idx on offer_events (offer_id, created_at);
 alter table offer_events enable row level security;
 drop policy if exists "buyer or seller can view offer events" on offer_events;

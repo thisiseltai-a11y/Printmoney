@@ -13,6 +13,8 @@ const BADGES: Record<OfferStatus, { label: string; className: string }> = {
   withdrawn: { label: 'Withdrawn', className: 'bg-raised text-muted' },
   auto_declined: { label: 'Auto-declined', className: 'bg-raised text-muted' },
   expired: { label: 'Expired', className: 'bg-raised text-muted' },
+  backup: { label: 'Backup offer', className: 'bg-raised text-muted' },
+  fell_through: { label: 'Deal fell through', className: 'bg-raised text-muted' },
 }
 
 function Badge({ status }: { status: OfferStatus }) {
@@ -41,7 +43,10 @@ export default function OfferActions({
   const [showCounter, setShowCounter] = useState(false)
   const [counterAmount, setCounterAmount] = useState('')
 
-  async function act(action: 'accept' | 'counter' | 'decline' | 'withdraw', counterAmountValue?: string) {
+  async function act(
+    action: 'accept' | 'counter' | 'decline' | 'withdraw' | 'fall_through',
+    counterAmountValue?: string
+  ) {
     setLoading(true)
     setError('')
     try {
@@ -63,6 +68,8 @@ export default function OfferActions({
 
   const isMyTurn = (role === 'seller' && status === 'pending_seller') || (role === 'buyer' && status === 'pending_buyer')
   const isWaiting = (role === 'seller' && status === 'pending_buyer') || (role === 'buyer' && status === 'pending_seller')
+  const isAccepted = status === 'accepted'
+  const isBackup = status === 'backup'
 
   return (
     <div>
@@ -130,7 +137,41 @@ export default function OfferActions({
         </div>
       )}
 
-      {!isMyTurn && !isWaiting && <Badge status={status} />}
+      {isAccepted && (
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge status={status} />
+          <button
+            onClick={() => act('fall_through')}
+            disabled={loading}
+            className="rounded-sm border border-line px-3 py-1.5 text-xs text-muted transition hover:text-ink disabled:opacity-60"
+          >
+            {loading ? 'Updating…' : 'Deal fell through?'}
+          </button>
+        </div>
+      )}
+
+      {isBackup && (
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge status={status} />
+          {role === 'buyer' && (
+            <button
+              onClick={() => act('withdraw')}
+              disabled={loading}
+              className="rounded-sm border border-line px-3 py-1.5 text-xs text-muted transition hover:text-ink disabled:opacity-60"
+            >
+              {loading ? 'Withdrawing…' : 'Withdraw backup offer'}
+            </button>
+          )}
+        </div>
+      )}
+
+      {isBackup && role === 'buyer' && (
+        <p className="mt-1 font-mono text-[11px] text-muted">
+          Only visible to you — the seller will see it if the accepted deal falls through.
+        </p>
+      )}
+
+      {!isMyTurn && !isWaiting && !isAccepted && !isBackup && <Badge status={status} />}
 
       {error && <p className="mt-1 font-mono text-xs text-amber">{error}</p>}
     </div>

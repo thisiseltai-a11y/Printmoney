@@ -19,7 +19,7 @@ export default function OfferForm({
   const [amount, setAmount] = useState('')
   const [loading, setLoading] = useState<'buy' | 'offer' | null>(null)
   const [error, setError] = useState('')
-  const [sent, setSent] = useState<'buy' | 'offer' | null>(null)
+  const [sent, setSent] = useState<'buy' | 'offer' | 'backup' | null>(null)
 
   async function submit(amountDollars: number, kind: 'buy' | 'offer') {
     if (preview) {
@@ -43,7 +43,9 @@ export default function OfferForm({
         setError("That offer wasn't high enough for the seller to consider — try offering more.")
         return
       }
-      setSent(kind)
+      // Submitted while the listing had another accepted offer pending —
+      // held back as a backup, not shown to the seller yet.
+      setSent(data.backup ? 'backup' : kind)
       router.refresh()
     } catch (err: any) {
       setError(err.message)
@@ -73,6 +75,14 @@ export default function OfferForm({
     return (
       <p className="mt-5 rounded-sm border border-teal/40 bg-raised px-4 py-3 text-sm text-teal">
         Offer sent! You&apos;ll be notified when the seller responds. Track it from your dashboard.
+      </p>
+    )
+  }
+  if (sent === 'backup') {
+    return (
+      <p className="mt-5 rounded-sm border border-amber/30 bg-amber/5 px-4 py-3 text-sm text-amber">
+        Backup offer submitted. The seller won&apos;t see it unless the accepted deal falls through — you&apos;ll be
+        notified either way. Track it from your dashboard.
       </p>
     )
   }

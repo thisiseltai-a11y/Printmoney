@@ -11,6 +11,13 @@ import { centsToDisplay } from '@/lib/money'
 import { formatTimeRemaining } from '@/lib/time'
 import { redirect } from 'next/navigation'
 
+const LISTING_STATUS_LABELS: Record<string, string> = {
+  active: 'active',
+  pending_sale: 'pending sale',
+  sold: 'sold',
+  cancelled: 'cancelled',
+}
+
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
@@ -72,12 +79,12 @@ export default async function DashboardPage() {
                           className={`inline-flex items-center rounded-full px-2.5 py-1 font-mono text-xs uppercase ${
                             listing.status === 'active'
                               ? 'bg-teal/10 text-teal'
-                              : listing.status === 'sold'
+                              : listing.status === 'pending_sale' || listing.status === 'sold'
                                 ? 'bg-amber/10 text-amber'
                                 : 'bg-raised text-muted'
                           }`}
                         >
-                          {listing.status}
+                          {LISTING_STATUS_LABELS[listing.status]}
                         </span>
                         {listing.status === 'active' && <CancelListingButton listingId={listing.id} />}
                       </div>

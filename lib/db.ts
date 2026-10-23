@@ -25,7 +25,7 @@ export interface Listing {
   photos: string[]
   asking_price: number
   minimum_offer: number
-  status: 'active' | 'sold' | 'cancelled'
+  status: 'active' | 'sold' | 'cancelled' | 'pending_sale'
   engine: string | null
   transmission: string | null
   drive_type: string | null
@@ -153,6 +153,8 @@ export type OfferStatus =
   | 'withdrawn'
   | 'auto_declined'
   | 'expired'
+  | 'backup'
+  | 'fell_through'
 
 export interface Offer {
   id: number
@@ -244,7 +246,11 @@ export async function listOffersForBuyer(buyerId: string): Promise<(Offer & { li
 }
 
 // listings the current user is selling, joined with their offers — used by
-// the seller side of the dashboard
+// the seller side of the dashboard. Excludes 'backup' offers: those were
+// submitted while the listing had an accepted deal pending, and the seller
+// isn't shown them (or notified) unless that deal falls through — see
+// listBackupOffersForListing() and the 'fall_through' handling in
+// lib/offers.ts.
 export async function listOffersForSeller(sellerId: string): Promise<(Offer & { listing: Listing })[]> {
   if (!dbConfigured()) return []
   const supabase = getSupabase()
@@ -252,11 +258,28 @@ export async function listOffersForSeller(sellerId: string): Promise<(Offer & { 
     .from('offers')
     .select('*, listing:listings!inner(*)')
     .eq('listing.seller_id', sellerId)
+    .neq('status', 'backup')
     .order('updated_at', { ascending: false })
   return (data as any) ?? []
 }
 
-export type OfferAction = 'offer' | 'counter' | 'accept' | 'decline' | 'withdraw' | 'auto_decline' | 'expire'
+export async function listBackupOffersForListing(listingId: number): Promise<Offer[]> {
+  if (!dbConfigured()) return []
+  const supabase = getSupabase()
+  const { data } = await supabase.from('offers').select().eq('listing_id', listingId).eq('status', 'backup')
+  return (data as Offer[]) ?? []
+}
+
+export type OfferAction =
+  | 'offer'
+  | 'counter'
+  | 'accept'
+  | 'decline'
+  | 'withdraw'
+  | 'auto_decline'
+  | 'expire'
+  | 'fall_through'
+  | 'reactivate'
 
 export async function insertOfferEvent(input: {
   offer_id: number

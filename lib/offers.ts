@@ -7,6 +7,7 @@ import {
   insertOfferEvent,
   createNotification,
   listPendingOffersForListing,
+  listBackupOffersForListing,
   type Offer,
   type Listing,
 } from './db'
@@ -80,20 +81,26 @@ export async function expireOverdueOffers<T extends Offer>(offers: T[]): Promise
 export async function submitOffer(input: { listingId: number; buyerId: string; amountCents: number }) {
   const listing = await getListing(input.listingId)
   if (!listing) throw new OfferError('Listing not found.', 404)
-  if (listing.status !== 'active') throw new OfferError('This listing is no longer active.', 409)
+  if (listing.status !== 'active' && listing.status !== 'pending_sale') {
+    throw new OfferError('This listing is no longer active.', 409)
+  }
   if (listing.seller_id === input.buyerId) throw new OfferError("You can't make an offer on your own listing.", 400)
   if (!Number.isFinite(input.amountCents) || input.amountCents <= 0) {
     throw new OfferError('Enter a valid offer amount.', 400)
   }
 
   const belowMinimum = input.amountCents < listing.minimum_offer
+  // A listing with an accepted-but-not-closed deal still takes offers, but
+  // they're held back as backups — not shown or notified to the seller —
+  // until that deal falls through. See the 'fall_through' handling below.
+  const isBackup = !belowMinimum && listing.status === 'pending_sale'
 
   const offer = await createOffer({
     listing_id: listing.id,
     buyer_id: input.buyerId,
     amount: input.amountCents,
-    status: belowMinimum ? 'auto_declined' : 'pending_seller',
-    expires_at: belowMinimum ? null : offerDeadline(),
+    status: belowMinimum ? 'auto_declined' : isBackup ? 'backup' : 'pending_seller',
+    expires_at: !belowMinimum && !isBackup ? offerDeadline() : null,
   })
 
   await insertOfferEvent({
@@ -104,7 +111,12 @@ export async function submitOffer(input: { listingId: number; buyerId: string; a
   })
 
   if (belowMinimum) {
-    return { offer, belowMinimum: true, minimum: listing.minimum_offer }
+    return { offer, belowMinimum: true, backup: false, minimum: listing.minimum_offer }
+  }
+
+  if (isBackup) {
+    // Deliberately no notification to the seller — that's the whole point.
+    return { offer, belowMinimum: false, backup: true }
   }
 
   await createNotification({
@@ -115,10 +127,10 @@ export async function submitOffer(input: { listingId: number; buyerId: string; a
     link: '/dashboard',
   })
 
-  return { offer, belowMinimum: false }
+  return { offer, belowMinimum: false, backup: false }
 }
 
-type RespondAction = 'accept' | 'counter' | 'decline' | 'withdraw'
+type RespondAction = 'accept' | 'counter' | 'decline' | 'withdraw' | 'fall_through'
 
 export async function respondToOffer(input: {
   offerId: number
@@ -141,19 +153,72 @@ export async function respondToOffer(input: {
 
   if (input.action === 'withdraw') {
     if (!isBuyer) throw new OfferError('Only the buyer can withdraw an offer.', 403)
-    if (offer.status !== 'pending_seller' && offer.status !== 'pending_buyer') {
+    const withdrawable: Offer['status'][] = ['pending_seller', 'pending_buyer', 'backup']
+    if (!withdrawable.includes(offer.status)) {
       throw new OfferError('This offer is no longer open.', 409)
     }
-    const applied = await updateOffer(offer.id, { status: 'withdrawn' }, ['pending_seller', 'pending_buyer'])
+    const wasBackup = offer.status === 'backup'
+    const applied = await updateOffer(offer.id, { status: 'withdrawn' }, offer.status)
     if (!applied) throw new OfferError('This offer is no longer open.', 409)
     await insertOfferEvent({ offer_id: offer.id, actor_id: input.actorId, action: 'withdraw' })
+    // The seller was never shown this offer — don't tip them off that it
+    // existed just because it was withdrawn.
+    if (!wasBackup) {
+      await createNotification({
+        user_id: listing.seller_id,
+        type: 'offer_withdrawn',
+        title: `An offer on your ${carLabel(listing)} was withdrawn`,
+        link: '/dashboard',
+      })
+    }
+    return { offer: { ...offer, status: 'withdrawn' as const } }
+  }
+
+  if (input.action === 'fall_through') {
+    if (offer.status !== 'accepted') throw new OfferError('This offer is not an active deal.', 409)
+    const applied = await updateOffer(offer.id, { status: 'fell_through' }, 'accepted')
+    if (!applied) throw new OfferError('This offer is not an active deal.', 409)
+    await insertOfferEvent({ offer_id: offer.id, actor_id: input.actorId, action: 'fall_through' })
+
+    const counterpartyId = isSeller ? offer.buyer_id : listing.seller_id
     await createNotification({
-      user_id: listing.seller_id,
-      type: 'offer_withdrawn',
-      title: `An offer on your ${carLabel(listing)} was withdrawn`,
+      user_id: counterpartyId,
+      type: 'deal_fell_through',
+      title: `The deal on the ${carLabel(listing)} fell through`,
       link: '/dashboard',
     })
-    return { offer: { ...offer, status: 'withdrawn' as const } }
+
+    // Promote any backup offers that piled up while this deal was pending
+    // — now it's the seller's turn to look at them, each with a fresh
+    // 48-hour window, same as a brand-new offer.
+    const backups = await listBackupOffersForListing(listing.id)
+    for (const backup of backups) {
+      const promoted = await updateOffer(
+        backup.id,
+        { status: 'pending_seller', expires_at: offerDeadline() },
+        'backup'
+      )
+      if (!promoted) continue
+      await insertOfferEvent({ offer_id: backup.id, actor_id: listing.seller_id, action: 'reactivate' })
+      await createNotification({
+        user_id: backup.buyer_id,
+        type: 'backup_offer_active',
+        title: `Your backup offer on the ${carLabel(listing)} is now active`,
+        body: 'The original deal fell through — the seller is reviewing your offer.',
+        link: '/dashboard',
+      })
+    }
+    if (backups.length > 0) {
+      await createNotification({
+        user_id: listing.seller_id,
+        type: 'backup_offers_ready',
+        title: `${backups.length} backup offer${backups.length > 1 ? 's' : ''} ready to review on the ${carLabel(listing)}`,
+        link: '/dashboard',
+      })
+    }
+
+    await updateListingStatus(listing.id, 'active')
+    return { offer: { ...offer, status: 'fell_through' as const } }
   }
 
   // accept/counter/decline — must be whoever's turn it is
@@ -166,7 +231,10 @@ export async function respondToOffer(input: {
     const applied = await updateOffer(offer.id, { status: 'accepted' }, expectedTurn)
     if (!applied) throw new OfferError('This offer is not waiting on your response.', 409)
     await insertOfferEvent({ offer_id: offer.id, actor_id: input.actorId, action: 'accept' })
-    await updateListingStatus(listing.id, 'sold')
+    // Not 'sold' yet — pending_sale, so the deal can still fall through.
+    // Other buyers can keep making offers in the meantime; see
+    // submitOffer()'s 'backup' handling.
+    await updateListingStatus(listing.id, 'pending_sale')
 
     const counterpartyId = isSeller ? offer.buyer_id : listing.seller_id
     await createNotification({

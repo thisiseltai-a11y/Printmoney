@@ -97,7 +97,7 @@ export default async function ListingPage({ params }: { params: { id: string } }
                     to start getting real offers.
                   </p>
                 </>
-              ) : listing.status !== 'active' ? (
+              ) : listing.status === 'sold' || listing.status === 'cancelled' ? (
                 <p className="mt-5 rounded-sm border border-line bg-raised px-4 py-3 text-sm text-muted">
                   This listing is no longer active.
                 </p>
@@ -110,7 +110,15 @@ export default async function ListingPage({ params }: { params: { id: string } }
                   .
                 </p>
               ) : user ? (
-                <OfferForm listingId={listing.id} askingPrice={listing.asking_price} />
+                <>
+                  {listing.status === 'pending_sale' && (
+                    <p className="mb-3 rounded-sm border border-amber/30 bg-amber/5 px-4 py-3 text-xs text-amber">
+                      This car has an accepted offer pending. You can still submit a backup offer — the seller will
+                      only see it if that deal falls through.
+                    </p>
+                  )}
+                  <OfferForm listingId={listing.id} askingPrice={listing.asking_price} />
+                </>
               ) : (
                 <p className="mt-5 text-sm text-muted">
                   <Link href={`/login?next=/listings/${listing.id}`} className="text-teal hover:underline">
