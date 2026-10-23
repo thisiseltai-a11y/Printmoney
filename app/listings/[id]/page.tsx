@@ -73,18 +73,23 @@ export default async function ListingPage({ params }: { params: { id: string } }
               <div className="mt-1 font-mono text-3xl font-semibold text-amber">
                 {centsToDisplay(listing.asking_price)}
               </div>
-              <div className="mt-2 font-mono text-xs text-teal">
-                Minimum offer considered: {centsToDisplay(listing.minimum_offer)}
-              </div>
+              {isOwner && (
+                <div className="mt-2 font-mono text-xs text-teal">
+                  Minimum offer considered: {centsToDisplay(listing.minimum_offer)}
+                </div>
+              )}
 
               {isExample ? (
-                <p className="mt-5 rounded-sm border border-line bg-raised px-4 py-3 text-sm text-muted">
-                  This is an example listing —{' '}
-                  <Link href="/sell/new" className="text-teal hover:underline">
-                    list your own car
-                  </Link>{' '}
-                  to start getting real offers.
-                </p>
+                <>
+                  <OfferForm listingId={listing.id} askingPrice={listing.asking_price} preview />
+                  <p className="mt-3 rounded-sm border border-line bg-raised px-4 py-3 text-sm text-muted">
+                    This is an example listing —{' '}
+                    <Link href="/sell/new" className="text-teal hover:underline">
+                      list your own car
+                    </Link>{' '}
+                    to start getting real offers.
+                  </p>
+                </>
               ) : listing.status !== 'active' ? (
                 <p className="mt-5 rounded-sm border border-line bg-raised px-4 py-3 text-sm text-muted">
                   This listing is no longer active.
@@ -98,11 +103,7 @@ export default async function ListingPage({ params }: { params: { id: string } }
                   .
                 </p>
               ) : user ? (
-                <OfferForm
-                  listingId={listing.id}
-                  askingPrice={listing.asking_price}
-                  minimumOffer={listing.minimum_offer}
-                />
+                <OfferForm listingId={listing.id} askingPrice={listing.asking_price} />
               ) : (
                 <p className="mt-5 text-sm text-muted">
                   <Link href={`/login?next=/listings/${listing.id}`} className="text-teal hover:underline">
