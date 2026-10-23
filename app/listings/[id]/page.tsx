@@ -50,13 +50,6 @@ export default async function ListingPage({ params }: { params: { id: string } }
                 </div>
               )}
             </div>
-
-            {listing.description && (
-              <div className="mt-6">
-                <h2 className="mb-2 font-grotesk text-lg font-semibold text-ink">Description</h2>
-                <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted">{listing.description}</p>
-              </div>
-            )}
           </div>
 
           <div className="lg:col-span-2">
@@ -117,6 +110,13 @@ export default async function ListingPage({ params }: { params: { id: string } }
             <div className="mt-6">
               <SpecsPanel listing={listing} />
             </div>
+
+            {listing.description && (
+              <div className="mt-6">
+                <h2 className="mb-2 font-grotesk text-lg font-semibold text-ink">Description</h2>
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted">{listing.description}</p>
+              </div>
+            )}
 
             {listing.vin && (
               <div className="mt-4">
