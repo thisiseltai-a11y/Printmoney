@@ -156,6 +156,7 @@ export type OfferStatus =
   | 'expired'
   | 'backup'
   | 'fell_through'
+  | 'sold'
 
 export interface Offer {
   id: number
@@ -307,6 +308,7 @@ export type OfferAction =
   | 'expire'
   | 'fall_through'
   | 'reactivate'
+  | 'mark_sold'
 
 export async function insertOfferEvent(input: {
   offer_id: number

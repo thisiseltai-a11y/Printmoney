@@ -156,7 +156,7 @@ export async function submitOffer(input: { listingId: number; buyerId: string; a
   return { offer, belowMinimum: false, backup: false }
 }
 
-type RespondAction = 'accept' | 'counter' | 'decline' | 'withdraw' | 'fall_through'
+type RespondAction = 'accept' | 'counter' | 'decline' | 'withdraw' | 'fall_through' | 'mark_sold'
 
 export async function respondToOffer(input: {
   offerId: number
@@ -245,6 +245,39 @@ export async function respondToOffer(input: {
 
     await updateListingStatus(listing.id, 'active')
     return { offer: { ...offer, status: 'fell_through' as const } }
+  }
+
+  if (input.action === 'mark_sold') {
+    if (!isSeller) throw new OfferError('Only the seller can mark a deal as sold.', 403)
+    if (offer.status !== 'accepted') throw new OfferError('This offer is not an active deal.', 409)
+    const applied = await updateOffer(offer.id, { status: 'sold' }, 'accepted')
+    if (!applied) throw new OfferError('This offer is not an active deal.', 409)
+    await insertOfferEvent({ offer_id: offer.id, actor_id: input.actorId, action: 'mark_sold' })
+    await updateListingStatus(listing.id, 'sold')
+
+    await createNotification({
+      user_id: offer.buyer_id,
+      type: 'deal_closed',
+      title: `Marked sold: the ${carLabel(listing)}`,
+      body: `${centsToDisplay(offer.amount)} — the sale is complete.`,
+      link: '/dashboard',
+    })
+
+    // Any backup offers that piled up are moot now — the car's gone.
+    const backups = await listBackupOffersForListing(listing.id)
+    for (const backup of backups) {
+      const declined = await updateOffer(backup.id, { status: 'auto_declined' }, 'backup')
+      if (!declined) continue
+      await insertOfferEvent({ offer_id: backup.id, actor_id: listing.seller_id, action: 'auto_decline' })
+      await createNotification({
+        user_id: backup.buyer_id,
+        type: 'listing_sold',
+        title: `The ${carLabel(listing)} was sold to another buyer`,
+        link: '/dashboard',
+      })
+    }
+
+    return { offer: { ...offer, status: 'sold' as const } }
   }
 
   // accept/counter/decline — must be whoever's turn it is

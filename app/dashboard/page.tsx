@@ -165,9 +165,9 @@ export default async function DashboardPage() {
                         <span className="font-mono text-sm text-amber">{centsToDisplay(listing.asking_price)}</span>
                         <span
                           className={`inline-flex items-center rounded-full px-2.5 py-1 font-mono text-xs uppercase ${
-                            listing.status === 'active'
+                            listing.status === 'active' || listing.status === 'sold'
                               ? 'bg-teal/10 text-teal'
-                              : listing.status === 'pending_sale' || listing.status === 'sold'
+                              : listing.status === 'pending_sale'
                                 ? 'bg-amber/10 text-amber'
                                 : 'bg-raised text-muted'
                           }`}

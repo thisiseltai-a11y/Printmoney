@@ -139,6 +139,11 @@ create policy "users manage own saved listings" on saved_listings
 -- excludes it, so the seller never sees it (and never gets notified) until
 -- the accepted deal falls through, at which point it's promoted to
 -- pending_seller (and given a fresh expires_at) like any other new offer.
+--
+-- `sold`: the seller closed out an accepted offer for real (the 'Mark as
+-- sold' action) — distinct from 'accepted', which just means the deal is
+-- pending_sale and could still fall through. Only reachable from
+-- 'accepted'.
 
 create table if not exists offers (
   id bigint generated always as identity primary key,
@@ -148,7 +153,7 @@ create table if not exists offers (
   status text not null default 'pending_seller'
     check (status in (
       'pending_seller', 'pending_buyer', 'accepted', 'declined', 'withdrawn',
-      'auto_declined', 'expired', 'backup', 'fell_through'
+      'auto_declined', 'expired', 'backup', 'fell_through', 'sold'
     )),
   expires_at timestamptz,
   -- Set once a "your window closes in under 24h" reminder email has gone
@@ -163,15 +168,15 @@ create index if not exists offers_buyer_idx on offers (buyer_id);
 alter table offers enable row level security;
 
 -- Safe to re-run against an offers table created before expires_at,
--- reminder_sent_at, and the 'expired'/'backup'/'fell_through' statuses
--- existed.
+-- reminder_sent_at, and the 'expired'/'backup'/'fell_through'/'sold'
+-- statuses existed.
 alter table offers add column if not exists expires_at timestamptz;
 alter table offers add column if not exists reminder_sent_at timestamptz;
 alter table offers drop constraint if exists offers_status_check;
 alter table offers add constraint offers_status_check
   check (status in (
     'pending_seller', 'pending_buyer', 'accepted', 'declined', 'withdrawn',
-    'auto_declined', 'expired', 'backup', 'fell_through'
+    'auto_declined', 'expired', 'backup', 'fell_through', 'sold'
   ));
 
 drop policy if exists "buyer or seller can view their offers" on offers;
@@ -182,14 +187,15 @@ create policy "buyer or seller can view their offers" on offers
   );
 
 -- Full negotiation history for an offer thread (offer / counter / accept /
--- decline / withdraw / expire / fall_through / reactivate), so the UI can
--- show the back-and-forth.
+-- decline / withdraw / expire / fall_through / reactivate / mark_sold), so
+-- the UI can show the back-and-forth.
 create table if not exists offer_events (
   id bigint generated always as identity primary key,
   offer_id bigint not null references offers (id) on delete cascade,
   actor_id uuid not null references auth.users (id),
   action text not null check (action in (
-    'offer', 'counter', 'accept', 'decline', 'withdraw', 'auto_decline', 'expire', 'fall_through', 'reactivate'
+    'offer', 'counter', 'accept', 'decline', 'withdraw', 'auto_decline',
+    'expire', 'fall_through', 'reactivate', 'mark_sold'
   )),
   amount integer,
   created_at timestamptz not null default now()
@@ -197,7 +203,8 @@ create table if not exists offer_events (
 alter table offer_events drop constraint if exists offer_events_action_check;
 alter table offer_events add constraint offer_events_action_check
   check (action in (
-    'offer', 'counter', 'accept', 'decline', 'withdraw', 'auto_decline', 'expire', 'fall_through', 'reactivate'
+    'offer', 'counter', 'accept', 'decline', 'withdraw', 'auto_decline',
+    'expire', 'fall_through', 'reactivate', 'mark_sold'
   ));
 create index if not exists offer_events_offer_idx on offer_events (offer_id, created_at);
 alter table offer_events enable row level security;

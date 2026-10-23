@@ -15,6 +15,7 @@ const BADGES: Record<OfferStatus, { label: string; className: string }> = {
   expired: { label: 'Expired', className: 'bg-raised text-muted' },
   backup: { label: 'Backup offer', className: 'bg-raised text-muted' },
   fell_through: { label: 'Deal fell through', className: 'bg-raised text-muted' },
+  sold: { label: 'Sold', className: 'bg-teal/10 text-teal' },
 }
 
 function Badge({ status }: { status: OfferStatus }) {
@@ -44,7 +45,7 @@ export default function OfferActions({
   const [counterAmount, setCounterAmount] = useState('')
 
   async function act(
-    action: 'accept' | 'counter' | 'decline' | 'withdraw' | 'fall_through',
+    action: 'accept' | 'counter' | 'decline' | 'withdraw' | 'fall_through' | 'mark_sold',
     counterAmountValue?: string
   ) {
     setLoading(true)
@@ -140,6 +141,15 @@ export default function OfferActions({
       {isAccepted && (
         <div className="flex flex-wrap items-center gap-2">
           <Badge status={status} />
+          {role === 'seller' && (
+            <button
+              onClick={() => act('mark_sold')}
+              disabled={loading}
+              className="rounded-sm bg-teal px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+            >
+              {loading ? 'Updating…' : 'Mark as sold'}
+            </button>
+          )}
           <button
             onClick={() => act('fall_through')}
             disabled={loading}
