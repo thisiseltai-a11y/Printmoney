@@ -66,14 +66,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Not authorized.' }, { status: 403 })
   }
 
-  if (isSeller) {
-    const canReply = await hasMessageRelationship(listingId, buyerId)
-    if (!canReply) {
-      return NextResponse.json(
-        { error: "This buyer hasn't messaged or made an offer on this listing yet." },
-        { status: 403 }
-      )
-    }
+  // Messaging is gated behind an offer, on both sides — a buyer can't open
+  // a thread until they've made one, and a seller can only reply into a
+  // thread that means the buyer already has.
+  const hasOffer = await hasMessageRelationship(listingId, buyerId)
+  if (!hasOffer) {
+    return NextResponse.json(
+      { error: 'Make an offer on this listing before messaging the seller.' },
+      { status: 403 }
+    )
   }
 
   const message = await createMessage({ listing_id: listingId, buyer_id: buyerId, sender_id: user.id, body: text })

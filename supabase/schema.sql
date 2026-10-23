@@ -240,10 +240,12 @@ create policy "users can mark own notifications read" on notifications
 -- whoever actually wrote a given message, since either side can post into
 -- the same thread. Plain text only, no read receipts, no attachments —
 -- the client polls for new messages the same way NotificationsBell does.
--- A buyer can start a thread any time; a seller can only reply into one
--- that already has a message or an offer from that buyer (see
--- hasMessageRelationship() in lib/db.ts) — sellers can't cold-message
--- strangers who've shown no interest in the listing.
+-- Messaging is gated behind having made an offer, on both sides (see
+-- hasMessageRelationship() in lib/db.ts) — a buyer can't open a thread
+-- until they've put a real number down, and a seller can only reply into
+-- a thread that means the same thing. That's the "serious buyers, not
+-- time-wasters" filter: the offer itself is the commitment, no separate
+-- hold/deposit needed.
 
 create table if not exists messages (
   id bigint generated always as identity primary key,

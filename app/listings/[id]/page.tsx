@@ -7,7 +7,7 @@ import PhotoGallery from './PhotoGallery'
 import SpecsPanel from '@/components/SpecsPanel'
 import SaveButton from '@/components/SaveButton'
 import SimilarListings from '@/components/SimilarListings'
-import { getListing, listSimilarListings, isListingSaved } from '@/lib/db'
+import { getListing, listSimilarListings, isListingSaved, hasMessageRelationship } from '@/lib/db'
 import { getExampleListing, EXAMPLE_LISTINGS } from '@/lib/exampleListings'
 import { getSessionUser } from '@/lib/supabase/server'
 import { centsToDisplay } from '@/lib/money'
@@ -27,9 +27,10 @@ export default async function ListingPage({ params }: { params: { id: string } }
   ])
   if (!listing) notFound()
 
-  const [similarListings, saved] = await Promise.all([
+  const [similarListings, saved, canMessage] = await Promise.all([
     isExample ? EXAMPLE_LISTINGS.filter((l) => l.id !== id).slice(0, 4) : listSimilarListings(listing),
     user && !isExample ? isListingSaved(user.id, listing.id) : Promise.resolve(false),
+    user && !isExample ? hasMessageRelationship(listing.id, user.id) : Promise.resolve(false),
   ])
 
   const title = [listing.year, listing.make, listing.model].filter(Boolean).join(' ')
@@ -118,13 +119,20 @@ export default async function ListingPage({ params }: { params: { id: string } }
                     </p>
                   )}
                   <OfferForm listingId={listing.id} askingPrice={listing.asking_price} />
-                  <Link
-                    href={`/messages/${listing.id}/${user.id}`}
-                    className="mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-sm border border-line text-sm font-medium text-ink transition hover:border-amber/40"
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    Message seller
-                  </Link>
+                  {canMessage ? (
+                    <Link
+                      href={`/messages/${listing.id}/${user.id}`}
+                      className="mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-sm border border-line text-sm font-medium text-ink transition hover:border-amber/40"
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      Message seller
+                    </Link>
+                  ) : (
+                    <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-muted">
+                      <MessageCircle className="h-3.5 w-3.5" />
+                      Make an offer to unlock messaging with the seller.
+                    </p>
+                  )}
                 </>
               ) : (
                 <p className="mt-5 text-sm text-muted">

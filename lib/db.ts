@@ -443,16 +443,21 @@ export async function listNewMessages(listingId: number, buyerId: string, afterI
   return (data as Message[]) ?? []
 }
 
-// A seller can only reply into a thread, never cold-start one — this
-// checks the buyer has already either messaged first or made an offer.
+// Messaging is gated behind having made an offer — on either side. A buyer
+// can't open a thread until they've put a real number down (which already
+// has to clear the seller's minimum or it auto-declines), and a seller can
+// only reply into a thread that means the same thing. This is the
+// "serious buyers, not time-wasters" filter — no separate hold/deposit
+// needed, the offer itself is the commitment.
 export async function hasMessageRelationship(listingId: number, buyerId: string): Promise<boolean> {
   if (!dbConfigured()) return false
   const supabase = getSupabase()
-  const [{ count: msgCount }, { count: offerCount }] = await Promise.all([
-    supabase.from('messages').select('id', { count: 'exact', head: true }).eq('listing_id', listingId).eq('buyer_id', buyerId),
-    supabase.from('offers').select('id', { count: 'exact', head: true }).eq('listing_id', listingId).eq('buyer_id', buyerId),
-  ])
-  return (msgCount ?? 0) > 0 || (offerCount ?? 0) > 0
+  const { count } = await supabase
+    .from('offers')
+    .select('id', { count: 'exact', head: true })
+    .eq('listing_id', listingId)
+    .eq('buyer_id', buyerId)
+  return (count ?? 0) > 0
 }
 
 // Every thread a user is party to, as either the buyer or the seller of

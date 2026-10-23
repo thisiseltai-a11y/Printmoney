@@ -3,7 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import MessageThread from '@/components/MessageThread'
-import { getListing, listMessagesForThread } from '@/lib/db'
+import { getListing, listMessagesForThread, hasMessageRelationship } from '@/lib/db'
 import { getSessionUser } from '@/lib/supabase/server'
 import { ArrowLeft, Car } from 'lucide-react'
 
@@ -27,8 +27,35 @@ export default async function MessageThreadPage({
   const isBuyer = params.buyerId === user.id
   if (!isSeller && !isBuyer) notFound()
 
-  const messages = await listMessagesForThread(listingId, params.buyerId)
+  const canMessage = await hasMessageRelationship(listingId, params.buyerId)
   const title = [listing.year, listing.make, listing.model].filter(Boolean).join(' ')
+
+  if (!canMessage) {
+    return (
+      <div className="flex min-h-screen flex-col bg-bg">
+        <Navbar />
+        <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
+          <Link href="/dashboard" className="mb-4 flex items-center gap-1.5 text-sm text-muted hover:text-ink">
+            <ArrowLeft className="h-4 w-4" />
+            Back to dashboard
+          </Link>
+          <div className="rounded-card border border-line bg-panel p-6 text-center">
+            <p className="text-sm text-muted">
+              {isBuyer
+                ? 'Make an offer on this listing before messaging the seller.'
+                : "This buyer hasn't made an offer on this listing yet."}
+            </p>
+            <Link href={`/listings/${listing.id}`} className="mt-3 inline-block text-sm text-teal hover:underline">
+              View {title || 'the listing'}
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
+  }
+
+  const messages = await listMessagesForThread(listingId, params.buyerId)
 
   return (
     <div className="flex min-h-screen flex-col bg-bg">
