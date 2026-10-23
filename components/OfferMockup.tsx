@@ -16,8 +16,8 @@ export default function OfferMockup() {
             <div className="font-grotesk text-sm font-semibold text-ink">2025 BMW 3 Series</div>
             <div className="font-mono text-xs text-muted">Asking $33,500</div>
           </div>
-          <span className="rounded-full bg-teal/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-teal">
-            Sold
+          <span className="rounded-full bg-amber/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-amber">
+            Pending sale
           </span>
         </div>
 

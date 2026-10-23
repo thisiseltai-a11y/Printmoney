@@ -42,7 +42,8 @@ export const EXAMPLE_LISTINGS: Listing[] = [
     trim: 'TRD Off-Road',
     mileage: 31200,
     vin: null,
-    description: 'Example listing — this is what a real one looks like once you post your car.',
+    description:
+      "Second owner, bought it at 14k miles and put most of these on dirt and fire roads rather than pavement. Army Green over black TRD cloth — the color everyone asks about at the trailhead. Runs 265/70R16s on the stock TRD wheels, skid plates have the scratches to prove they've done their job, nothing structural ever touched.\n\nV6 and the 4WD low-range never complained, even loaded with gear and a drift boat on the rack. Regular oil changes, new battery last year, tires have maybe 60% left.\n\nSelling because I'm moving somewhere I won't need it — this truck deserves someone who'll actually use the 4WD.",
     photos: [],
     asking_price: 2850000,
     minimum_offer: 2500000,
@@ -67,7 +68,8 @@ export const EXAMPLE_LISTINGS: Listing[] = [
     trim: 'Sport',
     mileage: 48900,
     vin: null,
-    description: 'Example listing — this is what a real one looks like once you post your car.',
+    description:
+      "My first car, bought used and driven responsibly for five years — commuting, not racing, despite what the Sport badge suggests. Rallye Red holds up well; one small parking-lot door ding on the passenger side, otherwise straight.\n\nNew tires about 8k miles ago, brakes done last spring, no warning lights, no slipping from the CVT. AC ice cold, which matters more than people think when buying used.\n\nUpgrading to something bigger for a kid on the way — this one's been reliable the whole time I've had it.",
     photos: [],
     asking_price: 1695000,
     minimum_offer: 1500000,
@@ -92,7 +94,8 @@ export const EXAMPLE_LISTINGS: Listing[] = [
     trim: 'Long Range',
     mileage: 9100,
     vin: null,
-    description: 'Example listing — this is what a real one looks like once you post your car.',
+    description:
+      "Barely broken in — under 10k miles, bought new last year. Pearl White over the black premium interior, no curb rash, no paint correction ever needed because it's never needed it.\n\nStill under the factory warranty with miles to spare. Full self-driving not included, but Autopilot and all the standard safety tech are there. Charges at home every night, so there's no supercharger wear-and-tear story to tell — just a car that's mostly sat in a garage between short trips.\n\nSelling because a company car is replacing it, not because anything's wrong. Priced to move since I'd rather not keep two cars that do the same commute.",
     photos: [],
     asking_price: 3395000,
     minimum_offer: 3100000,
