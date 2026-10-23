@@ -155,7 +155,7 @@ export default function OfferActions({
             disabled={loading}
             className="rounded-sm border border-line px-3 py-1.5 text-xs text-muted transition hover:text-ink disabled:opacity-60"
           >
-            {loading ? 'Updating…' : 'Deal fell through?'}
+            {loading ? 'Updating…' : 'Available'}
           </button>
         </div>
       )}
