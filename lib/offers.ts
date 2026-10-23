@@ -8,6 +8,8 @@ import {
   createNotification,
   listPendingOffersForListing,
   listBackupOffersForListing,
+  listOffersNeedingReminder,
+  markReminderSent,
   type Offer,
   type Listing,
 } from './db'
@@ -71,6 +73,30 @@ async function expireIfOverdue<T extends Offer>(offer: T): Promise<T> {
 // so the page never shows a stale "Awaiting seller" past the deadline.
 export async function expireOverdueOffers<T extends Offer>(offers: T[]): Promise<T[]> {
   return Promise.all(offers.map(expireIfOverdue))
+}
+
+// Called by the scheduled /api/cron/offer-reminders job (there's no way to
+// do this lazily — nobody has to visit the site for a reminder to be due).
+// Sends a "time's running out" notification/email to whoever still owes a
+// response on an offer with under 24h left on its 48h clock, once per
+// window. Returns how many were sent, for the route to report back.
+export async function sendPendingReminders(): Promise<number> {
+  const offers = await listOffersNeedingReminder()
+  let sent = 0
+  for (const offer of offers) {
+    const listing = offer.listing
+    const responsibleId = offer.status === 'pending_seller' ? listing.seller_id : offer.buyer_id
+    await createNotification({
+      user_id: responsibleId,
+      type: 'offer_reminder',
+      title: `Respond soon: your window on the ${carLabel(listing)} closes in under 24h`,
+      body: `${centsToDisplay(offer.amount)} — reply before the 48-hour window closes or the offer auto-closes.`,
+      link: '/dashboard',
+    })
+    await markReminderSent(offer.id)
+    sent++
+  }
+  return sent
 }
 
 // ─── Buyer submits a new offer ─────────────────────────────────────────
@@ -195,7 +221,7 @@ export async function respondToOffer(input: {
     for (const backup of backups) {
       const promoted = await updateOffer(
         backup.id,
-        { status: 'pending_seller', expires_at: offerDeadline() },
+        { status: 'pending_seller', expires_at: offerDeadline(), reminder_sent_at: null },
         'backup'
       )
       if (!promoted) continue
@@ -289,7 +315,7 @@ export async function respondToOffer(input: {
     const nextStatus = isSeller ? 'pending_buyer' : 'pending_seller'
     const applied = await updateOffer(
       offer.id,
-      { amount, status: nextStatus, expires_at: offerDeadline() },
+      { amount, status: nextStatus, expires_at: offerDeadline(), reminder_sent_at: null },
       expectedTurn
     )
     if (!applied) throw new OfferError('This offer is not waiting on your response.', 409)

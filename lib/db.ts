@@ -1,4 +1,5 @@
 import { getSupabase } from './supabase'
+import { sendNotificationEmail } from './email'
 
 export function dbConfigured(): boolean {
   return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY)
@@ -163,6 +164,7 @@ export interface Offer {
   amount: number
   status: OfferStatus
   expires_at: string | null
+  reminder_sent_at: string | null
   created_at: string
   updated_at: string
 }
@@ -195,7 +197,7 @@ export async function getOffer(id: number): Promise<Offer | null> {
 // rather than running any side effects (notifications, listing status, etc).
 export async function updateOffer(
   id: number,
-  patch: Partial<Pick<Offer, 'amount' | 'status' | 'expires_at'>>,
+  patch: Partial<Pick<Offer, 'amount' | 'status' | 'expires_at' | 'reminder_sent_at'>>,
   expectedStatus?: OfferStatus | OfferStatus[]
 ): Promise<boolean> {
   requireDb()
@@ -270,6 +272,31 @@ export async function listBackupOffersForListing(listingId: number): Promise<Off
   return (data as Offer[]) ?? []
 }
 
+// Offers with less than 24h left on their 48h clock that haven't had a
+// reminder sent yet — used by the scheduled /api/cron/offer-reminders job
+// (see lib/offers.ts's sendPendingReminders). Already-expired offers are
+// excluded; those are handled by the lazy expireIfOverdue() path instead.
+export async function listOffersNeedingReminder(): Promise<(Offer & { listing: Listing })[]> {
+  if (!dbConfigured()) return []
+  const supabase = getSupabase()
+  const now = new Date()
+  const in24h = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+  const { data } = await supabase
+    .from('offers')
+    .select('*, listing:listings!inner(*)')
+    .in('status', ['pending_seller', 'pending_buyer'])
+    .is('reminder_sent_at', null)
+    .gt('expires_at', now.toISOString())
+    .lte('expires_at', in24h.toISOString())
+  return (data as any) ?? []
+}
+
+export async function markReminderSent(id: number) {
+  requireDb()
+  const supabase = getSupabase()
+  await supabase.from('offers').update({ reminder_sent_at: new Date().toISOString() }).eq('id', id)
+}
+
 export type OfferAction =
   | 'offer'
   | 'counter'
@@ -319,6 +346,9 @@ export async function createNotification(input: {
   } catch (err) {
     console.error('createNotification failed:', err)
   }
+  // Mirrors every notification as an email, if RESEND_API_KEY is set — see
+  // lib/email.ts. No-ops (and never throws) when it isn't configured.
+  await sendNotificationEmail(input)
 }
 
 export async function listNotifications(userId: string, limit = 20) {

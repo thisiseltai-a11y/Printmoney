@@ -151,6 +151,10 @@ create table if not exists offers (
       'auto_declined', 'expired', 'backup', 'fell_through'
     )),
   expires_at timestamptz,
+  -- Set once a "your window closes in under 24h" reminder email has gone
+  -- out for the current expires_at, so it's sent at most once per window —
+  -- see lib/offers.ts's sendPendingReminders(), hit by a daily Vercel Cron.
+  reminder_sent_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -158,9 +162,11 @@ create index if not exists offers_listing_idx on offers (listing_id);
 create index if not exists offers_buyer_idx on offers (buyer_id);
 alter table offers enable row level security;
 
--- Safe to re-run against an offers table created before expires_at and the
--- 'expired'/'backup'/'fell_through' statuses existed.
+-- Safe to re-run against an offers table created before expires_at,
+-- reminder_sent_at, and the 'expired'/'backup'/'fell_through' statuses
+-- existed.
 alter table offers add column if not exists expires_at timestamptz;
+alter table offers add column if not exists reminder_sent_at timestamptz;
 alter table offers drop constraint if exists offers_status_check;
 alter table offers add constraint offers_status_check
   check (status in (
