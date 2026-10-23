@@ -117,6 +117,11 @@ create policy "users manage own saved listings" on saved_listings
 -- it is. All state transitions happen server-side (service-role key) after
 -- checking the caller is the buyer or the listing's seller — see
 -- lib/offers.ts — RLS here is a read-time backstop, not the only guard.
+--
+-- `expires_at` is a 48-hour response deadline, reset every time the ball
+-- moves to a new side (new offer, or a counter). There's no background job
+-- — lib/offers.ts checks it lazily whenever an offer is read or acted on,
+-- and flips it to 'expired' at that point rather than on a timer.
 
 create table if not exists offers (
   id bigint generated always as identity primary key,
@@ -124,13 +129,22 @@ create table if not exists offers (
   buyer_id uuid not null references auth.users (id) on delete cascade,
   amount integer not null,
   status text not null default 'pending_seller'
-    check (status in ('pending_seller', 'pending_buyer', 'accepted', 'declined', 'withdrawn', 'auto_declined')),
+    check (status in ('pending_seller', 'pending_buyer', 'accepted', 'declined', 'withdrawn', 'auto_declined', 'expired')),
+  expires_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 create index if not exists offers_listing_idx on offers (listing_id);
 create index if not exists offers_buyer_idx on offers (buyer_id);
 alter table offers enable row level security;
+
+-- Safe to re-run against an offers table created before expires_at and the
+-- 'expired' status existed.
+alter table offers add column if not exists expires_at timestamptz;
+alter table offers drop constraint if exists offers_status_check;
+alter table offers add constraint offers_status_check
+  check (status in ('pending_seller', 'pending_buyer', 'accepted', 'declined', 'withdrawn', 'auto_declined', 'expired'));
+
 drop policy if exists "buyer or seller can view their offers" on offers;
 create policy "buyer or seller can view their offers" on offers
   for select using (
@@ -139,15 +153,18 @@ create policy "buyer or seller can view their offers" on offers
   );
 
 -- Full negotiation history for an offer thread (offer / counter / accept /
--- decline / withdraw), so the UI can show the back-and-forth.
+-- decline / withdraw / expire), so the UI can show the back-and-forth.
 create table if not exists offer_events (
   id bigint generated always as identity primary key,
   offer_id bigint not null references offers (id) on delete cascade,
   actor_id uuid not null references auth.users (id),
-  action text not null check (action in ('offer', 'counter', 'accept', 'decline', 'withdraw', 'auto_decline')),
+  action text not null check (action in ('offer', 'counter', 'accept', 'decline', 'withdraw', 'auto_decline', 'expire')),
   amount integer,
   created_at timestamptz not null default now()
 );
+alter table offer_events drop constraint if exists offer_events_action_check;
+alter table offer_events add constraint offer_events_action_check
+  check (action in ('offer', 'counter', 'accept', 'decline', 'withdraw', 'auto_decline', 'expire'));
 create index if not exists offer_events_offer_idx on offer_events (offer_id, created_at);
 alter table offer_events enable row level security;
 drop policy if exists "buyer or seller can view offer events" on offer_events;

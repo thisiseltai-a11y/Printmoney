@@ -152,6 +152,7 @@ export type OfferStatus =
   | 'declined'
   | 'withdrawn'
   | 'auto_declined'
+  | 'expired'
 
 export interface Offer {
   id: number
@@ -159,6 +160,7 @@ export interface Offer {
   buyer_id: string
   amount: number
   status: OfferStatus
+  expires_at: string | null
   created_at: string
   updated_at: string
 }
@@ -168,6 +170,7 @@ export async function createOffer(input: {
   buyer_id: string
   amount: number
   status: OfferStatus
+  expires_at?: string | null
 }): Promise<Offer> {
   requireDb()
   const supabase = getSupabase()
@@ -190,7 +193,7 @@ export async function getOffer(id: number): Promise<Offer | null> {
 // rather than running any side effects (notifications, listing status, etc).
 export async function updateOffer(
   id: number,
-  patch: Partial<Pick<Offer, 'amount' | 'status'>>,
+  patch: Partial<Pick<Offer, 'amount' | 'status' | 'expires_at'>>,
   expectedStatus?: OfferStatus | OfferStatus[]
 ): Promise<boolean> {
   requireDb()
@@ -253,7 +256,7 @@ export async function listOffersForSeller(sellerId: string): Promise<(Offer & { 
   return (data as any) ?? []
 }
 
-export type OfferAction = 'offer' | 'counter' | 'accept' | 'decline' | 'withdraw' | 'auto_decline'
+export type OfferAction = 'offer' | 'counter' | 'accept' | 'decline' | 'withdraw' | 'auto_decline' | 'expire'
 
 export async function insertOfferEvent(input: {
   offer_id: number

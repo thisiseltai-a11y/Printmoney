@@ -11,6 +11,7 @@ import {
   type Listing,
 } from './db'
 import { centsToDisplay } from './money'
+import { offerDeadline, isPastDeadline } from './time'
 
 export class OfferError extends Error {
   status: number
@@ -22,6 +23,53 @@ export class OfferError extends Error {
 
 function carLabel(l: Listing) {
   return [l.year, l.make, l.model].filter(Boolean).join(' ')
+}
+
+// There's no background job to sweep for overdue offers — this runs lazily
+// whenever an offer is fetched for display or about to be acted on, and
+// flips it to 'expired' right then if its 48-hour window has passed.
+// Whoever's turn it was (the one who let it lapse) gets logged as the
+// event's actor; the other side gets notified their offer expired.
+async function expireIfOverdue<T extends Offer>(offer: T): Promise<T> {
+  if (offer.status !== 'pending_seller' && offer.status !== 'pending_buyer') return offer
+  if (!isPastDeadline(offer.expires_at)) return offer
+
+  const applied = await updateOffer(offer.id, { status: 'expired' }, offer.status)
+  if (!applied) {
+    // Someone else's action (or expiry) landed first — return the
+    // authoritative row rather than assuming ours won.
+    const fresh = await getOffer(offer.id)
+    return (fresh as T) ?? ({ ...offer, status: 'expired' } as T)
+  }
+
+  const listing = await getListing(offer.listing_id)
+  if (listing) {
+    const responsibleId = offer.status === 'pending_seller' ? listing.seller_id : offer.buyer_id
+    const notifiedId = offer.status === 'pending_seller' ? offer.buyer_id : listing.seller_id
+    await insertOfferEvent({ offer_id: offer.id, actor_id: responsibleId, action: 'expire' })
+    await createNotification({
+      user_id: notifiedId,
+      type: 'offer_expired',
+      title: `An offer on the ${carLabel(listing)} expired`,
+      body: '48 hours passed with no response — it was automatically closed.',
+      link: '/dashboard',
+    })
+    await createNotification({
+      user_id: responsibleId,
+      type: 'offer_expired',
+      title: `You missed the 48-hour window on the ${carLabel(listing)}`,
+      body: 'The offer was automatically closed.',
+      link: '/dashboard',
+    })
+  }
+
+  return { ...offer, status: 'expired' } as T
+}
+
+// Dashboard-facing: sweep a batch of offers, expiring any that are overdue,
+// so the page never shows a stale "Awaiting seller" past the deadline.
+export async function expireOverdueOffers<T extends Offer>(offers: T[]): Promise<T[]> {
+  return Promise.all(offers.map(expireIfOverdue))
 }
 
 // ─── Buyer submits a new offer ─────────────────────────────────────────
@@ -45,6 +93,7 @@ export async function submitOffer(input: { listingId: number; buyerId: string; a
     buyer_id: input.buyerId,
     amount: input.amountCents,
     status: belowMinimum ? 'auto_declined' : 'pending_seller',
+    expires_at: belowMinimum ? null : offerDeadline(),
   })
 
   await insertOfferEvent({
@@ -77,8 +126,12 @@ export async function respondToOffer(input: {
   action: RespondAction
   counterAmountCents?: number
 }) {
-  const offer = await getOffer(input.offerId)
+  let offer = await getOffer(input.offerId)
   if (!offer) throw new OfferError('Offer not found.', 404)
+  offer = await expireIfOverdue(offer)
+  if (offer.status === 'expired') {
+    throw new OfferError('This offer expired — 48 hours passed with no response.', 409)
+  }
   const listing = await getListing(offer.listing_id)
   if (!listing) throw new OfferError('Listing not found.', 404)
 
@@ -166,7 +219,11 @@ export async function respondToOffer(input: {
       throw new OfferError(`Counter must be at least ${centsToDisplay(listing.minimum_offer)} (your stated minimum).`, 400)
     }
     const nextStatus = isSeller ? 'pending_buyer' : 'pending_seller'
-    const applied = await updateOffer(offer.id, { amount, status: nextStatus }, expectedTurn)
+    const applied = await updateOffer(
+      offer.id,
+      { amount, status: nextStatus, expires_at: offerDeadline() },
+      expectedTurn
+    )
     if (!applied) throw new OfferError('This offer is not waiting on your response.', 409)
     await insertOfferEvent({ offer_id: offer.id, actor_id: input.actorId, action: 'counter', amount })
 

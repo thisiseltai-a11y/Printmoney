@@ -6,7 +6,9 @@ import CancelListingButton from '@/components/CancelListingButton'
 import ListingCard from '@/components/ListingCard'
 import { getSessionUser } from '@/lib/supabase/server'
 import { listListingsBySeller, listOffersForSeller, listOffersForBuyer, listSavedListings } from '@/lib/db'
+import { expireOverdueOffers } from '@/lib/offers'
 import { centsToDisplay } from '@/lib/money'
+import { formatTimeRemaining } from '@/lib/time'
 import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
@@ -15,11 +17,18 @@ export default async function DashboardPage() {
   const user = await getSessionUser()
   if (!user) redirect('/login?next=/dashboard')
 
-  const [listings, sellerOffers, buyerOffers, savedListings] = await Promise.all([
-    listListingsBySeller(user.id),
+  const [rawSellerOffers, rawBuyerOffers, listings, savedListings] = await Promise.all([
     listOffersForSeller(user.id),
     listOffersForBuyer(user.id),
+    listListingsBySeller(user.id),
     listSavedListings(user.id),
+  ])
+  // No background job — sweep for any offer whose 48-hour response window
+  // passed since the last page load, so the dashboard never shows a stale
+  // "Awaiting seller/buyer" past its deadline.
+  const [sellerOffers, buyerOffers] = await Promise.all([
+    expireOverdueOffers(rawSellerOffers),
+    expireOverdueOffers(rawBuyerOffers),
   ])
 
   const offersByListing = new Map<number, typeof sellerOffers>()
@@ -81,7 +90,12 @@ export default async function DashboardPage() {
                         {offers.map((offer) => (
                           <div key={offer.id} className="flex flex-wrap items-center justify-between gap-3">
                             <span className="readout text-sm text-ink">{centsToDisplay(offer.amount)}</span>
-                            <OfferActions offerId={offer.id} status={offer.status} role="seller" />
+                            <OfferActions
+                              offerId={offer.id}
+                              status={offer.status}
+                              role="seller"
+                              expiresIn={formatTimeRemaining(offer.expires_at)}
+                            />
                           </div>
                         ))}
                       </div>
@@ -116,7 +130,12 @@ export default async function DashboardPage() {
                         </Link>
                         <div className="readout mt-1 text-sm text-amber">{centsToDisplay(offer.amount)}</div>
                       </div>
-                      <OfferActions offerId={offer.id} status={offer.status} role="buyer" />
+                      <OfferActions
+                        offerId={offer.id}
+                        status={offer.status}
+                        role="buyer"
+                        expiresIn={formatTimeRemaining(offer.expires_at)}
+                      />
                     </div>
                   </div>
                 )

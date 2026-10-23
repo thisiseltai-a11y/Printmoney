@@ -12,6 +12,7 @@ const BADGES: Record<OfferStatus, { label: string; className: string }> = {
   declined: { label: 'Declined', className: 'bg-raised text-muted' },
   withdrawn: { label: 'Withdrawn', className: 'bg-raised text-muted' },
   auto_declined: { label: 'Auto-declined', className: 'bg-raised text-muted' },
+  expired: { label: 'Expired', className: 'bg-raised text-muted' },
 }
 
 function Badge({ status }: { status: OfferStatus }) {
@@ -27,10 +28,12 @@ export default function OfferActions({
   offerId,
   status,
   role,
+  expiresIn,
 }: {
   offerId: number
   status: OfferStatus
   role: 'buyer' | 'seller'
+  expiresIn?: string | null
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -87,6 +90,7 @@ export default function OfferActions({
             Decline
           </button>
           {loading && <Loader2 className="h-4 w-4 animate-spin text-muted" />}
+          {expiresIn && <span className="font-mono text-xs text-amber">{expiresIn} — respond or it auto-closes</span>}
         </div>
       )}
 
@@ -111,8 +115,9 @@ export default function OfferActions({
       )}
 
       {isWaiting && (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Badge status={status} />
+          {expiresIn && <span className="font-mono text-xs text-muted">{expiresIn}</span>}
           {role === 'buyer' && (
             <button
               onClick={() => act('withdraw')}
