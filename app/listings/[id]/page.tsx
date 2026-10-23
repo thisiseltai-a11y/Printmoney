@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import OfferForm from './OfferForm'
+import SpecsPanel from '@/components/SpecsPanel'
 import { getListing } from '@/lib/db'
 import { getExampleListing } from '@/lib/exampleListings'
 import { getSessionUser } from '@/lib/supabase/server'
@@ -67,21 +68,6 @@ export default async function ListingPage({ params }: { params: { id: string } }
             <h1 className="font-grotesk text-2xl font-semibold text-ink">{title || 'Vehicle'}</h1>
             {listing.trim && <p className="text-sm text-muted">{listing.trim}</p>}
 
-            <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-              {listing.mileage != null && (
-                <div>
-                  <div className="font-mono text-[10px] uppercase tracking-wider text-muted">Mileage</div>
-                  <div className="readout text-ink">{listing.mileage.toLocaleString()} mi</div>
-                </div>
-              )}
-              {listing.vin && (
-                <div>
-                  <div className="font-mono text-[10px] uppercase tracking-wider text-muted">VIN</div>
-                  <div className="readout text-ink">{listing.vin}</div>
-                </div>
-              )}
-            </div>
-
             <div className="mt-6 rounded-card border border-line bg-panel p-6">
               <div className="font-mono text-xs uppercase tracking-wider text-muted">Asking price</div>
               <div className="mt-1 font-mono text-3xl font-semibold text-amber">
@@ -122,6 +108,17 @@ export default async function ListingPage({ params }: { params: { id: string } }
                 </p>
               )}
             </div>
+
+            <div className="mt-6">
+              <SpecsPanel listing={listing} />
+            </div>
+
+            {listing.vin && (
+              <div className="mt-4">
+                <div className="font-mono text-[10px] uppercase tracking-wider text-muted">VIN</div>
+                <div className="readout mt-1 text-sm text-ink">{listing.vin}</div>
+              </div>
+            )}
           </div>
         </div>
       </main>

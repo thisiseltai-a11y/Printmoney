@@ -26,6 +26,15 @@ export interface Listing {
   asking_price: number
   minimum_offer: number
   status: 'active' | 'sold' | 'cancelled'
+  engine: string | null
+  transmission: string | null
+  drive_type: string | null
+  fuel_type: string | null
+  body_type: string | null
+  exterior_color: string | null
+  interior_color: string | null
+  city_mpg: number | null
+  highway_mpg: number | null
   created_at: string
 }
 

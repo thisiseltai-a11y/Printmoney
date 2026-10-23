@@ -22,6 +22,16 @@ export default function NewListingForm() {
   const [askingPrice, setAskingPrice] = useState('')
   const [minimumOffer, setMinimumOffer] = useState('')
 
+  const [engine, setEngine] = useState('')
+  const [transmission, setTransmission] = useState('')
+  const [driveType, setDriveType] = useState('')
+  const [fuelType, setFuelType] = useState('')
+  const [bodyType, setBodyType] = useState('')
+  const [exteriorColor, setExteriorColor] = useState('')
+  const [interiorColor, setInteriorColor] = useState('')
+  const [cityMpg, setCityMpg] = useState('')
+  const [highwayMpg, setHighwayMpg] = useState('')
+
   const [photos, setPhotos] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
 
@@ -48,6 +58,11 @@ export default function NewListingForm() {
       setMake(data.decoded.make || '')
       setModel(data.decoded.model || '')
       setTrim(data.decoded.trim || '')
+      setEngine(data.decoded.engine || '')
+      setTransmission(data.decoded.transmission || '')
+      setDriveType(data.decoded.driveType || '')
+      setFuelType(data.decoded.fuelType || '')
+      setBodyType(data.decoded.bodyType || '')
       setDecodeMsg('Filled in from the VIN — double-check before posting.')
     } catch (err: any) {
       setDecodeMsg(err.message)
@@ -107,6 +122,15 @@ export default function NewListingForm() {
           askingPrice,
           minimumOffer,
           photos,
+          engine,
+          transmission,
+          driveType,
+          fuelType,
+          bodyType,
+          exteriorColor,
+          interiorColor,
+          cityMpg,
+          highwayMpg,
         }),
       })
       const data = await res.json()
@@ -182,7 +206,56 @@ export default function NewListingForm() {
         </div>
       </FormSection>
 
-      <FormSection step="02" title="Photos">
+      <FormSection step="02" title="Specs">
+        <p className="mb-4 font-mono text-xs text-muted">
+          Auto-filled from the VIN when available — edit anything that&apos;s off, or fill in by hand.
+        </p>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+          <Field label="Engine" className="col-span-2 sm:col-span-1">
+            <input value={engine} onChange={(e) => setEngine(e.target.value)} className="field-input" />
+          </Field>
+          <Field label="Transmission" className="col-span-2 sm:col-span-1">
+            <input value={transmission} onChange={(e) => setTransmission(e.target.value)} className="field-input" />
+          </Field>
+          <Field label="Drive Type" className="col-span-2 sm:col-span-1">
+            <input value={driveType} onChange={(e) => setDriveType(e.target.value)} className="field-input" />
+          </Field>
+          <Field label="Fuel Type" className="col-span-2 sm:col-span-1">
+            <input value={fuelType} onChange={(e) => setFuelType(e.target.value)} className="field-input" />
+          </Field>
+          <Field label="Body Type" className="col-span-2 sm:col-span-1">
+            <input value={bodyType} onChange={(e) => setBodyType(e.target.value)} className="field-input" />
+          </Field>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-4">
+          <Field label="Exterior Color">
+            <input value={exteriorColor} onChange={(e) => setExteriorColor(e.target.value)} className="field-input" />
+          </Field>
+          <Field label="Interior Color">
+            <input value={interiorColor} onChange={(e) => setInteriorColor(e.target.value)} className="field-input" />
+          </Field>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-4">
+          <Field label="City MPG">
+            <input
+              value={cityMpg}
+              onChange={(e) => setCityMpg(e.target.value.replace(/[^0-9]/g, ''))}
+              className="field-input"
+            />
+          </Field>
+          <Field label="Highway MPG">
+            <input
+              value={highwayMpg}
+              onChange={(e) => setHighwayMpg(e.target.value.replace(/[^0-9]/g, ''))}
+              className="field-input"
+            />
+          </Field>
+        </div>
+      </FormSection>
+
+      <FormSection step="03" title="Photos">
         <div className="flex flex-wrap gap-3">
           {photos.map((p) => (
             <div key={p} className="relative h-20 w-24 overflow-hidden rounded-sm border border-line">
@@ -204,7 +277,7 @@ export default function NewListingForm() {
         </div>
       </FormSection>
 
-      <FormSection step="03" title="Pricing">
+      <FormSection step="04" title="Pricing">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Asking price ($)">
             <input

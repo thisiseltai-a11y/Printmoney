@@ -58,11 +58,36 @@ create table if not exists listings (
   asking_price integer not null,
   minimum_offer integer not null,
   status text not null default 'active' check (status in ('active', 'sold', 'cancelled')),
+  -- Spec panel fields. engine/transmission/drive_type/fuel_type/body_type
+  -- auto-fill from the free NHTSA VIN decode when a VIN is given; colors and
+  -- mpg are seller-entered (no free data source for those). All optional.
+  engine text,
+  transmission text,
+  drive_type text,
+  fuel_type text,
+  body_type text,
+  exterior_color text,
+  interior_color text,
+  city_mpg integer,
+  highway_mpg integer,
   created_at timestamptz not null default now()
 );
 create index if not exists listings_status_idx on listings (status, created_at desc);
 create index if not exists listings_seller_idx on listings (seller_id);
 alter table listings enable row level security;
+
+-- Safe to re-run against a listings table created before these columns
+-- existed.
+alter table listings add column if not exists engine text;
+alter table listings add column if not exists transmission text;
+alter table listings add column if not exists drive_type text;
+alter table listings add column if not exists fuel_type text;
+alter table listings add column if not exists body_type text;
+alter table listings add column if not exists exterior_color text;
+alter table listings add column if not exists interior_color text;
+alter table listings add column if not exists city_mpg integer;
+alter table listings add column if not exists highway_mpg integer;
+
 drop policy if exists "active listings are public" on listings;
 create policy "active listings are public" on listings
   for select using (status = 'active' or seller_id = auth.uid());

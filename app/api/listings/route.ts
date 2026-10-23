@@ -38,6 +38,15 @@ export async function POST(req: NextRequest) {
     photos: Array.isArray(body.photos) ? body.photos.slice(0, 12) : [],
     asking_price: dollarsToCents(askingPrice),
     minimum_offer: dollarsToCents(minimumOffer),
+    engine: body.engine ? String(body.engine) : null,
+    transmission: body.transmission ? String(body.transmission) : null,
+    drive_type: body.driveType ? String(body.driveType) : null,
+    fuel_type: body.fuelType ? String(body.fuelType) : null,
+    body_type: body.bodyType ? String(body.bodyType) : null,
+    exterior_color: body.exteriorColor ? String(body.exteriorColor) : null,
+    interior_color: body.interiorColor ? String(body.interiorColor) : null,
+    city_mpg: body.cityMpg ? Number(body.cityMpg) : null,
+    highway_mpg: body.highwayMpg ? Number(body.highwayMpg) : null,
   })
 
   return NextResponse.json({ listing })
