@@ -11,8 +11,8 @@ export default function OfferMockup() {
             <Car className="h-5 w-5 text-amber" />
           </div>
           <div>
-            <div className="font-grotesk text-sm font-semibold text-ink">2021 Toyota Tacoma</div>
-            <div className="font-mono text-xs text-muted">Asking $28,500</div>
+            <div className="font-grotesk text-sm font-semibold text-ink">2025 BMW 3 Series</div>
+            <div className="font-mono text-xs text-muted">Asking $33,500</div>
           </div>
         </div>
         <span className="rounded-full bg-teal/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-teal">
@@ -23,14 +23,14 @@ export default function OfferMockup() {
       <div className="space-y-2.5">
         <div className="flex items-center justify-between rounded-sm bg-raised px-4 py-2.5">
           <span className="text-xs text-muted">Buyer offered</span>
-          <span className="readout text-sm text-ink">$24,000</span>
+          <span className="readout text-sm text-ink">$30,000</span>
         </div>
         <div className="flex items-center justify-center text-muted">
           <ArrowRight className="h-3.5 w-3.5 rotate-90" />
         </div>
         <div className="flex items-center justify-between rounded-sm bg-raised px-4 py-2.5">
           <span className="text-xs text-muted">Seller countered</span>
-          <span className="readout text-sm text-amber">$26,000</span>
+          <span className="readout text-sm text-amber">$32,000</span>
         </div>
         <div className="flex items-center justify-center text-muted">
           <ArrowRight className="h-3.5 w-3.5 rotate-90" />
@@ -40,7 +40,7 @@ export default function OfferMockup() {
             <CheckCircle2 className="h-3.5 w-3.5" />
             Buyer accepted
           </span>
-          <span className="readout text-sm font-semibold text-teal">$26,000</span>
+          <span className="readout text-sm font-semibold text-teal">$32,000</span>
         </div>
       </div>
     </div>
