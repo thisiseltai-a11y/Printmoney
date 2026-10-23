@@ -117,13 +117,28 @@ export async function getOffer(id: number): Promise<Offer | null> {
   return (data as Offer) ?? null
 }
 
-export async function updateOffer(id: number, patch: Partial<Pick<Offer, 'amount' | 'status'>>) {
+// `expectedStatus` makes this an atomic compare-and-swap: the update only
+// applies if the row is still in that status when the write lands, so two
+// concurrent responses to the same offer (e.g. a double-tap) can't both
+// succeed — the loser gets `false` back and should treat that as a 409
+// rather than running any side effects (notifications, listing status, etc).
+export async function updateOffer(
+  id: number,
+  patch: Partial<Pick<Offer, 'amount' | 'status'>>,
+  expectedStatus?: OfferStatus | OfferStatus[]
+): Promise<boolean> {
   requireDb()
   const supabase = getSupabase()
-  await supabase
+  let query = supabase
     .from('offers')
     .update({ ...patch, updated_at: new Date().toISOString() })
     .eq('id', id)
+  if (expectedStatus) {
+    query = Array.isArray(expectedStatus) ? query.in('status', expectedStatus) : query.eq('status', expectedStatus)
+  }
+  const { data, error } = await query.select('id')
+  if (error) throw error
+  return (data?.length ?? 0) > 0
 }
 
 export async function listOffersForListing(listingId: number): Promise<Offer[]> {

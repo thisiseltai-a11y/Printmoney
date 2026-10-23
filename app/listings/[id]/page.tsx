@@ -25,7 +25,7 @@ export default async function ListingPage({ params }: { params: { id: string } }
       <Navbar />
       <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-12">
         <div className="grid gap-8 lg:grid-cols-5">
-          <div className="lg:col-span-3">
+          <div className="order-2 lg:order-none lg:col-span-3">
             <div className="overflow-hidden rounded-card border border-line bg-panel">
               <div className="flex aspect-[4/3] items-center justify-center bg-raised">
                 {listing.photos?.[0] ? (
@@ -53,7 +53,7 @@ export default async function ListingPage({ params }: { params: { id: string } }
             )}
           </div>
 
-          <div className="lg:col-span-2">
+          <div className="order-1 lg:order-none lg:col-span-2">
             <h1 className="font-grotesk text-2xl font-semibold text-ink">{title || 'Vehicle'}</h1>
             {listing.trim && <p className="text-sm text-muted">{listing.trim}</p>}
 

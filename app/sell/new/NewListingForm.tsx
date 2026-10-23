@@ -145,7 +145,7 @@ export default function NewListingForm() {
         {decodeMsg && <p className="mt-2 font-mono text-xs text-muted">{decodeMsg}</p>}
 
         <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <Field label="Year">
+          <Field label="Year" className="col-span-2 sm:col-span-1">
             <input value={year} onChange={(e) => setYear(e.target.value)} className="field-input" />
           </Field>
           <Field label="Make" className="col-span-2 sm:col-span-1">
@@ -154,7 +154,7 @@ export default function NewListingForm() {
           <Field label="Model" className="col-span-2 sm:col-span-1">
             <input value={model} onChange={(e) => setModel(e.target.value)} required className="field-input" />
           </Field>
-          <Field label="Trim">
+          <Field label="Trim" className="col-span-2 sm:col-span-1">
             <input value={trim} onChange={(e) => setTrim(e.target.value)} className="field-input" />
           </Field>
         </div>
@@ -205,7 +205,7 @@ export default function NewListingForm() {
       </FormSection>
 
       <FormSection step="03" title="Pricing">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Asking price ($)">
             <input
               type="number"

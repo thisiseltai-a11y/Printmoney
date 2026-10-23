@@ -91,7 +91,8 @@ export async function respondToOffer(input: {
     if (offer.status !== 'pending_seller' && offer.status !== 'pending_buyer') {
       throw new OfferError('This offer is no longer open.', 409)
     }
-    await updateOffer(offer.id, { status: 'withdrawn' })
+    const applied = await updateOffer(offer.id, { status: 'withdrawn' }, ['pending_seller', 'pending_buyer'])
+    if (!applied) throw new OfferError('This offer is no longer open.', 409)
     await insertOfferEvent({ offer_id: offer.id, actor_id: input.actorId, action: 'withdraw' })
     await createNotification({
       user_id: listing.seller_id,
@@ -109,7 +110,8 @@ export async function respondToOffer(input: {
   }
 
   if (input.action === 'accept') {
-    await updateOffer(offer.id, { status: 'accepted' })
+    const applied = await updateOffer(offer.id, { status: 'accepted' }, expectedTurn)
+    if (!applied) throw new OfferError('This offer is not waiting on your response.', 409)
     await insertOfferEvent({ offer_id: offer.id, actor_id: input.actorId, action: 'accept' })
     await updateListingStatus(listing.id, 'sold')
 
@@ -125,7 +127,8 @@ export async function respondToOffer(input: {
     // Any other still-open offers on this listing are moot now.
     const others = (await listPendingOffersForListing(listing.id)).filter((o) => o.id !== offer.id)
     for (const other of others) {
-      await updateOffer(other.id, { status: 'auto_declined' })
+      const otherApplied = await updateOffer(other.id, { status: 'auto_declined' }, ['pending_seller', 'pending_buyer'])
+      if (!otherApplied) continue
       await insertOfferEvent({ offer_id: other.id, actor_id: listing.seller_id, action: 'auto_decline' })
       await createNotification({
         user_id: other.buyer_id,
@@ -139,7 +142,8 @@ export async function respondToOffer(input: {
   }
 
   if (input.action === 'decline') {
-    await updateOffer(offer.id, { status: 'declined' })
+    const applied = await updateOffer(offer.id, { status: 'declined' }, expectedTurn)
+    if (!applied) throw new OfferError('This offer is not waiting on your response.', 409)
     await insertOfferEvent({ offer_id: offer.id, actor_id: input.actorId, action: 'decline' })
     const counterpartyId = isSeller ? offer.buyer_id : listing.seller_id
     await createNotification({
@@ -162,7 +166,8 @@ export async function respondToOffer(input: {
       throw new OfferError(`Counter must be at least ${centsToDisplay(listing.minimum_offer)} (your stated minimum).`, 400)
     }
     const nextStatus = isSeller ? 'pending_buyer' : 'pending_seller'
-    await updateOffer(offer.id, { amount, status: nextStatus })
+    const applied = await updateOffer(offer.id, { amount, status: nextStatus }, expectedTurn)
+    if (!applied) throw new OfferError('This offer is not waiting on your response.', 409)
     await insertOfferEvent({ offer_id: offer.id, actor_id: input.actorId, action: 'counter', amount })
 
     const counterpartyId = isSeller ? offer.buyer_id : listing.seller_id
