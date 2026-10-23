@@ -16,8 +16,9 @@ export const EXAMPLE_LISTINGS: Listing[] = [
     trim: null,
     mileage: 17748,
     vin: null,
-    description: 'Example listing — this is what a real one looks like once you post your car.',
-    photos: ['/example-bmw-3-series.png'],
+    description:
+      'One-owner, garage-kept 330i M Sport — Mineral Gray Metallic over black Vernasca leather, no curb rash on the 18" wheels and no swirl marks in the paint. Non-smoker, clean title, no accidents. Recent oil change and tire rotation, all service done at the dealer. iDrive with navigation, heated front seats, wireless CarPlay, and the sport suspension that makes this chassis genuinely fun on a back road. Still drives like new — selling only because I\'m relocating.',
+    photos: ['/example-bmw-3-series.png', '/example-bmw-3-series-front.jpg'],
     asking_price: 3350000,
     minimum_offer: 3000000,
     status: 'active',
