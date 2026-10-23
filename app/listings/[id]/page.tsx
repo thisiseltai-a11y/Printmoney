@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import OfferForm from './OfferForm'
 import { getListing } from '@/lib/db'
+import { getExampleListing } from '@/lib/exampleListings'
 import { getSessionUser } from '@/lib/supabase/server'
 import { centsToDisplay } from '@/lib/money'
 import { Car } from 'lucide-react'
@@ -14,7 +15,11 @@ export default async function ListingPage({ params }: { params: { id: string } }
   const id = Number(params.id)
   if (!Number.isFinite(id)) notFound()
 
-  const [listing, user] = await Promise.all([getListing(id), getSessionUser()])
+  const isExample = id < 0
+  const [listing, user] = await Promise.all([
+    isExample ? Promise.resolve(getExampleListing(id)) : getListing(id),
+    getSessionUser(),
+  ])
   if (!listing) notFound()
 
   const title = [listing.year, listing.make, listing.model].filter(Boolean).join(' ')
@@ -54,6 +59,11 @@ export default async function ListingPage({ params }: { params: { id: string } }
           </div>
 
           <div className="order-1 lg:order-none lg:col-span-2">
+            {isExample && (
+              <span className="mb-2 inline-block rounded-full bg-amber/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-amber">
+                Example listing
+              </span>
+            )}
             <h1 className="font-grotesk text-2xl font-semibold text-ink">{title || 'Vehicle'}</h1>
             {listing.trim && <p className="text-sm text-muted">{listing.trim}</p>}
 
@@ -81,7 +91,15 @@ export default async function ListingPage({ params }: { params: { id: string } }
                 Minimum offer considered: {centsToDisplay(listing.minimum_offer)}
               </div>
 
-              {listing.status !== 'active' ? (
+              {isExample ? (
+                <p className="mt-5 rounded-sm border border-line bg-raised px-4 py-3 text-sm text-muted">
+                  This is an example listing —{' '}
+                  <Link href="/sell/new" className="text-teal hover:underline">
+                    list your own car
+                  </Link>{' '}
+                  to start getting real offers.
+                </p>
+              ) : listing.status !== 'active' ? (
                 <p className="mt-5 rounded-sm border border-line bg-raised px-4 py-3 text-sm text-muted">
                   This listing is no longer active.
                 </p>
