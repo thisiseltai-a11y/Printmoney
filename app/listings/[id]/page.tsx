@@ -31,7 +31,7 @@ export default async function ListingPage({ params }: { params: { id: string } }
       <Navbar />
       <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-12">
         <div className="grid gap-8 lg:grid-cols-5">
-          <div className="order-2 lg:order-none lg:col-span-3">
+          <div className="lg:col-span-3">
             <div className="overflow-hidden rounded-card border border-line bg-panel">
               <div className="flex aspect-[4/3] items-center justify-center bg-raised">
                 {listing.photos?.[0] ? (
@@ -59,7 +59,7 @@ export default async function ListingPage({ params }: { params: { id: string } }
             )}
           </div>
 
-          <div className="order-1 lg:order-none lg:col-span-2">
+          <div className="lg:col-span-2">
             {isExample && (
               <span className="mb-2 inline-block rounded-full bg-amber/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-amber">
                 Example listing
