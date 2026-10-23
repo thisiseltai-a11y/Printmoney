@@ -13,11 +13,11 @@ export const EXAMPLE_LISTINGS: Listing[] = [
     year: 2025,
     make: 'BMW',
     model: '3 Series',
-    trim: null,
+    trim: '330i M Sport',
     mileage: 17748,
     vin: null,
     description:
-      'One-owner, garage-kept 330i M Sport — Mineral Gray Metallic over black Vernasca leather, no curb rash on the 18" wheels and no swirl marks in the paint. Non-smoker, clean title, no accidents. Recent oil change and tire rotation, all service done at the dealer. iDrive with navigation, heated front seats, wireless CarPlay, and the sport suspension that makes this chassis genuinely fun on a back road. Still drives like new — selling only because I\'m relocating.',
+      "Bought this one new and babied it — always garaged, always synthetic oil, washed by hand because I didn't trust the brushes at the car wash. The M Sport package was the right call: the adaptive suspension makes the backroads the best part of the drive, not just the commute.\n\nMineral Gray Metallic over black Vernasca leather is a sleeper combo — nobody looks twice until they hear it start up. 18\" wheels are curb-rash free, paint has never seen anything rougher than a microfiber towel.\n\nUnder 18k miles, one owner, zero accidents, clean title, full service history at the dealer. Loaded: iDrive with navigation, heated front seats, wireless CarPlay, and the 8-speed automatic that still shifts like it just rolled off the lot.\n\nOnly reason it's up for sale is a relocation I can't bring it along for. Whoever gets this one is getting a car that's actually been cared for, not just serviced on schedule.",
     photos: ['/example-bmw-3-series.png', '/example-bmw-3-series-front.jpg'],
     asking_price: 3350000,
     minimum_offer: 3000000,
