@@ -1,42 +1,60 @@
+/*
+ * Mobile: everything is one flex column, and .left/.right are collapsed with
+ * display:contents so their children become direct flex items — that lets
+ * `order` interleave photo/description (normally left-column content) with
+ * title/price/specs/vin (right-column content) into the order the mobile
+ * layout wants, without duplicating any markup.
+ *
+ * Desktop: .left/.right become real two-column grid items, each a plain
+ * block container, so their own children just stack in DOM order with no
+ * row-height coupling between the two columns (a taller right column no
+ * longer pushes the left column's content down).
+ */
 .layout {
-  display: grid;
-  gap: 1.5rem 2rem;
-  grid-template-columns: 1fr;
-  grid-template-areas:
-    'photo'
-    'title'
-    'price'
-    'specs'
-    'description'
-    'vin';
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.left,
+.right {
+  display: contents;
+}
+
+.photo {
+  order: 1;
+}
+.title {
+  order: 2;
+}
+.price {
+  order: 3;
+}
+.specs {
+  order: 4;
+}
+.description {
+  order: 5;
+}
+.vin {
+  order: 6;
 }
 
 @media (min-width: 1024px) {
   .layout {
+    display: grid;
     grid-template-columns: 3fr 2fr;
-    grid-template-areas:
-      'photo title'
-      'photo price'
-      'photo specs'
-      'description vin';
+    column-gap: 2rem;
+    align-items: start;
   }
-}
 
-.photo {
-  grid-area: photo;
-}
-.title {
-  grid-area: title;
-}
-.price {
-  grid-area: price;
-}
-.specs {
-  grid-area: specs;
-}
-.description {
-  grid-area: description;
-}
-.vin {
-  grid-area: vin;
+  .left,
+  .right {
+    display: block;
+  }
+
+  .left > * + *,
+  .right > * + * {
+    margin-top: 1.5rem;
+  }
 }

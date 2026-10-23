@@ -32,83 +32,87 @@ export default async function ListingPage({ params }: { params: { id: string } }
       <Navbar />
       <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-12">
         <div className={styles.layout}>
-          <div className={styles.photo}>
-            <PhotoGallery photos={listing.photos ?? []} title={title || 'Vehicle'} />
-          </div>
-
-          <div className={styles.title}>
-            {isExample && (
-              <span className="mb-2 inline-block rounded-full bg-amber/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-amber">
-                Example listing
-              </span>
-            )}
-            <h1 className="font-grotesk text-2xl font-semibold text-ink">{title || 'Vehicle'}</h1>
-            {listing.trim && <p className="text-sm text-muted">{listing.trim}</p>}
-          </div>
-
-          <div className={`${styles.price} rounded-card border border-line bg-panel p-6`}>
-            <div className="font-mono text-xs uppercase tracking-wider text-muted">Asking price</div>
-            <div className="mt-1 font-mono text-3xl font-semibold text-amber">
-              {centsToDisplay(listing.asking_price)}
+          <div className={styles.left}>
+            <div className={styles.photo}>
+              <PhotoGallery photos={listing.photos ?? []} title={title || 'Vehicle'} />
             </div>
-            {isOwner && (
-              <div className="mt-2 font-mono text-xs text-teal">
-                Minimum offer considered: {centsToDisplay(listing.minimum_offer)}
+
+            {listing.description && (
+              <div className={styles.description}>
+                <h2 className="mb-2 font-grotesk text-lg font-semibold text-ink">Description</h2>
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted">{listing.description}</p>
               </div>
             )}
+          </div>
 
-            {isExample ? (
-              <>
-                <OfferForm listingId={listing.id} askingPrice={listing.asking_price} preview />
-                <p className="mt-3 rounded-sm border border-line bg-raised px-4 py-3 text-sm text-muted">
-                  This is an example listing —{' '}
-                  <Link href="/sell/new" className="text-teal hover:underline">
-                    list your own car
-                  </Link>{' '}
-                  to start getting real offers.
+          <div className={styles.right}>
+            <div className={styles.title}>
+              {isExample && (
+                <span className="mb-2 inline-block rounded-full bg-amber/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-amber">
+                  Example listing
+                </span>
+              )}
+              <h1 className="font-grotesk text-2xl font-semibold text-ink">{title || 'Vehicle'}</h1>
+              {listing.trim && <p className="text-sm text-muted">{listing.trim}</p>}
+            </div>
+
+            <div className={`${styles.price} rounded-card border border-line bg-panel p-6`}>
+              <div className="font-mono text-xs uppercase tracking-wider text-muted">Asking price</div>
+              <div className="mt-1 font-mono text-3xl font-semibold text-amber">
+                {centsToDisplay(listing.asking_price)}
+              </div>
+              {isOwner && (
+                <div className="mt-2 font-mono text-xs text-teal">
+                  Minimum offer considered: {centsToDisplay(listing.minimum_offer)}
+                </div>
+              )}
+
+              {isExample ? (
+                <>
+                  <OfferForm listingId={listing.id} askingPrice={listing.asking_price} preview />
+                  <p className="mt-3 rounded-sm border border-line bg-raised px-4 py-3 text-sm text-muted">
+                    This is an example listing —{' '}
+                    <Link href="/sell/new" className="text-teal hover:underline">
+                      list your own car
+                    </Link>{' '}
+                    to start getting real offers.
+                  </p>
+                </>
+              ) : listing.status !== 'active' ? (
+                <p className="mt-5 rounded-sm border border-line bg-raised px-4 py-3 text-sm text-muted">
+                  This listing is no longer active.
                 </p>
-              </>
-            ) : listing.status !== 'active' ? (
-              <p className="mt-5 rounded-sm border border-line bg-raised px-4 py-3 text-sm text-muted">
-                This listing is no longer active.
-              </p>
-            ) : isOwner ? (
-              <p className="mt-5 rounded-sm border border-line bg-raised px-4 py-3 text-sm text-muted">
-                This is your listing — manage offers from your{' '}
-                <Link href="/dashboard" className="text-teal hover:underline">
-                  dashboard
-                </Link>
-                .
-              </p>
-            ) : user ? (
-              <OfferForm listingId={listing.id} askingPrice={listing.asking_price} />
-            ) : (
-              <p className="mt-5 text-sm text-muted">
-                <Link href={`/login?next=/listings/${listing.id}`} className="text-teal hover:underline">
-                  Log in
-                </Link>{' '}
-                to make an offer.
-              </p>
+              ) : isOwner ? (
+                <p className="mt-5 rounded-sm border border-line bg-raised px-4 py-3 text-sm text-muted">
+                  This is your listing — manage offers from your{' '}
+                  <Link href="/dashboard" className="text-teal hover:underline">
+                    dashboard
+                  </Link>
+                  .
+                </p>
+              ) : user ? (
+                <OfferForm listingId={listing.id} askingPrice={listing.asking_price} />
+              ) : (
+                <p className="mt-5 text-sm text-muted">
+                  <Link href={`/login?next=/listings/${listing.id}`} className="text-teal hover:underline">
+                    Log in
+                  </Link>{' '}
+                  to make an offer.
+                </p>
+              )}
+            </div>
+
+            <div className={styles.specs}>
+              <SpecsPanel listing={listing} />
+            </div>
+
+            {listing.vin && (
+              <div className={styles.vin}>
+                <div className="font-mono text-[10px] uppercase tracking-wider text-muted">VIN</div>
+                <div className="readout mt-1 text-sm text-ink">{listing.vin}</div>
+              </div>
             )}
           </div>
-
-          <div className={styles.specs}>
-            <SpecsPanel listing={listing} />
-          </div>
-
-          {listing.description && (
-            <div className={styles.description}>
-              <h2 className="mb-2 font-grotesk text-lg font-semibold text-ink">Description</h2>
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted">{listing.description}</p>
-            </div>
-          )}
-
-          {listing.vin && (
-            <div className={styles.vin}>
-              <div className="font-mono text-[10px] uppercase tracking-wider text-muted">VIN</div>
-              <div className="readout mt-1 text-sm text-ink">{listing.vin}</div>
-            </div>
-          )}
         </div>
       </main>
       <Footer />
