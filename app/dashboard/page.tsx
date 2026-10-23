@@ -44,6 +44,11 @@ export default async function DashboardPage() {
     list.push(offer)
     offersByListing.set(offer.listing_id, list)
   }
+  // Highest offer first, so the seller sees their best option without
+  // having to scan — ties broken by most recent.
+  for (const list of Array.from(offersByListing.values())) {
+    list.sort((a, b) => b.amount - a.amount || b.updated_at.localeCompare(a.updated_at))
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-bg">
