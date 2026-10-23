@@ -1,0 +1,42 @@
+.layout {
+  display: grid;
+  gap: 1.5rem 2rem;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    'photo'
+    'title'
+    'price'
+    'specs'
+    'description'
+    'vin';
+}
+
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: 3fr 2fr;
+    grid-template-areas:
+      'photo title'
+      'photo price'
+      'photo specs'
+      'description vin';
+  }
+}
+
+.photo {
+  grid-area: photo;
+}
+.title {
+  grid-area: title;
+}
+.price {
+  grid-area: price;
+}
+.specs {
+  grid-area: specs;
+}
+.description {
+  grid-area: description;
+}
+.vin {
+  grid-area: vin;
+}
