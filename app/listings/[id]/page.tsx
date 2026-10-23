@@ -98,7 +98,11 @@ export default async function ListingPage({ params }: { params: { id: string } }
                   .
                 </p>
               ) : user ? (
-                <OfferForm listingId={listing.id} minimumOffer={listing.minimum_offer} />
+                <OfferForm
+                  listingId={listing.id}
+                  askingPrice={listing.asking_price}
+                  minimumOffer={listing.minimum_offer}
+                />
               ) : (
                 <p className="mt-5 text-sm text-muted">
                   <Link href={`/login?next=/listings/${listing.id}`} className="text-teal hover:underline">
