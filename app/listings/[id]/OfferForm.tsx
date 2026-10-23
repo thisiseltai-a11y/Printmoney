@@ -99,7 +99,7 @@ export default function OfferForm({
       ) : (
         <form onSubmit={handleCustomSubmit} className="mt-4">
           <label className="mb-1.5 block font-mono text-xs uppercase tracking-wider text-muted">Your offer</label>
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <input
               type="number"
               required
@@ -108,7 +108,7 @@ export default function OfferForm({
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Enter an amount"
-              className="readout h-12 flex-1 rounded-sm border border-line bg-raised px-4 text-sm text-ink outline-none focus:border-amber"
+              className="readout h-12 min-w-0 flex-1 rounded-sm border border-line bg-raised px-4 text-sm text-ink outline-none focus:border-amber"
             />
             <button
               type="submit"
