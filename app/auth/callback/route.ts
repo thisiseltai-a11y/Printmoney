@@ -6,7 +6,7 @@ import { cookies } from 'next/headers'
 // that we exchange for a real session.
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get('code')
-  const next = req.nextUrl.searchParams.get('next') || '/dashboard'
+  const next = req.nextUrl.searchParams.get('next') || '/#browse'
 
   if (code) {
     const cookieStore = cookies()

@@ -24,7 +24,7 @@ function LoginFields() {
       setLoading(false)
       return
     }
-    router.push(searchParams.get('next') || '/dashboard')
+    router.push(searchParams.get('next') || '/#browse')
     router.refresh()
   }
 

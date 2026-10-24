@@ -67,7 +67,7 @@ export default function ListingsBrowser({
           <SlidersHorizontal className="h-3.5 w-3.5" />
           Filter
         </span>
-        <select value={year} onChange={(e) => setYear(e.target.value)} className="field-input h-10 w-auto">
+        <select value={year} onChange={(e) => setYear(e.target.value)} className="field-input h-10 w-auto py-0 leading-[2.5rem]">
           <option value="">All years</option>
           {years.map((y) => (
             <option key={y} value={y}>
@@ -75,7 +75,7 @@ export default function ListingsBrowser({
             </option>
           ))}
         </select>
-        <select value={make} onChange={(e) => handleMakeChange(e.target.value)} className="field-input h-10 w-auto">
+        <select value={make} onChange={(e) => handleMakeChange(e.target.value)} className="field-input h-10 w-auto py-0 leading-[2.5rem]">
           <option value="">All makes</option>
           {makes.map((m) => (
             <option key={m} value={m}>
@@ -83,7 +83,7 @@ export default function ListingsBrowser({
             </option>
           ))}
         </select>
-        <select value={model} onChange={(e) => setModel(e.target.value)} className="field-input h-10 w-auto">
+        <select value={model} onChange={(e) => setModel(e.target.value)} className="field-input h-10 w-auto py-0 leading-[2.5rem]">
           <option value="">All models</option>
           {models.map((m) => (
             <option key={m} value={m}>

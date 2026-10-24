@@ -33,7 +33,7 @@ export default function SignupForm() {
       return
     }
     if (data.session) {
-      router.push('/dashboard')
+      router.push('/#browse')
       router.refresh()
     } else {
       setCheckEmail(true)
