@@ -12,12 +12,17 @@ export default function ListingCard({ listing, href }: { listing: Listing; href?
       href={href ?? `/listings/${listing.id}`}
       className="card-lift group overflow-hidden rounded-card border border-line bg-panel transition-colors hover:border-amber/40"
     >
-      <div className="flex aspect-[4/3] items-center justify-center overflow-hidden bg-raised">
+      <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-raised">
         {photo ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={photo} alt={title} className="h-full w-full object-cover transition group-hover:scale-[1.02]" />
         ) : (
           <Car className="h-10 w-10 text-muted" />
+        )}
+        {listing.status === 'pending_sale' && (
+          <span className="absolute left-2 top-2 rounded-full bg-amber/90 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-white">
+            Pending sale
+          </span>
         )}
       </div>
       <div className="p-4">

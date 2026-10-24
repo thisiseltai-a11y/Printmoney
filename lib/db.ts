@@ -60,13 +60,16 @@ export async function getListing(id: number): Promise<Listing | null> {
   return (data as Listing) ?? null
 }
 
+// Includes pending_sale — a listing with an accepted-but-not-closed offer
+// stays browsable so other buyers can still see it and submit a backup
+// offer (see lib/offers.ts); only sold/cancelled drop off this list.
 export async function listActiveListings(): Promise<Listing[]> {
   if (!dbConfigured()) return []
   const supabase = getSupabase()
   const { data } = await supabase
     .from('listings')
     .select()
-    .eq('status', 'active')
+    .in('status', ['active', 'pending_sale'])
     .order('created_at', { ascending: false })
   return (data as Listing[]) ?? []
 }
