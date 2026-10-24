@@ -3,35 +3,12 @@
 import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { Bell } from 'lucide-react'
-
-interface Notification {
-  id: number
-  type: string
-  title: string
-  body: string | null
-  link: string | null
-  read: boolean
-  created_at: string
-}
+import { useNotifications } from './NotificationsProvider'
 
 export default function NotificationsBell() {
+  const { notifications, unread, markRead } = useNotifications()
   const [open, setOpen] = useState(false)
-  const [notifications, setNotifications] = useState<Notification[]>([])
-  const [unread, setUnread] = useState(0)
   const ref = useRef<HTMLDivElement>(null)
-
-  async function load() {
-    const res = await fetch('/api/notifications')
-    const data = await res.json()
-    setNotifications(data.notifications ?? [])
-    setUnread(data.unread ?? 0)
-  }
-
-  useEffect(() => {
-    load()
-    const id = setInterval(load, 30000)
-    return () => clearInterval(id)
-  }, [])
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -44,11 +21,7 @@ export default function NotificationsBell() {
   async function handleOpen() {
     const next = !open
     setOpen(next)
-    if (next && unread > 0) {
-      await fetch('/api/notifications/read', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
-      setUnread(0)
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-    }
+    if (next) await markRead()
   }
 
   return (
