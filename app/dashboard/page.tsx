@@ -81,7 +81,7 @@ export default async function DashboardPage() {
           <StatTile icon={Heart} value={savedListings.length} label="Saved cars" />
         </div>
 
-        <section className="mb-12">
+        <section id="messages" className="mb-12 scroll-mt-20">
           <div className="mb-4 flex items-center gap-2">
             <MessageCircle className="h-4 w-4 text-muted" />
             <h2 className="font-grotesk text-lg font-semibold text-ink">Messages</h2>

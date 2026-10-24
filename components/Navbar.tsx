@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Gauge } from 'lucide-react'
+import { Gauge, MessageCircle } from 'lucide-react'
 import { getSessionUser } from '@/lib/supabase/server'
 import NotificationsProvider from './NotificationsProvider'
 import NotificationsBell from './NotificationsBell'
@@ -29,6 +29,14 @@ export default async function Navbar() {
                 className="rounded-sm border border-amber/40 px-3 py-2 text-xs font-medium text-amber transition hover:bg-amber hover:text-white sm:px-4 sm:text-sm"
               >
                 List a car
+              </Link>
+              <Link
+                href="/dashboard#messages"
+                aria-label="Messages"
+                className="flex items-center transition hover:text-ink"
+              >
+                <MessageCircle className="h-4 w-4 sm:hidden" />
+                <span className="hidden sm:inline">Messages</span>
               </Link>
               <DashboardLink />
               <NotificationsBell />
