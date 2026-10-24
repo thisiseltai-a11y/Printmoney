@@ -17,7 +17,7 @@ export default async function Navbar() {
           </span>
         </Link>
         <nav className="flex items-center gap-3 text-sm text-muted sm:gap-5">
-          <Link href="/" className="hidden transition hover:text-ink sm:inline">
+          <Link href="/#browse" className="hidden transition hover:text-ink sm:inline">
             Browse
           </Link>
           {user ? (
