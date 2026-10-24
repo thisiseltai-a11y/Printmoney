@@ -113,7 +113,7 @@ export default async function ListingPage({ params }: { params: { id: string } }
               ) : user ? (
                 <>
                   {listing.status === 'pending_sale' && (
-                    <p className="mb-3 rounded-sm border border-amber/30 bg-amber/5 px-4 py-3 text-xs text-amber">
+                    <p className="mt-4 mb-3 rounded-sm border border-amber/30 bg-amber/5 px-4 py-3 text-xs text-amber">
                       This car has an accepted offer pending. You can still submit a backup offer — the seller will
                       only see it if that deal falls through.
                     </p>
