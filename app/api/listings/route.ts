@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { getSessionUser } from '@/lib/supabase/server'
 import { createListing } from '@/lib/db'
 import { dollarsToCents } from '@/lib/money'
@@ -50,6 +51,11 @@ export async function POST(req: NextRequest) {
       highway_mpg: body.highwayMpg ? Number(body.highwayMpg) : null,
     })
 
+    // The homepage's Browse section is force-dynamic on the server, but the
+    // client-side router cache can still serve a stale copy of '/' for up
+    // to 30s after a mutation — revalidate it so the new listing shows up
+    // immediately for whoever just posted it.
+    revalidatePath('/')
     return NextResponse.json({ listing })
   } catch (err: any) {
     console.error('Create listing error:', err)

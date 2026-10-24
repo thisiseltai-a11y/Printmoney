@@ -1,3 +1,4 @@
+import { revalidatePath } from 'next/cache'
 import { getSupabase } from './supabase'
 import { sendNotificationEmail } from './email'
 
@@ -85,6 +86,10 @@ export async function updateListingStatus(id: number, status: Listing['status'])
   requireDb()
   const supabase = getSupabase()
   await supabase.from('listings').update({ status }).eq('id', id)
+  // Any status change can add/remove the listing from the homepage's active
+  // list — revalidate so the client router cache doesn't keep serving a
+  // stale '/' after a cancel, sale, or offer acceptance.
+  revalidatePath('/')
 }
 
 // Same make, active, not the listing itself — a simple stand-in for a real
