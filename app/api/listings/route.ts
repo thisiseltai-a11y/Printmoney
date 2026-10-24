@@ -7,47 +7,52 @@ export async function POST(req: NextRequest) {
   const user = await getSessionUser()
   if (!user) return NextResponse.json({ error: 'You must be logged in.' }, { status: 401 })
 
-  const body = await req.json()
-  const make = String(body.make || '').trim()
-  const model = String(body.model || '').trim()
-  const askingPrice = Number(body.askingPrice)
-  const minimumOffer = Number(body.minimumOffer)
+  try {
+    const body = await req.json()
+    const make = String(body.make || '').trim()
+    const model = String(body.model || '').trim()
+    const askingPrice = Number(body.askingPrice)
+    const minimumOffer = Number(body.minimumOffer)
 
-  if (!make || !model) {
-    return NextResponse.json({ error: 'Make and model are required.' }, { status: 400 })
-  }
-  if (!Number.isFinite(askingPrice) || askingPrice <= 0) {
-    return NextResponse.json({ error: 'Enter a valid asking price.' }, { status: 400 })
-  }
-  if (!Number.isFinite(minimumOffer) || minimumOffer <= 0) {
-    return NextResponse.json({ error: 'Enter a valid minimum offer.' }, { status: 400 })
-  }
-  if (minimumOffer > askingPrice) {
-    return NextResponse.json({ error: "Minimum offer can't be higher than the asking price." }, { status: 400 })
-  }
+    if (!make || !model) {
+      return NextResponse.json({ error: 'Make and model are required.' }, { status: 400 })
+    }
+    if (!Number.isFinite(askingPrice) || askingPrice <= 0) {
+      return NextResponse.json({ error: 'Enter a valid asking price.' }, { status: 400 })
+    }
+    if (!Number.isFinite(minimumOffer) || minimumOffer <= 0) {
+      return NextResponse.json({ error: 'Enter a valid minimum offer.' }, { status: 400 })
+    }
+    if (minimumOffer > askingPrice) {
+      return NextResponse.json({ error: "Minimum offer can't be higher than the asking price." }, { status: 400 })
+    }
 
-  const listing = await createListing({
-    seller_id: user.id,
-    year: body.year ? Number(body.year) : null,
-    make,
-    model,
-    trim: body.trim ? String(body.trim) : null,
-    mileage: body.mileage ? Number(body.mileage) : null,
-    vin: body.vin ? String(body.vin).toUpperCase() : null,
-    description: body.description ? String(body.description) : null,
-    photos: Array.isArray(body.photos) ? body.photos.slice(0, 12) : [],
-    asking_price: dollarsToCents(askingPrice),
-    minimum_offer: dollarsToCents(minimumOffer),
-    engine: body.engine ? String(body.engine) : null,
-    transmission: body.transmission ? String(body.transmission) : null,
-    drive_type: body.driveType ? String(body.driveType) : null,
-    fuel_type: body.fuelType ? String(body.fuelType) : null,
-    body_type: body.bodyType ? String(body.bodyType) : null,
-    exterior_color: body.exteriorColor ? String(body.exteriorColor) : null,
-    interior_color: body.interiorColor ? String(body.interiorColor) : null,
-    city_mpg: body.cityMpg ? Number(body.cityMpg) : null,
-    highway_mpg: body.highwayMpg ? Number(body.highwayMpg) : null,
-  })
+    const listing = await createListing({
+      seller_id: user.id,
+      year: body.year ? Number(body.year) : null,
+      make,
+      model,
+      trim: body.trim ? String(body.trim) : null,
+      mileage: body.mileage ? Number(body.mileage) : null,
+      vin: body.vin ? String(body.vin).toUpperCase() : null,
+      description: body.description ? String(body.description) : null,
+      photos: Array.isArray(body.photos) ? body.photos.slice(0, 12) : [],
+      asking_price: dollarsToCents(askingPrice),
+      minimum_offer: dollarsToCents(minimumOffer),
+      engine: body.engine ? String(body.engine) : null,
+      transmission: body.transmission ? String(body.transmission) : null,
+      drive_type: body.driveType ? String(body.driveType) : null,
+      fuel_type: body.fuelType ? String(body.fuelType) : null,
+      body_type: body.bodyType ? String(body.bodyType) : null,
+      exterior_color: body.exteriorColor ? String(body.exteriorColor) : null,
+      interior_color: body.interiorColor ? String(body.interiorColor) : null,
+      city_mpg: body.cityMpg ? Number(body.cityMpg) : null,
+      highway_mpg: body.highwayMpg ? Number(body.highwayMpg) : null,
+    })
 
-  return NextResponse.json({ listing })
+    return NextResponse.json({ listing })
+  } catch (err: any) {
+    console.error('Create listing error:', err)
+    return NextResponse.json({ error: err.message || 'Could not create listing.' }, { status: 500 })
+  }
 }
