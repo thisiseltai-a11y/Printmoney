@@ -68,7 +68,7 @@ export default function ListingsBrowser({
           Filter
         </span>
         <select value={year} onChange={(e) => setYear(e.target.value)} className="field-input h-10 w-auto py-0 leading-[2.5rem]">
-          <option value="">All years</option>
+          <option value="">Year</option>
           {years.map((y) => (
             <option key={y} value={y}>
               {y}
@@ -76,7 +76,7 @@ export default function ListingsBrowser({
           ))}
         </select>
         <select value={make} onChange={(e) => handleMakeChange(e.target.value)} className="field-input h-10 w-auto py-0 leading-[2.5rem]">
-          <option value="">All makes</option>
+          <option value="">Make</option>
           {makes.map((m) => (
             <option key={m} value={m}>
               {m}
@@ -84,7 +84,7 @@ export default function ListingsBrowser({
           ))}
         </select>
         <select value={model} onChange={(e) => setModel(e.target.value)} className="field-input h-10 w-auto py-0 leading-[2.5rem]">
-          <option value="">All models</option>
+          <option value="">Model</option>
           {models.map((m) => (
             <option key={m} value={m}>
               {m}
