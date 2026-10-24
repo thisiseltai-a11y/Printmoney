@@ -3,7 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import MessageThread from '@/components/MessageThread'
-import { getListing, listMessagesForThread, hasMessageRelationship } from '@/lib/db'
+import { getListing, listMessagesForThread, hasMessageRelationship, getProfileNames } from '@/lib/db'
 import { getSessionUser } from '@/lib/supabase/server'
 import { ArrowLeft, Car } from 'lucide-react'
 
@@ -56,6 +56,8 @@ export default async function MessageThreadPage({
   }
 
   const messages = await listMessagesForThread(listingId, params.buyerId)
+  const names = await getProfileNames([isSeller ? params.buyerId : listing.seller_id])
+  const counterpartyName = names[isSeller ? params.buyerId : listing.seller_id] || (isSeller ? 'this buyer' : 'the seller')
 
   return (
     <div className="flex min-h-screen flex-col bg-bg">
@@ -83,7 +85,7 @@ export default async function MessageThreadPage({
               <Link href={`/listings/${listing.id}`} className="font-grotesk font-semibold text-ink hover:underline">
                 {title || 'Vehicle'}
               </Link>
-              <div className="font-mono text-xs text-muted">{isSeller ? 'Message from a buyer' : 'Message with the seller'}</div>
+              <div className="font-mono text-xs text-muted">With {counterpartyName}</div>
             </div>
           </div>
 

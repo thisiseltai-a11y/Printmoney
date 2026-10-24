@@ -11,6 +11,7 @@ import {
   listOffersForBuyer,
   listSavedListings,
   listMessageThreadsForUser,
+  getProfileNames,
 } from '@/lib/db'
 import { expireOverdueOffers } from '@/lib/offers'
 import { centsToDisplay } from '@/lib/money'
@@ -44,6 +45,14 @@ export default async function DashboardPage() {
   const [sellerOffers, buyerOffers] = await Promise.all([
     expireOverdueOffers(rawSellerOffers),
     expireOverdueOffers(rawBuyerOffers),
+  ])
+
+  const threadCounterpartyId = (thread: (typeof messageThreads)[number]) =>
+    thread.buyer_id === user.id ? thread.listing.seller_id : thread.buyer_id
+
+  const profileNames = await getProfileNames([
+    ...sellerOffers.map((o) => o.buyer_id),
+    ...messageThreads.map(threadCounterpartyId),
   ])
 
   const offersByListing = new Map<number, typeof sellerOffers>()
@@ -96,6 +105,7 @@ export default async function DashboardPage() {
                   .join(' ')
                 const photo = thread.listing.photos?.[0]
                 const isMine = thread.last_message.sender_id === user.id
+                const counterpartyName = profileNames[threadCounterpartyId(thread)] || 'them'
                 return (
                   <Link
                     key={`${thread.listing_id}:${thread.buyer_id}`}
@@ -112,6 +122,7 @@ export default async function DashboardPage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="font-grotesk text-sm font-semibold text-ink">{title || 'Vehicle'}</div>
+                      <div className="font-mono text-[11px] text-muted">with {counterpartyName}</div>
                       <div className="truncate text-xs text-muted">
                         {isMine && 'You: '}
                         {thread.last_message.body}
@@ -185,17 +196,27 @@ export default async function DashboardPage() {
                         {offers.map((offer) => (
                           <div
                             key={offer.id}
-                            className={`flex flex-wrap items-center justify-between gap-3 rounded-sm px-3 py-2 ${
-                              offer.status === 'pending_seller' ? 'bg-amber/5' : ''
-                            }`}
+                            className={`rounded-sm px-3 py-2 ${offer.status === 'pending_seller' ? 'bg-amber/5' : ''}`}
                           >
-                            <span className="readout text-sm text-ink">{centsToDisplay(offer.amount)}</span>
-                            <OfferActions
-                              offerId={offer.id}
-                              status={offer.status}
-                              role="seller"
-                              expiresIn={formatTimeRemaining(offer.expires_at)}
-                            />
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                              <div className="flex items-baseline gap-2">
+                                <span className="readout text-sm text-ink">{centsToDisplay(offer.amount)}</span>
+                                <span className="text-xs text-muted">from {profileNames[offer.buyer_id] || 'a buyer'}</span>
+                              </div>
+                              <OfferActions
+                                offerId={offer.id}
+                                status={offer.status}
+                                role="seller"
+                                expiresIn={formatTimeRemaining(offer.expires_at)}
+                              />
+                            </div>
+                            <Link
+                              href={`/messages/${listing.id}/${offer.buyer_id}`}
+                              className="mt-1.5 inline-flex items-center gap-1 text-xs text-teal hover:underline"
+                            >
+                              <MessageCircle className="h-3 w-3" />
+                              Message {profileNames[offer.buyer_id] || 'buyer'}
+                            </Link>
                           </div>
                         ))}
                       </div>

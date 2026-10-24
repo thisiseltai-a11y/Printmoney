@@ -453,6 +453,23 @@ export async function listNewMessages(listingId: number, buyerId: string, afterI
   return (data as Message[]) ?? []
 }
 
+// Display names for a batch of user ids, keyed by id. Falls back to
+// 'Buyer'/'Seller'-style generic text at the call site for anyone missing a
+// profiles row or who never set a display name.
+export async function getProfileNames(userIds: string[]): Promise<Record<string, string>> {
+  if (!dbConfigured() || userIds.length === 0) return {}
+  const supabase = getSupabase()
+  const { data } = await supabase
+    .from('profiles')
+    .select('id, display_name')
+    .in('id', Array.from(new Set(userIds)))
+  const names: Record<string, string> = {}
+  for (const row of (data as { id: string; display_name: string | null }[]) ?? []) {
+    if (row.display_name) names[row.id] = row.display_name
+  }
+  return names
+}
+
 // Messaging is gated behind having made an offer — on either side. A buyer
 // can't open a thread until they've put a real number down (which already
 // has to clear the seller's minimum or it auto-declines), and a seller can
