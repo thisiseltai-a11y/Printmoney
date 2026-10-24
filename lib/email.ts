@@ -27,7 +27,7 @@ export async function sendNotificationEmail(input: {
     if (!email) return
 
     const resend = new Resend(process.env.RESEND_API_KEY)
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
+    const siteUrl = process.env.NEXT_PUBLIC_BASE_URL
     const url = input.link ? `${siteUrl ?? ''}${input.link}` : undefined
 
     await resend.emails.send({
